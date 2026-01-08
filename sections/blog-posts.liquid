@@ -8,19 +8,41 @@
   assign posts_to_show = section.settings.posts_to_show
   assign columns_desktop = section.settings.columns_desktop
   assign columns_mobile = section.settings.columns_mobile
+  assign padding = section.settings.padding
+  assign image_ratio = section.settings.image_ratio
+  assign layout = section.settings.layout
+
+  case image_ratio
+    when 'landscape'
+      assign aspect_class = 'aspect-16-9'
+    when 'portrait'
+      assign aspect_class = 'aspect-portrait'
+    when 'square'
+      assign aspect_class = 'aspect-square'
+    else
+      assign aspect_class = 'aspect-16-9'
+  endcase
 -%}
 
-<section class="blog-posts section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+<section
+  class="blog-posts section section--{{ padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
+  data-section-id="{{ section.id }}"
+  data-layout="{{ layout }}"
+>
   <div class="container">
-    {%- if section.settings.heading != blank or section.settings.show_view_all -%}
+    {%- if section.settings.subheading != blank or section.settings.heading != blank or section.settings.show_view_all -%}
       <div class="blog-posts__header">
-        {%- if section.settings.heading != blank -%}
-          <h2 class="blog-posts__heading section-heading">{{ section.settings.heading }}</h2>
-        {%- endif -%}
+        <div class="blog-posts__header-text">
+          {%- if section.settings.subheading != blank -%}
+            <p class="blog-posts__subheading subheading" data-animate="fade">{{ section.settings.subheading }}</p>
+          {%- endif -%}
+          {%- if section.settings.heading != blank -%}
+            <h2 class="blog-posts__heading h2" data-animate style="--delay: 50ms">{{ section.settings.heading }}</h2>
+          {%- endif -%}
+        </div>
         {%- if section.settings.show_view_all and blog -%}
-          <a href="{{ blog.url }}" class="blog-posts__view-all link-with-arrow">
+          <a href="{{ blog.url }}" class="blog-posts__view-all btn btn--{{ section.settings.view_all_style }}" data-animate="fade" style="--delay: 100ms">
             {{ 'blog.view_all' | t }}
-            {% render 'icon', icon: 'arrow-right', size: 'sm' %}
           </a>
         {%- endif -%}
       </div>
@@ -28,11 +50,13 @@
 
     {%- if blog != blank and blog.articles.size > 0 -%}
       <div
-        class="blog-posts__grid grid"
+        class="blog-posts__articles {% if layout == 'carousel' %}blog-posts__carousel{% else %}blog-posts__grid{% endif %}"
+        {% if layout == 'carousel' %}data-carousel{% endif %}
         style="--grid-columns-desktop: {{ columns_desktop }}; --grid-columns-mobile: {{ columns_mobile }};"
       >
         {%- for article in blog.articles limit: posts_to_show -%}
-          <article class="blog-posts__item">
+          {%- assign card_delay = forloop.index0 | times: 50 | plus: 150 -%}
+          <article class="blog-posts__item" data-animate="fade" style="--delay: {{ card_delay }}ms">
             {% render 'article-card',
               article: article,
               show_date: section.settings.show_date,
@@ -46,35 +70,249 @@
     {%- else -%}
       {%- comment -%} Placeholder content {%- endcomment -%}
       <div
-        class="blog-posts__grid grid"
+        class="blog-posts__articles {% if layout == 'carousel' %}blog-posts__carousel{% else %}blog-posts__grid{% endif %}"
+        {% if layout == 'carousel' %}data-carousel{% endif %}
         style="--grid-columns-desktop: {{ columns_desktop }}; --grid-columns-mobile: {{ columns_mobile }};"
       >
         {%- for i in (1..posts_to_show) -%}
-          <article class="blog-posts__item">
+          {%- assign card_delay = forloop.index0 | times: 50 | plus: 150 -%}
+          <article class="blog-posts__item" data-animate="fade" style="--delay: {{ card_delay }}ms">
             <div class="article-card">
-              <div class="article-card__media media aspect-16-9">
+              <div class="article-card__media media {{ aspect_class }}">
                 {{ 'lifestyle-1' | placeholder_svg_tag: 'article-card__placeholder' }}
               </div>
               <div class="article-card__content">
                 <h3 class="article-card__title h4">
                   <a href="#">{{ 'blog.onboarding.title' | t }}</a>
                 </h3>
-                <p class="article-card__excerpt">
-                  {{ 'blog.onboarding.excerpt' | t }}
-                </p>
-                <div class="article-card__meta">
-                  <span class="article-card__author">{{ 'blog.onboarding.author' | t }}</span>
-                  <span class="article-card__separator">·</span>
-                  <time class="article-card__date">{{ 'now' | date: format: 'abbreviated_date' }}</time>
-                </div>
+                {%- if section.settings.show_excerpt -%}
+                  <p class="article-card__excerpt">
+                    {{ 'blog.onboarding.excerpt' | t }}
+                  </p>
+                {%- endif -%}
+                {%- if section.settings.show_author or section.settings.show_date -%}
+                  <div class="article-card__meta">
+                    {%- if section.settings.show_author -%}
+                      <span class="article-card__author">{{ 'blog.onboarding.author' | t }}</span>
+                    {%- endif -%}
+                    {%- if section.settings.show_author and section.settings.show_date -%}
+                      <span class="article-card__separator">·</span>
+                    {%- endif -%}
+                    {%- if section.settings.show_date -%}
+                      <time class="article-card__date">{{ 'now' | date: format: 'abbreviated_date' }}</time>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
               </div>
             </div>
           </article>
         {%- endfor -%}
       </div>
     {%- endif -%}
+
+    {%- if layout == 'carousel' -%}
+      <div class="blog-posts__nav">
+        <button
+          type="button"
+          class="blog-posts__nav-btn blog-posts__nav-btn--prev"
+          data-carousel-prev
+          aria-label="{{ 'accessibility.previous' | t }}"
+        >
+          {% render 'icon', icon: 'chevron-left' %}
+        </button>
+        <button
+          type="button"
+          class="blog-posts__nav-btn blog-posts__nav-btn--next"
+          data-carousel-next
+          aria-label="{{ 'accessibility.next' | t }}"
+        >
+          {% render 'icon', icon: 'chevron-right' %}
+        </button>
+      </div>
+    {%- endif -%}
   </div>
 </section>
+
+{% stylesheet %}
+  .blog-posts__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+  }
+
+  .blog-posts__header-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .blog-posts__view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .blog-posts__grid {
+    display: grid;
+    gap: var(--grid-gap-md);
+    grid-template-columns: repeat(var(--grid-columns-mobile, 1), 1fr);
+  }
+
+  @media (min-width: 750px) {
+    .blog-posts__grid {
+      grid-template-columns: repeat(var(--grid-columns-desktop, 3), 1fr);
+    }
+  }
+
+  /* Carousel styles */
+  .blog-posts__carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: var(--space-4);
+    margin-inline: calc(var(--page-margin) * -1);
+    padding-inline: var(--page-margin);
+  }
+
+  .blog-posts__carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .blog-posts__carousel .blog-posts__item {
+    flex: 0 0 calc((100% - (var(--grid-columns-mobile, 1) - 1) * var(--space-4)) / var(--grid-columns-mobile, 1));
+    scroll-snap-align: start;
+  }
+
+  @media (min-width: 750px) {
+    .blog-posts__carousel {
+      margin-inline: 0;
+      padding-inline: 0;
+      gap: var(--grid-gap-md);
+    }
+
+    .blog-posts__carousel .blog-posts__item {
+      flex: 0 0 calc((100% - (var(--grid-columns-desktop, 3) - 1) * var(--grid-gap-md)) / var(--grid-columns-desktop, 3));
+    }
+  }
+
+  /* Carousel navigation */
+  .blog-posts__nav {
+    display: none;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+  }
+
+  @media (min-width: 750px) {
+    .blog-posts__nav {
+      display: flex;
+    }
+  }
+
+  .blog-posts__nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    cursor: pointer;
+    transition: all var(--duration-short) var(--ease-out);
+  }
+
+  .blog-posts__nav-btn:hover {
+    background: var(--color-foreground);
+    color: var(--color-background);
+    border-color: var(--color-foreground);
+  }
+
+  .blog-posts__nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .blog-posts__nav-btn:disabled:hover {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    border-color: var(--color-border);
+  }
+
+  /* Article card excerpt margin */
+  .article-card__excerpt {
+    margin-bottom: var(--space-3);
+  }
+
+  /* Section padding variants */
+  .blog-posts.section--none {
+    padding-block: 0;
+  }
+
+  .blog-posts.section--small {
+    padding-block: var(--section-spacing-sm);
+  }
+
+  .blog-posts.section--medium {
+    padding-block: var(--section-spacing-md);
+  }
+
+  .blog-posts.section--large {
+    padding-block: var(--section-spacing-lg);
+  }
+{% endstylesheet %}
+
+<script>
+  (function() {
+    const section = document.querySelector('[data-section-id="{{ section.id }}"]');
+    if (section && section.dataset.layout === 'carousel') {
+      const carousel = section.querySelector('[data-carousel]');
+      const prevBtn = section.querySelector('[data-carousel-prev]');
+      const nextBtn = section.querySelector('[data-carousel-next]');
+
+      if (carousel && prevBtn && nextBtn) {
+        const updateButtons = () => {
+          const scrollLeft = carousel.scrollLeft;
+          const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+
+          prevBtn.disabled = scrollLeft <= 0;
+          nextBtn.disabled = scrollLeft >= maxScroll - 1;
+        };
+
+        const getScrollAmount = () => {
+          const item = carousel.querySelector('.blog-posts__item');
+          if (item) {
+            const style = getComputedStyle(carousel);
+            const gap = parseFloat(style.gap) || 0;
+            return item.offsetWidth + gap;
+          }
+          return carousel.clientWidth * 0.8;
+        };
+
+        prevBtn.addEventListener('click', () => {
+          carousel.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+        });
+
+        nextBtn.addEventListener('click', () => {
+          carousel.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+        });
+
+        carousel.addEventListener('scroll', updateButtons);
+        window.addEventListener('resize', updateButtons);
+
+        // Initial state
+        updateButtons();
+      }
+    }
+  })();
+</script>
 
 {% schema %}
 {
@@ -82,6 +320,11 @@
   "tag": "section",
   "class": "section-blog-posts",
   "settings": [
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "t:labels.subheading"
+    },
     {
       "type": "text",
       "id": "heading",
@@ -107,6 +350,31 @@
       "id": "show_view_all",
       "label": "t:sections.blog_posts.settings.show_view_all.label",
       "default": true
+    },
+    {
+      "type": "select",
+      "id": "view_all_style",
+      "label": "t:labels.button_style",
+      "options": [
+        { "value": "filled", "label": "t:options.button_style.filled" },
+        { "value": "outline", "label": "t:options.button_style.outline" },
+        { "value": "underline", "label": "t:options.button_style.underline" }
+      ],
+      "default": "outline"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "t:labels.layout",
+      "options": [
+        { "value": "grid", "label": "t:options.layout.grid" },
+        { "value": "carousel", "label": "t:options.layout.carousel" }
+      ],
+      "default": "grid"
     },
     {
       "type": "range",
@@ -159,6 +427,22 @@
       "id": "show_excerpt",
       "label": "t:sections.blog_posts.settings.show_excerpt.label",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
+      "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
     },
     {
       "type": "color_scheme",

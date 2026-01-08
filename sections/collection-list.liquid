@@ -8,12 +8,13 @@
   assign columns_mobile = section.settings.columns_mobile
   assign show_collection_count = section.settings.show_collection_count
   assign image_ratio = section.settings.image_ratio
+  assign padding = section.settings.padding
 -%}
 
-<section class="collection-list section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+<section class="collection-list section section--{{ padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
   <div class="container">
     {%- if section.settings.heading != blank -%}
-      <h1 class="collection-list__heading section-heading text-{{ section.settings.heading_alignment }}">
+      <h1 class="collection-list__heading section-heading text-{{ section.settings.heading_alignment }}" data-animate>
         {{ section.settings.heading }}
       </h1>
     {%- endif -%}
@@ -23,13 +24,33 @@
       style="--grid-columns-desktop: {{ columns_desktop }}; --grid-columns-mobile: {{ columns_mobile }};"
     >
       {%- for collection in collections -%}
-        <div class="collection-list__item">
+        {%- assign card_delay = forloop.index0 | times: 50 | plus: 100 -%}
+        <div class="collection-list__item" data-animate="fade" style="--delay: {{ card_delay }}ms">
           {% render 'collection-card', collection: collection, show_count: show_collection_count, image_ratio: image_ratio %}
         </div>
       {%- endfor -%}
     </div>
   </div>
 </section>
+
+{% stylesheet %}
+  /* Section padding variants */
+  .collection-list.section--none {
+    padding-block: 0;
+  }
+
+  .collection-list.section--small {
+    padding-block: var(--section-spacing-sm);
+  }
+
+  .collection-list.section--medium {
+    padding-block: var(--section-spacing-md);
+  }
+
+  .collection-list.section--large {
+    padding-block: var(--section-spacing-lg);
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -88,6 +109,18 @@
         { "value": "2", "label": "2" }
       ],
       "default": "1"
+    },
+    {
+      "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
     },
     {
       "type": "color_scheme",
