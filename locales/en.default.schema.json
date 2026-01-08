@@ -1501,7 +1501,7 @@
         },
         "shipping_message_progress": {
           "label": "Progress message",
-          "info": "Use {{ remaining }} for the remaining amount"
+          "info": "Use [remaining] for the remaining amount"
         },
         "shipping_message_success": {
           "label": "Success message"

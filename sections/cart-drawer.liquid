@@ -63,7 +63,8 @@
         {%- if shipping_achieved -%}
           {{ section.settings.shipping_message_success }}
         {%- else -%}
-          {{ section.settings.shipping_message_progress | replace: '{{ remaining }}', remaining_formatted }}
+          {%- assign shipping_msg = section.settings.shipping_message_progress | replace: '[remaining]', remaining_formatted -%}
+          {{ shipping_msg }}
         {%- endif -%}
       </p>
       <div class="cart-drawer__shipping-progress{% if shipping_achieved %} cart-drawer__shipping-progress--complete{% endif %}" data-shipping-progress>
@@ -730,7 +731,7 @@
       "id": "shipping_message_progress",
       "label": "t:sections.cart_drawer.settings.shipping_message_progress.label",
       "info": "t:sections.cart_drawer.settings.shipping_message_progress.info",
-      "default": "You're {{ remaining }} away from free shipping"
+      "default": "You're [remaining] away from free shipping"
     },
     {
       "type": "text",
