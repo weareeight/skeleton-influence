@@ -117,17 +117,40 @@
        COLORS
        ======================================== */
 
-    /* Color Scheme 1 (Primary/Default) */
+    /* Color Scheme 1 - Light (Primary/Default) */
     --color-scheme-1-background: {{ settings.scheme_1_background }};
     --color-scheme-1-foreground: {{ settings.scheme_1_foreground }};
     --color-scheme-1-accent: {{ settings.scheme_1_accent }};
     --color-scheme-1-muted: {{ settings.scheme_1_muted }};
+    --color-scheme-1-border: {{ settings.scheme_1_border }};
 
-    /* Color Scheme 2 (Inverse/Dark) */
+    /* Color Scheme 2 - Dark (Inverse) */
     --color-scheme-2-background: {{ settings.scheme_2_background }};
     --color-scheme-2-foreground: {{ settings.scheme_2_foreground }};
     --color-scheme-2-accent: {{ settings.scheme_2_accent }};
     --color-scheme-2-muted: {{ settings.scheme_2_muted }};
+    --color-scheme-2-border: {{ settings.scheme_2_border }};
+
+    /* Color Scheme 3 - Warm */
+    --color-scheme-3-background: {{ settings.scheme_3_background }};
+    --color-scheme-3-foreground: {{ settings.scheme_3_foreground }};
+    --color-scheme-3-accent: {{ settings.scheme_3_accent }};
+    --color-scheme-3-muted: {{ settings.scheme_3_muted }};
+    --color-scheme-3-border: {{ settings.scheme_3_border }};
+
+    /* Color Scheme 4 - Accent Dark */
+    --color-scheme-4-background: {{ settings.scheme_4_background }};
+    --color-scheme-4-foreground: {{ settings.scheme_4_foreground }};
+    --color-scheme-4-accent: {{ settings.scheme_4_accent }};
+    --color-scheme-4-muted: {{ settings.scheme_4_muted }};
+    --color-scheme-4-border: {{ settings.scheme_4_border }};
+
+    /* Color Scheme 5 - Bold */
+    --color-scheme-5-background: {{ settings.scheme_5_background }};
+    --color-scheme-5-foreground: {{ settings.scheme_5_foreground }};
+    --color-scheme-5-accent: {{ settings.scheme_5_accent }};
+    --color-scheme-5-muted: {{ settings.scheme_5_muted }};
+    --color-scheme-5-border: {{ settings.scheme_5_border }};
 
     /* Semantic Colors */
     --color-sale: {{ settings.color_sale }};
@@ -139,6 +162,7 @@
     --color-foreground: var(--color-scheme-1-foreground);
     --color-accent: var(--color-scheme-1-accent);
     --color-muted: var(--color-scheme-1-muted);
+    --color-border: var(--color-scheme-1-border);
 
     /* ========================================
        ANIMATION
@@ -169,7 +193,7 @@
        ======================================== */
     --border-width: 1px;
     --border-width-thick: 2px;
-    --border-color: var(--color-muted);
+    --border-color: var(--color-border);
     --border-color-dark: var(--color-foreground);
 
     --radius-none: 0;

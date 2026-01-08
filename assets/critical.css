@@ -802,6 +802,8 @@ main {
 
 /* ========================================
    COLOR SCHEMES
+   Each scheme sets local CSS variables that cascade
+   to child elements, enabling nested color contexts
    ======================================== */
 
 .color-scheme-1 {
@@ -809,6 +811,7 @@ main {
   --color-foreground: var(--color-scheme-1-foreground);
   --color-accent: var(--color-scheme-1-accent);
   --color-muted: var(--color-scheme-1-muted);
+  --color-border: var(--color-scheme-1-border);
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
@@ -818,8 +821,49 @@ main {
   --color-foreground: var(--color-scheme-2-foreground);
   --color-accent: var(--color-scheme-2-accent);
   --color-muted: var(--color-scheme-2-muted);
+  --color-border: var(--color-scheme-2-border);
   background-color: var(--color-background);
   color: var(--color-foreground);
+}
+
+.color-scheme-3 {
+  --color-background: var(--color-scheme-3-background);
+  --color-foreground: var(--color-scheme-3-foreground);
+  --color-accent: var(--color-scheme-3-accent);
+  --color-muted: var(--color-scheme-3-muted);
+  --color-border: var(--color-scheme-3-border);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+.color-scheme-4 {
+  --color-background: var(--color-scheme-4-background);
+  --color-foreground: var(--color-scheme-4-foreground);
+  --color-accent: var(--color-scheme-4-accent);
+  --color-muted: var(--color-scheme-4-muted);
+  --color-border: var(--color-scheme-4-border);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+.color-scheme-5 {
+  --color-background: var(--color-scheme-5-background);
+  --color-foreground: var(--color-scheme-5-foreground);
+  --color-accent: var(--color-scheme-5-accent);
+  --color-muted: var(--color-scheme-5-muted);
+  --color-border: var(--color-scheme-5-border);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Accent text utility - uses current scheme's accent color */
+.text-accent-color {
+  color: var(--color-accent);
+}
+
+/* Accent background utility */
+.bg-accent-color {
+  background-color: var(--color-accent);
 }
 
 /* ========================================

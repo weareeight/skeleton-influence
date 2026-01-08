@@ -7,6 +7,13 @@
 
   Or inline:
   <div class="{% render 'color-scheme', scheme: section.settings.color_scheme %}">
+
+  Available schemes:
+  - scheme-1 (Light - default)
+  - scheme-2 (Dark)
+  - scheme-3 (Warm)
+  - scheme-4 (Accent dark)
+  - scheme-5 (Bold)
 {% endcomment %}
 
 {%- liquid
@@ -15,6 +22,12 @@
       echo 'color-scheme-1'
     when 'scheme-2', '2', 'dark', 'inverse'
       echo 'color-scheme-2'
+    when 'scheme-3', '3', 'warm'
+      echo 'color-scheme-3'
+    when 'scheme-4', '4', 'accent-dark'
+      echo 'color-scheme-4'
+    when 'scheme-5', '5', 'bold'
+      echo 'color-scheme-5'
     else
       echo 'color-scheme-1'
   endcase

@@ -18,11 +18,21 @@
     "colors": {
       "name": "Colors",
       "settings": {
+        "info": "Define up to 5 color schemes to use throughout your theme. Sections can choose which scheme to use.",
         "scheme_1": {
-          "header": "Scheme 1 (Light)"
+          "header": "Scheme 1 - Light"
         },
         "scheme_2": {
-          "header": "Scheme 2 (Dark)"
+          "header": "Scheme 2 - Dark"
+        },
+        "scheme_3": {
+          "header": "Scheme 3 - Warm"
+        },
+        "scheme_4": {
+          "header": "Scheme 4 - Accent dark"
+        },
+        "scheme_5": {
+          "header": "Scheme 5 - Bold"
         },
         "background": {
           "label": "Background"
@@ -35,6 +45,9 @@
         },
         "muted": {
           "label": "Muted text"
+        },
+        "border": {
+          "label": "Border"
         },
         "semantic": {
           "header": "Semantic colors"
@@ -1208,8 +1221,11 @@
       "right": "Right"
     },
     "color_scheme": {
-      "scheme_1": "Scheme 1",
-      "scheme_2": "Scheme 2"
+      "scheme_1": "Scheme 1 - Light",
+      "scheme_2": "Scheme 2 - Dark",
+      "scheme_3": "Scheme 3 - Warm",
+      "scheme_4": "Scheme 4 - Accent dark",
+      "scheme_5": "Scheme 5 - Bold"
     },
     "direction": {
       "horizontal": "Horizontal",

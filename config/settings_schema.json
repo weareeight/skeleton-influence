@@ -37,6 +37,10 @@
     "name": "t:settings_schema.colors.name",
     "settings": [
       {
+        "type": "paragraph",
+        "content": "t:settings_schema.colors.settings.info"
+      },
+      {
         "type": "header",
         "content": "t:settings_schema.colors.settings.scheme_1.header"
       },
@@ -65,6 +69,12 @@
         "default": "#757575"
       },
       {
+        "type": "color",
+        "id": "scheme_1_border",
+        "label": "t:settings_schema.colors.settings.border.label",
+        "default": "#E5E5E5"
+      },
+      {
         "type": "header",
         "content": "t:settings_schema.colors.settings.scheme_2.header"
       },
@@ -91,6 +101,114 @@
         "id": "scheme_2_muted",
         "label": "t:settings_schema.colors.settings.muted.label",
         "default": "#A0A0A0"
+      },
+      {
+        "type": "color",
+        "id": "scheme_2_border",
+        "label": "t:settings_schema.colors.settings.border.label",
+        "default": "#333333"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.colors.settings.scheme_3.header"
+      },
+      {
+        "type": "color",
+        "id": "scheme_3_background",
+        "label": "t:settings_schema.colors.settings.background.label",
+        "default": "#F5F5F0"
+      },
+      {
+        "type": "color",
+        "id": "scheme_3_foreground",
+        "label": "t:settings_schema.colors.settings.foreground.label",
+        "default": "#2C2C2C"
+      },
+      {
+        "type": "color",
+        "id": "scheme_3_accent",
+        "label": "t:settings_schema.colors.settings.accent.label",
+        "default": "#8B7355"
+      },
+      {
+        "type": "color",
+        "id": "scheme_3_muted",
+        "label": "t:settings_schema.colors.settings.muted.label",
+        "default": "#6B6B6B"
+      },
+      {
+        "type": "color",
+        "id": "scheme_3_border",
+        "label": "t:settings_schema.colors.settings.border.label",
+        "default": "#D9D9D0"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.colors.settings.scheme_4.header"
+      },
+      {
+        "type": "color",
+        "id": "scheme_4_background",
+        "label": "t:settings_schema.colors.settings.background.label",
+        "default": "#0A0A0A"
+      },
+      {
+        "type": "color",
+        "id": "scheme_4_foreground",
+        "label": "t:settings_schema.colors.settings.foreground.label",
+        "default": "#F0F0F0"
+      },
+      {
+        "type": "color",
+        "id": "scheme_4_accent",
+        "label": "t:settings_schema.colors.settings.accent.label",
+        "default": "#C9A962"
+      },
+      {
+        "type": "color",
+        "id": "scheme_4_muted",
+        "label": "t:settings_schema.colors.settings.muted.label",
+        "default": "#888888"
+      },
+      {
+        "type": "color",
+        "id": "scheme_4_border",
+        "label": "t:settings_schema.colors.settings.border.label",
+        "default": "#2A2A2A"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.colors.settings.scheme_5.header"
+      },
+      {
+        "type": "color",
+        "id": "scheme_5_background",
+        "label": "t:settings_schema.colors.settings.background.label",
+        "default": "#1C1C28"
+      },
+      {
+        "type": "color",
+        "id": "scheme_5_foreground",
+        "label": "t:settings_schema.colors.settings.foreground.label",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "color",
+        "id": "scheme_5_accent",
+        "label": "t:settings_schema.colors.settings.accent.label",
+        "default": "#6366F1"
+      },
+      {
+        "type": "color",
+        "id": "scheme_5_muted",
+        "label": "t:settings_schema.colors.settings.muted.label",
+        "default": "#9CA3AF"
+      },
+      {
+        "type": "color",
+        "id": "scheme_5_border",
+        "label": "t:settings_schema.colors.settings.border.label",
+        "default": "#374151"
       },
       {
         "type": "header",
