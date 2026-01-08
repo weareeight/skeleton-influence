@@ -37,7 +37,7 @@
 >
   {%- comment -%} Utility Navigation (optional) {%- endcomment -%}
   {%- if section.settings.show_utility_nav and section.settings.utility_menu != blank -%}
-    <div class="header__utility color-scheme-2">
+    <div class="header__utility color-scheme_2">
       <div class="container">
         <nav class="header__utility-nav" aria-label="{{ 'accessibility.utility_navigation' | t }}">
           <ul class="header__utility-list">
@@ -106,7 +106,6 @@
                 aria-controls="mega-menu-{{ forloop.index }}"
               >
                 {{ link.title }}
-                {% render 'icon', icon: 'chevron-down', size: 'sm' %}
               </a>
 
               {%- comment -%} Enhanced Mega Menu {%- endcomment -%}
@@ -214,12 +213,6 @@
     </div>
   </div>
 
-  {%- comment -%} Predictive Search (Hidden by default, shown via JS) {%- endcomment -%}
-  <div class="header__search" id="header-search" data-search-container hidden>
-    <div class="container">
-      {% render 'predictive-search' %}
-    </div>
-  </div>
 </header>
 
 {%- comment -%} Mobile Drawer {%- endcomment -%}
@@ -323,7 +316,6 @@
 
     const stickyBehavior = header.dataset.stickyBehavior;
     const isTransparentHome = header.dataset.transparentHome === 'true';
-    const searchContainer = document.querySelector('[data-search-container]');
     const searchToggle = document.querySelector('[data-search-toggle]');
     const drawerToggles = document.querySelectorAll('[data-drawer-toggle]');
     const drawerCloses = document.querySelectorAll('[data-drawer-close]');
@@ -376,47 +368,122 @@
       }, { passive: true });
     }
 
-    // Search toggle
-    if (searchToggle && searchContainer) {
+    // Search toggle - opens search overlay
+    if (searchToggle) {
       searchToggle.addEventListener('click', () => {
-        const isOpen = !searchContainer.hidden;
-        searchContainer.hidden = isOpen;
-        searchToggle.setAttribute('aria-expanded', !isOpen);
-        if (!isOpen) {
-          const searchInput = searchContainer.querySelector('input[type="search"]');
-          if (searchInput) {
-            setTimeout(() => searchInput.focus(), 100);
-          }
-        }
+        document.dispatchEvent(new CustomEvent('search:open', {
+          detail: { trigger: searchToggle }
+        }));
       });
     }
 
-    // Mega menu keyboard accessibility
+    // Mega menu - Hover with proper delays (300ms open, 500ms close)
+    let openTimeout = null;
+    let closeTimeout = null;
+    let currentOpenMenu = null;
+
+    function openMegaMenu(trigger) {
+      const link = trigger.querySelector('.header__nav-link');
+      const menu = trigger.querySelector('[data-mega-menu]');
+      if (!menu) return;
+
+      // Clear any pending close
+      clearTimeout(closeTimeout);
+
+      // Close any other open menu immediately
+      if (currentOpenMenu && currentOpenMenu !== trigger) {
+        closeMegaMenuImmediate(currentOpenMenu);
+      }
+
+      // Open with 100ms hover intent delay (quick but prevents accidental triggers)
+      openTimeout = setTimeout(() => {
+        trigger.classList.add('is-active');
+        menu.classList.add('is-open');
+        if (link) link.setAttribute('aria-expanded', 'true');
+        currentOpenMenu = trigger;
+      }, 100);
+    }
+
+    function closeMegaMenu(trigger) {
+      // Clear any pending open
+      clearTimeout(openTimeout);
+
+      // Close with 500ms grace period
+      closeTimeout = setTimeout(() => {
+        closeMegaMenuImmediate(trigger);
+      }, 500);
+    }
+
+    function closeMegaMenuImmediate(trigger) {
+      const link = trigger.querySelector('.header__nav-link');
+      const menu = trigger.querySelector('[data-mega-menu]');
+      if (!menu) return;
+
+      clearTimeout(openTimeout);
+      clearTimeout(closeTimeout);
+
+      trigger.classList.remove('is-active');
+      menu.classList.remove('is-open');
+      if (link) link.setAttribute('aria-expanded', 'false');
+      if (currentOpenMenu === trigger) currentOpenMenu = null;
+    }
+
+    function cancelTimers() {
+      clearTimeout(openTimeout);
+      clearTimeout(closeTimeout);
+    }
+
     megaMenuTriggers.forEach(trigger => {
       const link = trigger.querySelector('.header__nav-link');
       const menu = trigger.querySelector('[data-mega-menu]');
 
       if (link && menu) {
+        // HOVER: Open on mouseenter (with 300ms delay)
+        trigger.addEventListener('mouseenter', () => {
+          clearTimeout(closeTimeout);
+          if (!menu.classList.contains('is-open')) {
+            openMegaMenu(trigger);
+          }
+        });
+
+        // HOVER: Close on mouseleave (with 500ms delay)
+        trigger.addEventListener('mouseleave', () => {
+          clearTimeout(openTimeout);
+          closeMegaMenu(trigger);
+        });
+
+        // HOVER: Keep open when entering menu
+        menu.addEventListener('mouseenter', () => {
+          cancelTimers();
+        });
+
+        // HOVER: Close when leaving menu
+        menu.addEventListener('mouseleave', () => {
+          closeMegaMenu(trigger);
+        });
+
+        // KEYBOARD: Toggle on Enter/Space
         link.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            const isExpanded = link.getAttribute('aria-expanded') === 'true';
-            link.setAttribute('aria-expanded', !isExpanded);
+            if (menu.classList.contains('is-open')) {
+              closeMegaMenuImmediate(trigger);
+            } else {
+              cancelTimers();
+              trigger.classList.add('is-active');
+              menu.classList.add('is-open');
+              link.setAttribute('aria-expanded', 'true');
+              currentOpenMenu = trigger;
+            }
           }
         });
 
+        // KEYBOARD: Close on Escape
         menu.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
-            link.setAttribute('aria-expanded', 'false');
+            closeMegaMenuImmediate(trigger);
             link.focus();
           }
-        });
-
-        trigger.addEventListener('mouseenter', () => {
-          link.setAttribute('aria-expanded', 'true');
-        });
-        trigger.addEventListener('mouseleave', () => {
-          link.setAttribute('aria-expanded', 'false');
         });
       }
     });
@@ -472,22 +539,14 @@
       overlay.addEventListener('click', () => {
         closeDrawer();
         drawerToggles.forEach(toggle => toggle.setAttribute('aria-expanded', 'false'));
-        if (searchContainer && !searchContainer.hidden) {
-          searchContainer.hidden = true;
-          searchToggle?.setAttribute('aria-expanded', 'false');
-        }
       });
     }
 
-    // Close drawer/search on escape
+    // Close drawer on escape (search overlay handles its own escape)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeDrawer();
         drawerToggles.forEach(toggle => toggle.setAttribute('aria-expanded', 'false'));
-        if (searchContainer && !searchContainer.hidden) {
-          searchContainer.hidden = true;
-          searchToggle?.setAttribute('aria-expanded', 'false');
-        }
       }
     });
   })();

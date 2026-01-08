@@ -156,6 +156,39 @@
     /* Animation toggle (respects user preference) */
     --animation-enabled: {{ settings.enable_animations | default: true }};
 
+    /* Animation Style Variants
+       Controlled by settings.animation_style (subtle/elegant/dramatic) */
+    {%- case settings.animation_style -%}
+      {%- when 'subtle' -%}
+        --animate-distance: 0.25rem;
+        --animate-distance-lg: 0.5rem;
+        --animate-duration: 300ms;
+        --animate-duration-lg: 400ms;
+        --animate-stagger: 30ms;
+        --animate-easing: var(--ease-out);
+        --animate-scale-start: 0.98;
+        --animate-image-clip: false;
+      {%- when 'dramatic' -%}
+        --animate-distance: 1rem;
+        --animate-distance-lg: 1.5rem;
+        --animate-duration: 700ms;
+        --animate-duration-lg: 900ms;
+        --animate-stagger: 100ms;
+        --animate-easing: var(--ease-dramatic);
+        --animate-scale-start: 0.95;
+        --animate-image-clip: true;
+      {%- else -%}
+        /* Default: elegant */
+        --animate-distance: 0.5rem;
+        --animate-distance-lg: 1rem;
+        --animate-duration: 500ms;
+        --animate-duration-lg: 700ms;
+        --animate-stagger: 50ms;
+        --animate-easing: var(--ease-elegant);
+        --animate-scale-start: 0.97;
+        --animate-image-clip: true;
+    {%- endcase -%}
+
     /* ========================================
        BORDERS & RADIUS
        ======================================== */

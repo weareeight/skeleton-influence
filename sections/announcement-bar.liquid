@@ -12,11 +12,12 @@
   assign section_id = section.id
   assign enable_dismiss = section.settings.enable_dismiss
   assign dismiss_days = section.settings.dismiss_days | default: 7
+  assign padding = section.settings.padding
 -%}
 
 {%- if section.blocks.size > 0 -%}
   <div
-    class="announcement-bar {% render 'color-scheme', scheme: section.settings.color_scheme %}"
+    class="announcement-bar announcement-bar--{{ padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
     id="announcement-bar-{{ section_id }}"
     data-announcement-bar
     data-section-id="{{ section_id }}"
@@ -213,9 +214,28 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: var(--announcement-bar-height);
-    padding-block: var(--space-2);
     gap: var(--space-4);
+  }
+
+  /* Padding variants - override theme.css defaults */
+  .announcement-bar.announcement-bar--none {
+    min-height: 0;
+    padding-block: 0;
+  }
+
+  .announcement-bar.announcement-bar--small {
+    min-height: 0;
+    padding-block: var(--space-1);
+  }
+
+  .announcement-bar.announcement-bar--medium {
+    min-height: 0;
+    padding-block: var(--space-2);
+  }
+
+  .announcement-bar.announcement-bar--large {
+    min-height: 0;
+    padding-block: var(--space-3);
   }
 
   .announcement-bar__message {
@@ -340,6 +360,18 @@
       "id": "color_scheme",
       "label": "t:sections.announcement_bar.settings.color_scheme.label",
       "default": "scheme_2"
+    },
+    {
+      "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "small"
     },
     {
       "type": "header",

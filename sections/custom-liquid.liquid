@@ -3,11 +3,36 @@
   Allows merchants to add custom Liquid code to any page
 {% endcomment %}
 
-<section class="custom-liquid section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+<section class="custom-liquid section section--{{ section.settings.padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
   {%- if section.settings.custom_liquid != blank -%}
-    {{ section.settings.custom_liquid }}
+    {%- if section.settings.use_page_width -%}
+      <div class="container">
+        {{ section.settings.custom_liquid }}
+      </div>
+    {%- else -%}
+      {{ section.settings.custom_liquid }}
+    {%- endif -%}
   {%- endif -%}
 </section>
+
+{% stylesheet %}
+  /* Section padding variants */
+  .custom-liquid.section--none {
+    padding-block: 0;
+  }
+
+  .custom-liquid.section--small {
+    padding-block: var(--section-spacing-sm);
+  }
+
+  .custom-liquid.section--medium {
+    padding-block: var(--section-spacing-md);
+  }
+
+  .custom-liquid.section--large {
+    padding-block: var(--section-spacing-lg);
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -19,7 +44,29 @@
       "type": "liquid",
       "id": "custom_liquid",
       "label": "t:sections.custom_liquid.settings.liquid.label",
-      "info": "Add app snippets or other Liquid code to create advanced customizations."
+      "info": "t:sections.custom_liquid.settings.liquid.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_page_width",
+      "label": "t:sections.custom_liquid.settings.use_page_width.label",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
+      "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
     },
     {
       "type": "color_scheme",

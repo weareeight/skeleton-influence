@@ -1,17 +1,43 @@
 {% comment %}
   Cart Drawer Section - Influence Theme
-  Slide-out cart with AJAX functionality
+  Premium slide-out cart with AJAX functionality, free shipping bar, and cart note
 {% endcomment %}
+
+{%- comment -%} Calculate shipping progress if enabled {%- endcomment -%}
+{%- if section.settings.enable_shipping_bar -%}
+  {%- assign threshold_cents = section.settings.shipping_threshold | times: 100 -%}
+  {%- assign remaining_cents = threshold_cents | minus: cart.total_price -%}
+  {%- if remaining_cents < 0 -%}
+    {%- assign remaining_cents = 0 -%}
+  {%- endif -%}
+  {%- assign remaining_formatted = remaining_cents | money_without_trailing_zeros -%}
+  {%- assign progress_percent = cart.total_price | times: 100 | divided_by: threshold_cents -%}
+  {%- if progress_percent > 100 -%}
+    {%- assign progress_percent = 100 -%}
+  {%- endif -%}
+  {%- assign shipping_achieved = false -%}
+  {%- if cart.total_price >= threshold_cents -%}
+    {%- assign shipping_achieved = true -%}
+  {%- endif -%}
+{%- endif -%}
 
 <div
   id="cart-drawer"
-  class="cart-drawer drawer drawer--right"
+  class="cart-drawer drawer drawer--right color-{{ section.settings.color_scheme }}"
   data-cart-drawer
+  data-section-id="{{ section.id }}"
   aria-hidden="true"
+  aria-modal="true"
+  role="dialog"
   aria-label="{{ 'cart.title' | t }}"
 >
+  {%- comment -%} Loading overlay {%- endcomment -%}
+  <div class="cart-drawer__loading-overlay" data-loading-overlay>
+    <div class="cart-drawer__spinner"></div>
+  </div>
+
   <div class="cart-drawer__header">
-    <h2 class="cart-drawer__title h4">
+    <h2 class="cart-drawer__title">
       {{ 'cart.title' | t }}
       <span class="cart-drawer__count" data-cart-count>({{ cart.item_count }})</span>
     </h2>
@@ -25,6 +51,31 @@
     </button>
   </div>
 
+  {%- comment -%} Free Shipping Progress Bar {%- endcomment -%}
+  {%- if section.settings.enable_shipping_bar and cart.item_count > 0 -%}
+    <div
+      class="cart-drawer__shipping-bar"
+      data-shipping-bar
+      data-threshold="{{ threshold_cents }}"
+      data-cart-total="{{ cart.total_price }}"
+    >
+      <p class="cart-drawer__shipping-message{% if shipping_achieved %} cart-drawer__shipping-message--success{% endif %}" data-shipping-message>
+        {%- if shipping_achieved -%}
+          {{ section.settings.shipping_message_success }}
+        {%- else -%}
+          {{ section.settings.shipping_message_progress | replace: '{{ remaining }}', remaining_formatted }}
+        {%- endif -%}
+      </p>
+      <div class="cart-drawer__shipping-progress{% if shipping_achieved %} cart-drawer__shipping-progress--complete{% endif %}" data-shipping-progress>
+        <div
+          class="cart-drawer__shipping-progress-fill"
+          data-shipping-progress-fill
+          style="width: {{ progress_percent }}%;"
+        ></div>
+      </div>
+    </div>
+  {%- endif -%}
+
   <div class="cart-drawer__body" data-cart-drawer-body>
     {%- if cart.item_count > 0 -%}
       <div class="cart-drawer__items">
@@ -32,14 +83,14 @@
           <div class="cart-drawer-item" data-cart-item data-line-item-key="{{ item.key }}">
             <div class="cart-drawer-item__media">
               {%- if item.image -%}
-                <a href="{{ item.url }}">
+                <a href="{{ item.url }}" tabindex="-1">
                   {{
                     item.image
-                    | image_url: width: 150
+                    | image_url: width: 200
                     | image_tag:
                       loading: 'lazy',
-                      width: 75,
-                      height: 75,
+                      widths: '80, 160, 200',
+                      sizes: '80px',
                       class: 'cart-drawer-item__image'
                   }}
                 </a>
@@ -85,7 +136,7 @@
                   >
                     {% render 'icon', icon: 'minus', size: 'xs' %}
                   </button>
-                  <span class="quantity-value" data-quantity-value>{{ item.quantity }}</span>
+                  <span class="quantity-value" data-quantity-value aria-label="{{ 'cart.quantity' | t }}">{{ item.quantity }}</span>
                   <button
                     type="button"
                     class="quantity-btn"
@@ -101,7 +152,10 @@
                 <div class="cart-drawer-item__price">
                   {%- if item.original_line_price != item.final_line_price -%}
                     <span class="cart-drawer-item__price-sale">{{ item.final_line_price | money }}</span>
-                    <span class="cart-drawer-item__price-compare">{{ item.original_line_price | money }}</span>
+                    <span class="cart-drawer-item__price-compare">
+                      <span class="visually-hidden">{{ 'product.price.regular_price' | t }}</span>
+                      {{ item.original_line_price | money }}
+                    </span>
                   {%- else -%}
                     {{ item.final_line_price | money }}
                   {%- endif -%}
@@ -124,7 +178,7 @@
             <button
               type="button"
               class="cart-drawer-item__remove"
-              aria-label="{{ 'cart.remove' | t: title: item.title }}"
+              aria-label="{{ 'cart.remove_item' | t: title: item.title }}"
               data-cart-remove
               data-line-key="{{ item.key }}"
             >
@@ -139,7 +193,7 @@
           {% render 'icon', icon: 'cart', size: 'lg' %}
         </div>
         <p class="cart-drawer__empty-text">{{ 'cart.empty' | t }}</p>
-        <a href="{{ routes.all_products_collection_url }}" class="btn btn--primary" data-cart-drawer-close>
+        <a href="{{ routes.all_products_collection_url }}" class="btn btn--filled" data-cart-drawer-close>
           {{ 'cart.continue_shopping' | t }}
         </a>
       </div>
@@ -147,6 +201,26 @@
   </div>
 
   {%- if cart.item_count > 0 -%}
+    {%- comment -%} Cart Note Section {%- endcomment -%}
+    {%- if section.settings.enable_cart_note -%}
+      <div class="cart-drawer__note" data-cart-note>
+        <button type="button" class="cart-drawer__note-toggle" data-cart-note-toggle aria-expanded="false">
+          <span>{{ 'cart.note_toggle' | t }}</span>
+          {% render 'icon', icon: 'chevron-down', size: 'sm' %}
+        </button>
+        <div class="cart-drawer__note-content" data-cart-note-content hidden>
+          <textarea
+            class="cart-drawer__note-textarea"
+            name="note"
+            placeholder="{{ 'cart.note_placeholder' | t }}"
+            data-cart-note-input
+            aria-label="{{ 'cart.note' | t }}"
+          >{{ cart.note }}</textarea>
+          <span class="cart-drawer__note-save" data-cart-note-save aria-live="polite"></span>
+        </div>
+      </div>
+    {%- endif -%}
+
     <div class="cart-drawer__footer">
       {%- comment -%} Order Discounts {%- endcomment -%}
       {%- if cart.cart_level_discount_applications.size > 0 -%}
@@ -169,14 +243,22 @@
       </div>
 
       <p class="cart-drawer__taxes">
-        {{ 'cart.taxes_and_shipping_at_checkout' | t }}
+        {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
+          {{ 'cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+        {%- elsif cart.taxes_included -%}
+          {{ 'cart.taxes_included_but_shipping_at_checkout' | t }}
+        {%- elsif shop.shipping_policy.body != blank -%}
+          {{ 'cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+        {%- else -%}
+          {{ 'cart.taxes_and_shipping_at_checkout' | t }}
+        {%- endif -%}
       </p>
 
       <div class="cart-drawer__buttons">
         <a href="{{ routes.cart_url }}" class="btn btn--outline btn--full">
           {{ 'cart.view_cart' | t }}
         </a>
-        <a href="{{ routes.checkout_url }}" class="btn btn--primary btn--full">
+        <a href="{{ routes.checkout_url }}" class="btn btn--filled btn--full">
           {{ 'cart.checkout' | t }}
         </a>
       </div>
@@ -184,110 +266,206 @@
   {%- endif -%}
 </div>
 
-<div class="cart-drawer__overlay" data-cart-drawer-overlay></div>
+<div class="cart-drawer__overlay" data-cart-drawer-overlay aria-hidden="true"></div>
+
+{%- comment -%} ARIA Live Region for screen reader announcements {%- endcomment -%}
+<div id="cart-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 (function() {
   const cartDrawer = document.querySelector('[data-cart-drawer]');
   const cartOverlay = document.querySelector('[data-cart-drawer-overlay]');
   const cartToggles = document.querySelectorAll('[data-cart-toggle]');
-  const cartCloseButtons = document.querySelectorAll('[data-cart-drawer-close]');
+  const liveRegion = document.getElementById('cart-live-region');
 
-  function openCartDrawer() {
-    if (cartDrawer) {
-      cartDrawer.classList.add('is-open');
-      cartDrawer.setAttribute('aria-hidden', 'false');
-      cartOverlay.classList.add('is-active');
-      document.body.style.overflow = 'hidden';
+  let isLoading = false;
+  let triggerElement = null;
+
+  // Focus trap variables
+  const focusableSelector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  function announce(message) {
+    if (liveRegion) {
+      liveRegion.textContent = '';
+      setTimeout(() => {
+        liveRegion.textContent = message;
+      }, 100);
     }
+  }
+
+  function getFocusableElements() {
+    return Array.from(cartDrawer.querySelectorAll(focusableSelector)).filter(el => {
+      return el.offsetParent !== null && !el.closest('[hidden]');
+    });
+  }
+
+  function trapFocus(e) {
+    if (e.key !== 'Tab') return;
+
+    const focusables = getFocusableElements();
+    if (focusables.length === 0) return;
+
+    const firstFocusable = focusables[0];
+    const lastFocusable = focusables[focusables.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstFocusable) {
+        e.preventDefault();
+        lastFocusable.focus();
+      }
+    } else {
+      if (document.activeElement === lastFocusable) {
+        e.preventDefault();
+        firstFocusable.focus();
+      }
+    }
+  }
+
+  function openCartDrawer(trigger = null) {
+    if (!cartDrawer) return;
+
+    triggerElement = trigger || document.activeElement;
+    cartDrawer.classList.add('is-open');
+    cartDrawer.setAttribute('aria-hidden', 'false');
+    cartOverlay.classList.add('is-active');
+    document.body.style.overflow = 'hidden';
+
+    // Focus first focusable element
+    setTimeout(() => {
+      const focusables = getFocusableElements();
+      if (focusables.length > 0) {
+        focusables[0].focus();
+      }
+    }, 100);
+
+    // Add focus trap
+    cartDrawer.addEventListener('keydown', trapFocus);
   }
 
   function closeCartDrawer() {
-    if (cartDrawer) {
-      cartDrawer.classList.remove('is-open');
-      cartDrawer.setAttribute('aria-hidden', 'true');
-      cartOverlay.classList.remove('is-active');
-      document.body.style.overflow = '';
+    if (!cartDrawer) return;
+
+    cartDrawer.classList.remove('is-open');
+    cartDrawer.setAttribute('aria-hidden', 'true');
+    cartOverlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+
+    // Remove focus trap
+    cartDrawer.removeEventListener('keydown', trapFocus);
+
+    // Return focus to trigger element
+    if (triggerElement && typeof triggerElement.focus === 'function') {
+      triggerElement.focus();
     }
   }
 
-  // Toggle cart drawer
-  cartToggles.forEach(toggle => {
-    toggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (cartDrawer.classList.contains('is-open')) {
-        closeCartDrawer();
-      } else {
-        openCartDrawer();
+  function setLoading(loading, lineKey = null) {
+    isLoading = loading;
+
+    if (loading) {
+      cartDrawer.classList.add('is-loading');
+      if (lineKey) {
+        const item = cartDrawer.querySelector(`[data-line-item-key="${lineKey}"]`);
+        if (item) item.classList.add('is-updating');
       }
-    });
-  });
-
-  // Close buttons
-  cartCloseButtons.forEach(btn => {
-    btn.addEventListener('click', closeCartDrawer);
-  });
-
-  // Close on overlay click
-  if (cartOverlay) {
-    cartOverlay.addEventListener('click', closeCartDrawer);
+    } else {
+      cartDrawer.classList.remove('is-loading');
+      const updatingItems = cartDrawer.querySelectorAll('.is-updating');
+      updatingItems.forEach(item => item.classList.remove('is-updating'));
+    }
   }
 
-  // Close on escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && cartDrawer.classList.contains('is-open')) {
-      closeCartDrawer();
-    }
-  });
+  async function updateCart(lineKey, quantity, isRemove = false) {
+    if (isLoading) return;
 
-  // Quantity and remove buttons via AJAX
-  async function updateCart(lineKey, quantity) {
+    setLoading(true, lineKey);
+
     try {
       const response = await fetch('/cart/change.js', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          id: lineKey,
-          quantity: quantity
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: lineKey, quantity: quantity })
       });
 
-      if (response.ok) {
-        // Reload the cart drawer content
-        const cartResponse = await fetch('/?section_id=cart-drawer');
-        const html = await cartResponse.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const newDrawer = doc.querySelector('[data-cart-drawer]');
+      if (!response.ok) throw new Error('Cart update failed');
 
-        if (newDrawer && cartDrawer) {
-          cartDrawer.innerHTML = newDrawer.innerHTML;
-          // Re-attach event listeners
-          attachCartItemListeners();
+      const cartData = await response.json();
+
+      // Animate removal if quantity is 0
+      if (isRemove || quantity === 0) {
+        const item = cartDrawer.querySelector(`[data-line-item-key="${lineKey}"]`);
+        if (item) {
+          item.classList.add('is-removing');
+          await new Promise(resolve => setTimeout(resolve, 300));
         }
+      }
 
-        // Update cart count in header
-        const cartData = await response.json();
-        const cartCounts = document.querySelectorAll('[data-cart-count]');
-        cartCounts.forEach(count => {
-          if (count.closest('.cart-drawer')) {
-            count.textContent = `(${cartData.item_count})`;
-          } else {
-            count.textContent = cartData.item_count;
-          }
-        });
+      await refreshDrawerContent();
+
+      // Announce change to screen readers
+      if (quantity === 0) {
+        announce('{{ "cart.item_removed" | t }}');
+      } else {
+        announce('{{ "cart.cart_updated" | t }}');
+      }
+
+      updateHeaderCartCount(cartData.item_count);
+
+    } catch (error) {
+      console.error('Cart update error:', error);
+      announce('{{ "cart.error_updating" | t }}');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function refreshDrawerContent() {
+    // Show loading state immediately
+    setLoading(true);
+
+    try {
+      // Fetch the cart-drawer section from cart page context
+      const response = await fetch('/cart?section_id=cart-drawer');
+      const html = await response.text();
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const newDrawer = doc.querySelector('[data-cart-drawer]');
+
+      if (newDrawer && cartDrawer) {
+        const wasOpen = cartDrawer.classList.contains('is-open');
+        cartDrawer.innerHTML = newDrawer.innerHTML;
+
+        attachCartItemListeners();
+        initCartNote();
+
+        if (wasOpen) {
+          cartDrawer.addEventListener('keydown', trapFocus);
+        }
       }
     } catch (error) {
-      console.error('Error updating cart:', error);
+      console.error('Failed to refresh cart drawer:', error);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  function updateHeaderCartCount(count) {
+    const headerCounts = document.querySelectorAll('[data-cart-count]');
+    headerCounts.forEach(el => {
+      if (el.closest('.cart-drawer')) {
+        el.textContent = `(${count})`;
+      } else {
+        el.textContent = count;
+      }
+    });
   }
 
   function attachCartItemListeners() {
     const minusButtons = cartDrawer.querySelectorAll('[data-quantity-minus]');
     const plusButtons = cartDrawer.querySelectorAll('[data-quantity-plus]');
     const removeButtons = cartDrawer.querySelectorAll('[data-cart-remove]');
+    const closeButtons = cartDrawer.querySelectorAll('[data-cart-drawer-close]');
 
     minusButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -296,7 +474,7 @@
         if (currentQty > 1) {
           updateCart(lineKey, currentQty - 1);
         } else {
-          updateCart(lineKey, 0);
+          updateCart(lineKey, 0, true);
         }
       });
     });
@@ -312,16 +490,175 @@
     removeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const lineKey = btn.dataset.lineKey;
-        updateCart(lineKey, 0);
+        updateCart(lineKey, 0, true);
       });
+    });
+
+    closeButtons.forEach(btn => {
+      btn.addEventListener('click', closeCartDrawer);
     });
   }
 
-  // Initial attachment
-  attachCartItemListeners();
+  function initCartNote() {
+    const noteToggle = cartDrawer.querySelector('[data-cart-note-toggle]');
+    const noteContainer = cartDrawer.querySelector('[data-cart-note]');
+    const noteContent = cartDrawer.querySelector('[data-cart-note-content]');
+    const noteTextarea = cartDrawer.querySelector('[data-cart-note-input]');
+    const noteSaveIndicator = cartDrawer.querySelector('[data-cart-note-save]');
 
-  // Expose openCartDrawer globally for add-to-cart events
+    if (!noteToggle || !noteTextarea) return;
+
+    let saveTimeout = null;
+    let originalNote = noteTextarea.value;
+
+    // Toggle visibility
+    noteToggle.addEventListener('click', () => {
+      const isExpanded = noteToggle.getAttribute('aria-expanded') === 'true';
+      noteToggle.setAttribute('aria-expanded', !isExpanded);
+      noteContent.hidden = isExpanded;
+      noteContainer.classList.toggle('is-open', !isExpanded);
+
+      if (!isExpanded) {
+        noteTextarea.focus();
+      }
+    });
+
+    // Auto-save with debounce
+    noteTextarea.addEventListener('input', () => {
+      if (saveTimeout) clearTimeout(saveTimeout);
+
+      if (noteTextarea.value !== originalNote && noteSaveIndicator) {
+        noteSaveIndicator.classList.add('is-visible');
+        noteSaveIndicator.textContent = '{{ "cart.note_saving" | t }}';
+      }
+
+      saveTimeout = setTimeout(async () => {
+        try {
+          await fetch('/cart/update.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ note: noteTextarea.value })
+          });
+
+          originalNote = noteTextarea.value;
+          if (noteSaveIndicator) {
+            noteSaveIndicator.textContent = '{{ "cart.note_saved" | t }}';
+            setTimeout(() => {
+              noteSaveIndicator.classList.remove('is-visible');
+            }, 2000);
+          }
+
+        } catch (error) {
+          console.error('Failed to save note:', error);
+          if (noteSaveIndicator) {
+            noteSaveIndicator.textContent = '{{ "cart.error_updating" | t }}';
+          }
+        }
+      }, 800);
+    });
+  }
+
+  // Toggle cart drawer
+  cartToggles.forEach(toggle => {
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (cartDrawer.classList.contains('is-open')) {
+        closeCartDrawer();
+      } else {
+        openCartDrawer(toggle);
+      }
+    });
+  });
+
+  // Close on overlay click
+  if (cartOverlay) {
+    cartOverlay.addEventListener('click', closeCartDrawer);
+  }
+
+  // Close on escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && cartDrawer.classList.contains('is-open')) {
+      closeCartDrawer();
+    }
+  });
+
+  // Initial setup
+  attachCartItemListeners();
+  initCartNote();
+
+  // Expose functions globally for add-to-cart events
   window.openCartDrawer = openCartDrawer;
+  window.closeCartDrawer = closeCartDrawer;
+  window.refreshCartDrawer = refreshDrawerContent;
+
+  // Global handler for quick-add forms (product cards)
+  document.addEventListener('submit', async (e) => {
+    const form = e.target.closest('[data-quick-add-form]');
+    if (!form) return;
+
+    e.preventDefault();
+
+    const btn = form.querySelector('[data-quick-add-btn]');
+    const textEl = form.querySelector('[data-quick-add-text]');
+    const formData = new FormData(form);
+
+    if (btn) btn.disabled = true;
+    const originalText = textEl ? textEl.textContent : '';
+    if (textEl) textEl.textContent = '{{ "product.adding" | t | default: "Adding..." }}';
+
+    try {
+      // Use JSON format with sections parameter for reliable section rendering
+      const response = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{ id: parseInt(formData.get('id')), quantity: parseInt(formData.get('quantity') || 1) }],
+          sections: 'cart-drawer',
+          sections_url: window.location.pathname
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add to cart');
+      }
+
+      const data = await response.json();
+
+      // Update cart count
+      const cartResponse = await fetch('/cart.js');
+      const cartData = await cartResponse.json();
+      updateHeaderCartCount(cartData.item_count);
+
+      // Update drawer with returned section HTML
+      if (data.sections && data.sections['cart-drawer']) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.sections['cart-drawer'], 'text/html');
+        const newDrawer = doc.querySelector('[data-cart-drawer]');
+        if (newDrawer && cartDrawer) {
+          cartDrawer.innerHTML = newDrawer.innerHTML;
+          attachCartItemListeners();
+          initCartNote();
+        }
+      }
+
+      openCartDrawer();
+
+      // Success feedback
+      if (textEl) textEl.textContent = '{{ "product.added" | t | default: "Added!" }}';
+      setTimeout(() => {
+        if (textEl) textEl.textContent = originalText;
+        if (btn) btn.disabled = false;
+      }, 1500);
+
+    } catch (error) {
+      console.error('Quick add error:', error);
+      if (textEl) textEl.textContent = '{{ "product.error" | t | default: "Error" }}';
+      setTimeout(() => {
+        if (textEl) textEl.textContent = originalText;
+        if (btn) btn.disabled = false;
+      }, 2000);
+    }
+  });
 })();
 </script>
 
@@ -329,6 +666,61 @@
 {
   "name": "t:sections.cart_drawer.name",
   "class": "section-cart-drawer",
-  "settings": []
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.cart_drawer.settings.header_shipping.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_shipping_bar",
+      "label": "t:sections.cart_drawer.settings.enable_shipping_bar.label",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "shipping_threshold",
+      "label": "t:sections.cart_drawer.settings.shipping_threshold.label",
+      "info": "t:sections.cart_drawer.settings.shipping_threshold.info",
+      "min": 0,
+      "max": 500,
+      "step": 10,
+      "unit": "$",
+      "default": 100
+    },
+    {
+      "type": "text",
+      "id": "shipping_message_progress",
+      "label": "t:sections.cart_drawer.settings.shipping_message_progress.label",
+      "info": "t:sections.cart_drawer.settings.shipping_message_progress.info",
+      "default": "You're {{ remaining }} away from free shipping"
+    },
+    {
+      "type": "text",
+      "id": "shipping_message_success",
+      "label": "t:sections.cart_drawer.settings.shipping_message_success.label",
+      "default": "You've unlocked free shipping!"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.cart_drawer.settings.header_cart_note.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_cart_note",
+      "label": "t:sections.cart_drawer.settings.enable_cart_note.label",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.cart_drawer.settings.header_display.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme_1"
+    }
+  ]
 }
 {% endschema %}

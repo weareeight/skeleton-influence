@@ -31,7 +31,7 @@
 
 <section
   id="{{ section_id }}"
-  class="video-section section video-section--{{ video_style }} video-section--{{ aspect_ratio }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
+  class="video-section section section--{{ section.settings.padding }} video-section--{{ video_style }} video-section--{{ aspect_ratio }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
   data-section-id="{{ section.id }}"
   data-section-type="video"
   data-video-type="{{ video_type }}"
@@ -94,9 +94,10 @@
 
                     {%- when 'heading' -%}
                       {%- if block.settings.text != blank -%}
-                        <h2 class="video-section__title h1" {{ block.shopify_attributes }}>
+                        {%- assign heading_size = block.settings.heading_size | default: 'h2' -%}
+                        <{{ heading_size }} class="video-section__title {{ heading_size }}" {{ block.shopify_attributes }}>
                           {{ block.settings.text }}
-                        </h2>
+                        </{{ heading_size }}>
                       {%- endif -%}
 
                     {%- when 'text' -%}
@@ -146,8 +147,8 @@
               data-video-play
             >
               <span class="video-section__play-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M8 5v14l11-7z"/>
+                <svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+                  <path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/>
                 </svg>
               </span>
             </button>
@@ -166,9 +167,10 @@
 
                     {%- when 'heading' -%}
                       {%- if block.settings.text != blank -%}
-                        <h2 class="video-section__title h2" {{ block.shopify_attributes }}>
+                        {%- assign heading_size = block.settings.heading_size | default: 'h2' -%}
+                        <{{ heading_size }} class="video-section__title {{ heading_size }}" {{ block.shopify_attributes }}>
                           {{ block.settings.text }}
-                        </h2>
+                        </{{ heading_size }}>
                       {%- endif -%}
                   {%- endcase -%}
                 {%- endfor -%}
@@ -203,9 +205,10 @@
 
             {%- when 'heading' -%}
               {%- if block.settings.text != blank -%}
-                <h2 class="video-section__title h3" {{ block.shopify_attributes }}>
+                {%- assign heading_size = block.settings.heading_size | default: 'h2' -%}
+                <{{ heading_size }} class="video-section__title {{ heading_size }}" {{ block.shopify_attributes }}>
                   {{ block.settings.text }}
-                </h2>
+                </{{ heading_size }}>
               {%- endif -%}
 
             {%- when 'text' -%}
@@ -531,6 +534,23 @@
       transition: none;
     }
   }
+
+  /* Section padding variants */
+  .video-section.section--none {
+    padding-block: 0;
+  }
+
+  .video-section.section--small {
+    padding-block: var(--section-spacing-sm);
+  }
+
+  .video-section.section--medium {
+    padding-block: var(--section-spacing-md);
+  }
+
+  .video-section.section--large {
+    padding-block: var(--section-spacing-lg);
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -648,14 +668,26 @@
       "default": "center"
     },
     {
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
       "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
-      "options": [
-        { "value": "scheme-1", "label": "t:options.color_scheme.scheme_1" },
-        { "value": "scheme-2", "label": "t:options.color_scheme.scheme_2" }
-      ],
-      "default": "scheme-1"
+      "default": "scheme_1"
     }
   ],
   "blocks": [
@@ -682,6 +714,17 @@
           "id": "text",
           "label": "t:labels.heading",
           "default": "Brand Film"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "t:labels.heading_size",
+          "options": [
+            { "value": "h1", "label": "t:options.heading_size.h1" },
+            { "value": "h2", "label": "t:options.heading_size.h2" },
+            { "value": "h3", "label": "t:options.heading_size.h3" }
+          ],
+          "default": "h2"
         }
       ]
     },
@@ -719,17 +762,24 @@
           "id": "style",
           "label": "t:labels.button_style",
           "options": [
-            { "value": "primary", "label": "t:options.button_style.primary" },
-            { "value": "secondary", "label": "t:options.button_style.secondary" }
+            { "value": "filled", "label": "t:options.button_style.filled" },
+            { "value": "outline", "label": "t:options.button_style.outline" },
+            { "value": "underline", "label": "t:options.button_style.underline" }
           ],
-          "default": "primary"
+          "default": "filled"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "t:sections.video.name"
+      "name": "t:sections.video.name",
+      "blocks": [
+        { "type": "subheading" },
+        { "type": "heading" },
+        { "type": "text" },
+        { "type": "button" }
+      ]
     }
   ]
 }

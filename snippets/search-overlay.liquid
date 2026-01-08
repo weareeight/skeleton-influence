@@ -1,0 +1,588 @@
+{% comment %}
+  Search Overlay - Influence Theme
+  Full-screen editorial search experience with predictive results
+
+  Usage: {% render 'search-overlay' %}
+
+  Required: Rendered in layout/theme.liquid after footer
+{% endcomment %}
+
+{%- if settings.predictive_search_enabled -%}
+  {%- liquid
+    assign show_products = settings.predictive_search_show_products
+    assign show_collections = settings.predictive_search_show_collections
+    assign show_articles = settings.predictive_search_show_articles
+    assign show_pages = settings.predictive_search_show_pages
+    assign product_limit = settings.predictive_search_product_limit | default: 6
+    assign other_limit = settings.predictive_search_other_limit | default: 4
+
+    # Build resource types string
+    assign types = ''
+    if show_products
+      assign types = types | append: 'product'
+    endif
+    if show_collections
+      if types != blank
+        assign types = types | append: ','
+      endif
+      assign types = types | append: 'collection'
+    endif
+    if show_articles
+      if types != blank
+        assign types = types | append: ','
+      endif
+      assign types = types | append: 'article'
+    endif
+    if show_pages
+      if types != blank
+        assign types = types | append: ','
+      endif
+      assign types = types | append: 'page'
+    endif
+  -%}
+
+  {{ 'search-overlay.css' | asset_url | stylesheet_tag }}
+
+  <search-overlay
+    class="search-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{{ 'search.title' | t }}"
+    aria-hidden="true"
+    data-search-overlay
+    data-resource-types="{{ types }}"
+    data-product-limit="{{ product_limit }}"
+    data-other-limit="{{ other_limit }}"
+    data-show-vendor="{{ settings.predictive_search_show_vendor }}"
+    data-show-price="{{ settings.predictive_search_show_price }}"
+    data-show-products="{{ show_products }}"
+    data-show-collections="{{ show_collections }}"
+    data-show-articles="{{ show_articles }}"
+    data-show-pages="{{ show_pages }}"
+    data-translations='{
+      "products": {{ 'search.products' | t | json }},
+      "collections": {{ 'search.collections' | t | json }},
+      "articles": {{ 'search.articles' | t | json }},
+      "pages": {{ 'search.pages' | t | json }},
+      "no_results": {{ 'search.no_results' | t: terms: '__TERMS__' | json }},
+      "view_all": {{ 'search.view_all' | t | json }},
+      "loading": {{ 'search.loading' | t | json }},
+      "suggestion_1": {{ 'search.suggestion_1' | t | json }},
+      "suggestion_2": {{ 'search.suggestion_2' | t | json }},
+      "suggestion_3": {{ 'search.suggestion_3' | t | json }},
+      "results_count": {{ 'search.results_count' | t: count: '__COUNT__', terms: '__TERMS__' | json }}
+    }'
+    data-money-format="{{ shop.money_format }}"
+    data-routes-root="{{ routes.root_url }}"
+  >
+    {%- comment -%} Backdrop {%- endcomment -%}
+    <div class="search-overlay__backdrop" data-search-close></div>
+
+    {%- comment -%} Content Container {%- endcomment -%}
+    <div class="search-overlay__container">
+      {%- comment -%} Close Button {%- endcomment -%}
+      <button
+        type="button"
+        class="search-overlay__close"
+        data-search-close
+        aria-label="{{ 'accessibility.close' | t }}"
+      >
+        {% render 'icon', icon: 'close', size: 'lg' %}
+      </button>
+
+      {%- comment -%} Search Form {%- endcomment -%}
+      <form
+        action="{{ routes.search_url }}"
+        method="get"
+        role="search"
+        class="search-overlay__form"
+      >
+        <div class="search-overlay__input-wrapper">
+          {% render 'icon', icon: 'search', class: 'search-overlay__search-icon' %}
+          <input
+            type="search"
+            name="q"
+            class="search-overlay__input"
+            placeholder="{{ 'search.placeholder' | t }}"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            data-search-input
+            role="combobox"
+            aria-expanded="false"
+            aria-controls="search-overlay-results"
+            aria-autocomplete="list"
+          >
+        </div>
+        <input type="hidden" name="type" value="{{ types }}">
+      </form>
+
+      {%- comment -%} Results Container {%- endcomment -%}
+      <div
+        id="search-overlay-results"
+        class="search-overlay__results"
+        role="listbox"
+        aria-label="{{ 'search.results' | t }}"
+        data-search-results
+        hidden
+      >
+        {%- comment -%} Loading State {%- endcomment -%}
+        <div class="search-overlay__loading" data-search-loading hidden>
+          <span class="search-overlay__spinner" aria-hidden="true"></span>
+          <span>{{ 'search.loading' | t }}</span>
+        </div>
+
+        {%- comment -%} Results Content (populated by JS) {%- endcomment -%}
+        <div class="search-overlay__content" data-search-content></div>
+      </div>
+    </div>
+
+    {%- comment -%} Live Region for Screen Readers {%- endcomment -%}
+    <div class="visually-hidden" aria-live="polite" aria-atomic="true" data-search-announce></div>
+  </search-overlay>
+
+  <script>
+    class SearchOverlay extends HTMLElement {
+      constructor() {
+        super();
+
+        // Elements
+        this.backdrop = this.querySelector('.search-overlay__backdrop');
+        this.closeButtons = this.querySelectorAll('[data-search-close]');
+        this.input = this.querySelector('[data-search-input]');
+        this.results = this.querySelector('[data-search-results]');
+        this.content = this.querySelector('[data-search-content]');
+        this.loading = this.querySelector('[data-search-loading]');
+        this.announcer = this.querySelector('[data-search-announce]');
+        this.form = this.querySelector('form');
+
+        // Config from data attributes
+        this.translations = JSON.parse(this.dataset.translations || '{}');
+        this.resourceTypes = this.dataset.resourceTypes || 'product,collection,article,page';
+        this.productLimit = parseInt(this.dataset.productLimit) || 6;
+        this.otherLimit = parseInt(this.dataset.otherLimit) || 4;
+        this.showVendor = this.dataset.showVendor === 'true';
+        this.showPrice = this.dataset.showPrice === 'true';
+        this.showProducts = this.dataset.showProducts === 'true';
+        this.showCollections = this.dataset.showCollections === 'true';
+        this.showArticles = this.dataset.showArticles === 'true';
+        this.showPages = this.dataset.showPages === 'true';
+        this.moneyFormat = this.dataset.moneyFormat || '${{amount}}';
+        this.routesRoot = this.dataset.routesRoot || '/';
+
+        // State
+        this.isOpen = false;
+        this.cache = {};
+        this.debounceTimer = null;
+        this.abortController = null;
+        this.selectedIndex = -1;
+        this.triggerElement = null;
+
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        // Open triggers (global)
+        document.addEventListener('search:open', (e) => this.open(e.detail?.trigger));
+
+        // Close triggers
+        this.closeButtons.forEach(btn => {
+          btn.addEventListener('click', () => this.close());
+        });
+
+        // Input handling
+        this.input?.addEventListener('input', () => this.onInput());
+        this.input?.addEventListener('keydown', (e) => this.onKeydown(e));
+
+        // Global escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.isOpen) {
+            this.close();
+          }
+        });
+      }
+
+      open(trigger = null) {
+        this.triggerElement = trigger || document.activeElement;
+        this.isOpen = true;
+        this.classList.add('is-open');
+        this.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        // Focus input after animation
+        setTimeout(() => {
+          this.input?.focus();
+        }, 100);
+
+        // Add focus trap
+        this.boundTrapFocus = this.trapFocus.bind(this);
+        this.addEventListener('keydown', this.boundTrapFocus);
+      }
+
+      close() {
+        this.isOpen = false;
+        this.classList.remove('is-open');
+        this.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+
+        // Remove focus trap
+        if (this.boundTrapFocus) {
+          this.removeEventListener('keydown', this.boundTrapFocus);
+        }
+
+        // Return focus to trigger
+        if (this.triggerElement && typeof this.triggerElement.focus === 'function') {
+          this.triggerElement.focus();
+        }
+      }
+
+      trapFocus(e) {
+        if (e.key !== 'Tab') return;
+
+        const focusableSelector = 'button:not([disabled]):not([hidden]), [href], input:not([disabled]):not([hidden]), [tabindex]:not([tabindex="-1"])';
+        const focusables = Array.from(this.querySelectorAll(focusableSelector)).filter(el => {
+          return el.offsetParent !== null && !el.closest('[hidden]');
+        });
+
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+
+      onInput() {
+        const query = this.input.value.trim();
+
+        // Clear debounce
+        clearTimeout(this.debounceTimer);
+
+        if (query.length < 2) {
+          this.hideResults();
+          return;
+        }
+
+        // Debounce search
+        this.debounceTimer = setTimeout(() => {
+          this.search(query);
+        }, 300);
+      }
+
+      onKeydown(e) {
+        const items = this.results.querySelectorAll('[data-result-item]');
+
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
+            this.updateSelection(items);
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+            this.updateSelection(items);
+            break;
+          case 'Enter':
+            if (this.selectedIndex >= 0 && items[this.selectedIndex]) {
+              e.preventDefault();
+              const link = items[this.selectedIndex].querySelector('a');
+              if (link) link.click();
+            }
+            break;
+        }
+      }
+
+      updateSelection(items) {
+        items.forEach((item, index) => {
+          const isSelected = index === this.selectedIndex;
+          item.classList.toggle('is-selected', isSelected);
+          item.setAttribute('aria-selected', isSelected);
+          if (isSelected) {
+            item.scrollIntoView({ block: 'nearest' });
+            this.input.setAttribute('aria-activedescendant', item.id);
+          }
+        });
+
+        if (this.selectedIndex === -1) {
+          this.input.removeAttribute('aria-activedescendant');
+        }
+      }
+
+      async search(query) {
+        // Check cache
+        if (this.cache[query]) {
+          this.renderResults(this.cache[query], query);
+          return;
+        }
+
+        // Abort previous request
+        if (this.abortController) {
+          this.abortController.abort();
+        }
+        this.abortController = new AbortController();
+
+        this.showLoading();
+
+        try {
+          const limit = Math.max(this.productLimit, this.otherLimit);
+          const url = `${this.routesRoot}search/suggest.json?q=${encodeURIComponent(query)}&resources[type]=${this.resourceTypes}&resources[limit]=${limit}&resources[options][unavailable_products]=hide`;
+
+          const response = await fetch(url, { signal: this.abortController.signal });
+
+          if (!response.ok) throw new Error('Search failed');
+
+          const data = await response.json();
+          this.cache[query] = data;
+          this.renderResults(data, query);
+
+        } catch (error) {
+          if (error.name !== 'AbortError') {
+            console.error('Search error:', error);
+            this.hideResults();
+          }
+        }
+      }
+
+      renderResults(data, query) {
+        const resources = data.resources?.results || {};
+        const products = this.showProducts ? (resources.products || []).slice(0, this.productLimit) : [];
+        const collections = this.showCollections ? (resources.collections || []).slice(0, this.otherLimit) : [];
+        const articles = this.showArticles ? (resources.articles || []).slice(0, this.otherLimit) : [];
+        const pages = this.showPages ? (resources.pages || []).slice(0, this.otherLimit) : [];
+
+        const hasResults = products.length || collections.length || articles.length || pages.length;
+
+        if (!hasResults) {
+          this.renderNoResults(query);
+          return;
+        }
+
+        let html = '';
+        let itemIndex = 0;
+
+        // Products Section
+        if (products.length) {
+          html += `<div class="search-overlay__products">
+            <h3 class="search-overlay__section-title">${this.escapeHtml(this.translations.products)}</h3>
+            <div class="search-overlay__products-grid">`;
+
+          products.forEach(product => {
+            html += this.renderProductCard(product, itemIndex++);
+          });
+
+          html += '</div></div>';
+        }
+
+        // Other Results (collections, articles, pages)
+        const otherHtml = this.renderOtherResults(collections, articles, pages, itemIndex);
+        if (otherHtml) {
+          html += `<div class="search-overlay__other-results">${otherHtml}</div>`;
+        }
+
+        // View All Button
+        html += `<div class="search-overlay__footer">
+          <a href="${this.routesRoot}search?q=${encodeURIComponent(query)}" class="search-overlay__view-all btn btn--outline">
+            ${this.escapeHtml(this.translations.view_all)}
+          </a>
+        </div>`;
+
+        this.content.innerHTML = html;
+        this.showResults();
+        this.selectedIndex = -1;
+
+        // Announce to screen readers
+        const total = products.length + collections.length + articles.length + pages.length;
+        this.announce(`${total} results found`);
+      }
+
+      renderProductCard(product, index) {
+        const imageHtml = product.featured_image?.url
+          ? `<img src="${this.getSizedImageUrl(product.featured_image.url, '300x')}"
+               alt="${this.escapeHtml(product.featured_image.alt || product.title)}"
+               loading="lazy" width="80" height="100">`
+          : `<div class="search-overlay__product-placeholder">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                 <rect x="3" y="3" width="18" height="18" rx="2"/>
+                 <circle cx="8.5" cy="8.5" r="1.5"/>
+                 <path d="m21 15-5-5L5 21"/>
+               </svg>
+             </div>`;
+
+        const vendorHtml = this.showVendor && product.vendor
+          ? `<span class="search-overlay__product-vendor">${this.escapeHtml(product.vendor)}</span>`
+          : '';
+
+        const priceHtml = this.showPrice
+          ? `<span class="search-overlay__product-price">${this.formatMoney(product.price)}</span>`
+          : '';
+
+        return `
+          <div class="search-overlay__product"
+               data-result-item
+               id="search-result-${index}"
+               role="option"
+               aria-selected="false">
+            <a href="${product.url}" class="search-overlay__product-link">
+              <div class="search-overlay__product-image">${imageHtml}</div>
+              <div class="search-overlay__product-info">
+                ${vendorHtml}
+                <span class="search-overlay__product-title">${this.escapeHtml(product.title)}</span>
+                ${priceHtml}
+              </div>
+            </a>
+          </div>
+        `;
+      }
+
+      renderOtherResults(collections, articles, pages, startIndex) {
+        let html = '';
+        let index = startIndex;
+
+        if (collections.length) {
+          html += `<div class="search-overlay__section">
+            <h3 class="search-overlay__section-title">${this.escapeHtml(this.translations.collections)}</h3>
+            <ul class="search-overlay__list">
+              ${collections.map(c => `
+                <li class="search-overlay__list-item" data-result-item id="search-result-${index++}" role="option" aria-selected="false">
+                  <a href="${c.url}" class="search-overlay__list-link">${this.escapeHtml(c.title)}</a>
+                </li>
+              `).join('')}
+            </ul>
+          </div>`;
+        }
+
+        if (articles.length) {
+          html += `<div class="search-overlay__section">
+            <h3 class="search-overlay__section-title">${this.escapeHtml(this.translations.articles)}</h3>
+            <ul class="search-overlay__list">
+              ${articles.map(a => `
+                <li class="search-overlay__list-item" data-result-item id="search-result-${index++}" role="option" aria-selected="false">
+                  <a href="${a.url}" class="search-overlay__list-link">${this.escapeHtml(a.title)}</a>
+                </li>
+              `).join('')}
+            </ul>
+          </div>`;
+        }
+
+        if (pages.length) {
+          html += `<div class="search-overlay__section">
+            <h3 class="search-overlay__section-title">${this.escapeHtml(this.translations.pages)}</h3>
+            <ul class="search-overlay__list">
+              ${pages.map(p => `
+                <li class="search-overlay__list-item" data-result-item id="search-result-${index++}" role="option" aria-selected="false">
+                  <a href="${p.url}" class="search-overlay__list-link">${this.escapeHtml(p.title)}</a>
+                </li>
+              `).join('')}
+            </ul>
+          </div>`;
+        }
+
+        return html;
+      }
+
+      renderNoResults(query) {
+        const message = this.translations.no_results.replace('__TERMS__', this.escapeHtml(query));
+
+        this.content.innerHTML = `
+          <div class="search-overlay__no-results">
+            <p>${message}</p>
+            <ul class="search-overlay__suggestions">
+              <li>${this.escapeHtml(this.translations.suggestion_1)}</li>
+              <li>${this.escapeHtml(this.translations.suggestion_2)}</li>
+              <li>${this.escapeHtml(this.translations.suggestion_3)}</li>
+            </ul>
+          </div>
+        `;
+
+        this.showResults();
+        this.announce('No results found');
+      }
+
+      showLoading() {
+        this.loading.hidden = false;
+        this.content.innerHTML = '';
+        this.results.hidden = false;
+        this.input.setAttribute('aria-expanded', 'true');
+      }
+
+      showResults() {
+        this.loading.hidden = true;
+        this.results.hidden = false;
+        this.input.setAttribute('aria-expanded', 'true');
+      }
+
+      hideResults() {
+        this.results.hidden = true;
+        this.input.setAttribute('aria-expanded', 'false');
+        this.selectedIndex = -1;
+      }
+
+      announce(message) {
+        if (this.announcer) {
+          this.announcer.textContent = '';
+          setTimeout(() => {
+            this.announcer.textContent = message;
+          }, 100);
+        }
+      }
+
+      escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      getSizedImageUrl(url, size) {
+        if (!url) return '';
+        const match = url.match(/\.(jpg|jpeg|gif|png|bmp|tiff|webp)(\?v=\d+)?$/i);
+        if (match) {
+          const prefix = url.split(match[0])[0];
+          return `${prefix}_${size}${match[0]}`;
+        }
+        return url;
+      }
+
+      formatMoney(price) {
+        // The Search Suggest API can return price in different formats:
+        // - As cents integer: 7900 for $79.00
+        // - As dollars string: "79.00" for $79.00
+        // Detect format by checking if original contains a decimal
+        const priceStr = String(price);
+        const priceNum = parseFloat(price);
+        const hasDecimal = priceStr.includes('.');
+
+        // Determine dollars value
+        // If string has decimal, it's already in dollars; otherwise it's cents
+        const dollars = hasDecimal ? priceNum : priceNum / 100;
+
+        // If Shopify.formatMoney is available, use it (expects cents)
+        if (typeof Shopify !== 'undefined' && Shopify.formatMoney) {
+          const cents = hasDecimal ? Math.round(priceNum * 100) : priceNum;
+          return Shopify.formatMoney(cents, this.moneyFormat);
+        }
+
+        // Fallback: format manually
+        const amount = dollars.toFixed(2);
+        const amountNoDecimals = Math.floor(dollars).toString();
+        const amountWithComma = amount.replace('.', ',');
+
+        // Replace all common Shopify money format placeholders
+        return this.moneyFormat
+          .replace(/\{\{\s*amount_with_comma_separator\s*\}\}/g, amountWithComma)
+          .replace(/\{\{\s*amount_no_decimals\s*\}\}/g, amountNoDecimals)
+          .replace(/\{\{\s*amount\s*\}\}/g, amount);
+      }
+    }
+
+    customElements.define('search-overlay', SearchOverlay);
+  </script>
+{%- endif -%}

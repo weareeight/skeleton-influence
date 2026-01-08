@@ -11,10 +11,11 @@
   assign images_to_show = section.settings.images_to_show | default: 4
   assign height_class = 'carousel-3d--' | append: section.settings.height
   assign display_title = section.settings.custom_title | default: product.title | default: 'Product Title'
+  assign padding = section.settings.padding
 -%}
 
 <section
-  class="carousel-3d {{ height_class }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
+  class="carousel-3d section section--{{ padding }} {{ height_class }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
   data-carousel-3d
   data-radius="{{ section.settings.carousel_radius }}"
   style="
@@ -27,6 +28,10 @@
   <div class="carousel-3d__scene">
     {%- comment -%} Title overlay - centered in the middle of the carousel {%- endcomment -%}
     <div class="carousel-3d__title-overlay">
+      {%- if section.settings.subheading != blank -%}
+        <p class="carousel-3d__subheading subheading">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+
       {%- if product != blank -%}
         <a href="{{ product.url }}" class="carousel-3d__title-link">
           <h2 class="carousel-3d__title carousel-3d__title--{{ section.settings.title_size }}">
@@ -40,29 +45,47 @@
       {%- endif -%}
 
       {%- comment -%} Product info below title {%- endcomment -%}
-      {%- if section.settings.show_price and product != blank -%}
+      {%- if section.settings.show_price -%}
         <p class="carousel-3d__price">
-          {{ product.price | money }}
-          {%- if product.compare_at_price > product.price -%}
-            <span class="carousel-3d__compare-price">{{ product.compare_at_price | money }}</span>
+          {%- if product != blank -%}
+            {{ product.price | money }}
+            {%- if product.compare_at_price > product.price -%}
+              <span class="carousel-3d__compare-price">{{ product.compare_at_price | money }}</span>
+            {%- endif -%}
+          {%- else -%}
+            {{ 4999 | money }}
+            <span class="carousel-3d__compare-price">{{ 6999 | money }}</span>
           {%- endif -%}
         </p>
       {%- endif -%}
 
-      {%- if section.settings.show_variants and product != blank and product.has_only_default_variant == false -%}
-        <div class="carousel-3d__variants">
-          {%- for option in product.options_with_values -%}
-            <span class="carousel-3d__variant-group">
-              {{ option.name }}: {{ option.values | join: ', ' }}
-            </span>
-          {%- endfor -%}
-        </div>
+      {%- if section.settings.show_variants -%}
+        {%- if product != blank and product.has_only_default_variant == false -%}
+          <div class="carousel-3d__variants">
+            {%- for option in product.options_with_values -%}
+              <span class="carousel-3d__variant-group">
+                {{ option.name }}: {{ option.values | join: ', ' }}
+              </span>
+            {%- endfor -%}
+          </div>
+        {%- elsif product == blank -%}
+          <div class="carousel-3d__variants">
+            <span class="carousel-3d__variant-group">Size: S, M, L, XL</span>
+            <span class="carousel-3d__variant-group">Color: Black, White</span>
+          </div>
+        {%- endif -%}
       {%- endif -%}
 
-      {%- if section.settings.cta_text != blank and product != blank -%}
-        <a href="{{ product.url }}" class="carousel-3d__cta btn btn--{{ section.settings.cta_style }}">
-          {{ section.settings.cta_text }}
-        </a>
+      {%- if section.settings.cta_text != blank -%}
+        {%- if product != blank -%}
+          <a href="{{ product.url }}" class="carousel-3d__cta btn btn--{{ section.settings.cta_style }}">
+            {{ section.settings.cta_text }}
+          </a>
+        {%- else -%}
+          <span class="carousel-3d__cta btn btn--{{ section.settings.cta_style }}">
+            {{ section.settings.cta_text }}
+          </span>
+        {%- endif -%}
       {%- endif -%}
     </div>
 
@@ -327,6 +350,23 @@
       transition: none;
     }
   }
+
+  /* Section padding variants */
+  .carousel-3d.section--none {
+    padding-block: 0;
+  }
+
+  .carousel-3d.section--small {
+    padding-block: var(--section-spacing-sm);
+  }
+
+  .carousel-3d.section--medium {
+    padding-block: var(--section-spacing-md);
+  }
+
+  .carousel-3d.section--large {
+    padding-block: var(--section-spacing-lg);
+  }
 {% endstylesheet %}
 
 <script>
@@ -406,6 +446,11 @@
   "tag": "section",
   "settings": [
     {
+      "type": "text",
+      "id": "subheading",
+      "label": "t:labels.subheading"
+    },
+    {
       "type": "header",
       "content": "t:sections.product_carousel_3d.settings.header_product.content"
     },
@@ -471,11 +516,11 @@
       "id": "cta_style",
       "label": "t:sections.product_carousel_3d.settings.cta_style.label",
       "options": [
-        { "value": "primary", "label": "t:sections.product_carousel_3d.settings.cta_style.options.primary" },
-        { "value": "secondary", "label": "t:sections.product_carousel_3d.settings.cta_style.options.secondary" },
-        { "value": "outline", "label": "t:sections.product_carousel_3d.settings.cta_style.options.outline" }
+        { "value": "filled", "label": "t:options.button_style.filled" },
+        { "value": "outline", "label": "t:options.button_style.outline" },
+        { "value": "underline", "label": "t:options.button_style.underline" }
       ],
-      "default": "primary"
+      "default": "filled"
     },
     {
       "type": "header",
@@ -501,6 +546,22 @@
       "unit": "px",
       "label": "t:sections.product_carousel_3d.settings.carousel_radius.label",
       "default": 500
+    },
+    {
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
+      "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "none"
     },
     {
       "type": "color_scheme",

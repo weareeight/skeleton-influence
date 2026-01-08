@@ -1,0 +1,603 @@
+{% comment %}
+  Quick Shop Drawer Section - Influence Theme
+  Slide-out drawer for quick product viewing with variant selection and add-to-cart
+{% endcomment %}
+
+<div
+  id="quick-shop"
+  class="quick-shop drawer drawer--right color-{{ section.settings.color_scheme }}"
+  data-quick-shop
+  aria-hidden="true"
+  aria-modal="true"
+  role="dialog"
+  aria-label="{{ 'quick_shop.title' | t }}"
+>
+  {%- comment -%} Loading overlay {%- endcomment -%}
+  <div class="quick-shop__loading-overlay" data-quick-shop-loading>
+    <div class="quick-shop__spinner"></div>
+  </div>
+
+  <div class="quick-shop__header">
+    <h2 class="quick-shop__title">{{ 'quick_shop.title' | t }}</h2>
+    <button
+      type="button"
+      class="quick-shop__close"
+      aria-label="{{ 'accessibility.close' | t }}"
+      data-quick-shop-close
+    >
+      {% render 'icon', icon: 'close' %}
+    </button>
+  </div>
+
+  <div class="quick-shop__body" data-quick-shop-body>
+    {%- comment -%} Product content - loaded dynamically via JavaScript {%- endcomment -%}
+    {%- if product != blank -%}
+      {% render 'quick-shop-product', product: product %}
+    {%- else -%}
+      <div class="quick-shop__placeholder">
+        <p>{{ 'quick_shop.loading' | t }}</p>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<div class="quick-shop__overlay" data-quick-shop-overlay aria-hidden="true"></div>
+
+{%- comment -%} ARIA Live Region for screen reader announcements {%- endcomment -%}
+<div id="quick-shop-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(function() {
+  const quickShop = document.querySelector('[data-quick-shop]');
+  const quickShopOverlay = document.querySelector('[data-quick-shop-overlay]');
+  const quickShopBody = document.querySelector('[data-quick-shop-body]');
+  const quickShopLoading = document.querySelector('[data-quick-shop-loading]');
+  const liveRegion = document.getElementById('quick-shop-live-region');
+
+  let isLoading = false;
+  let triggerElement = null;
+  let currentProductHandle = null;
+
+  const focusableSelector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  function announce(message) {
+    if (liveRegion) {
+      liveRegion.textContent = '';
+      setTimeout(() => {
+        liveRegion.textContent = message;
+      }, 100);
+    }
+  }
+
+  function getFocusableElements() {
+    return Array.from(quickShop.querySelectorAll(focusableSelector)).filter(el => {
+      return el.offsetParent !== null && !el.closest('[hidden]');
+    });
+  }
+
+  function trapFocus(e) {
+    if (e.key !== 'Tab') return;
+
+    const focusables = getFocusableElements();
+    if (focusables.length === 0) return;
+
+    const firstFocusable = focusables[0];
+    const lastFocusable = focusables[focusables.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstFocusable) {
+        e.preventDefault();
+        lastFocusable.focus();
+      }
+    } else {
+      if (document.activeElement === lastFocusable) {
+        e.preventDefault();
+        firstFocusable.focus();
+      }
+    }
+  }
+
+  function setLoading(loading) {
+    isLoading = loading;
+    if (quickShopLoading) {
+      quickShopLoading.classList.toggle('is-active', loading);
+    }
+  }
+
+  async function loadProductContent(productHandle) {
+    if (currentProductHandle === productHandle && quickShopBody.querySelector('[data-quick-shop-product]')) {
+      return;
+    }
+
+    setLoading(true);
+    currentProductHandle = productHandle;
+
+    try {
+      const response = await fetch(`/products/${productHandle}?section_id=quick-shop`);
+      if (!response.ok) throw new Error('Failed to load product');
+
+      const html = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const productContent = doc.querySelector('[data-quick-shop-body]');
+
+      if (productContent) {
+        quickShopBody.innerHTML = productContent.innerHTML;
+        initVariantPicker();
+        initQuantityButtons();
+        initAddToCart();
+      }
+    } catch (error) {
+      console.error('Quick shop load error:', error);
+      quickShopBody.innerHTML = '<div class="quick-shop__error"><p>{{ "quick_shop.error_loading" | t }}</p></div>';
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function initVariantPicker() {
+    const form = quickShop.querySelector('[data-quick-shop-form]');
+    if (!form) return;
+
+    const productJsonEl = quickShop.querySelector('[data-product-json]');
+    if (!productJsonEl) return;
+
+    const productJson = JSON.parse(productJsonEl.textContent);
+    const variantSelect = form.querySelector('[data-variant-select]');
+    const variantPicker = quickShop.querySelector('[data-quick-shop-variant-picker]');
+
+    if (!variantPicker) return;
+
+    variantPicker.querySelectorAll('button[data-value]').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const optionContainer = e.target.closest('[data-option-index]');
+        const value = button.dataset.value;
+
+        optionContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('is-selected'));
+        button.classList.add('is-selected');
+
+        const selectedValueDisplay = optionContainer.querySelector('[data-selected-value]');
+        if (selectedValueDisplay) selectedValueDisplay.textContent = value;
+
+        updateVariant(productJson, variantPicker, variantSelect, form);
+      });
+    });
+
+    variantPicker.querySelectorAll('select[data-option-select]').forEach(select => {
+      select.addEventListener('change', () => {
+        const optionContainer = select.closest('[data-option-index]');
+        const selectedValueDisplay = optionContainer.querySelector('[data-selected-value]');
+        if (selectedValueDisplay) selectedValueDisplay.textContent = select.value;
+
+        updateVariant(productJson, variantPicker, variantSelect, form);
+      });
+    });
+  }
+
+  function updateVariant(productJson, variantPicker, variantSelect, form) {
+    const selectedOptions = [];
+
+    variantPicker.querySelectorAll('[data-option-index]').forEach(option => {
+      const selectedBtn = option.querySelector('button.is-selected');
+      const selectedSelect = option.querySelector('select[data-option-select]');
+
+      if (selectedBtn) {
+        selectedOptions.push(selectedBtn.dataset.value);
+      } else if (selectedSelect) {
+        selectedOptions.push(selectedSelect.value);
+      }
+    });
+
+    const variant = productJson.variants.find(v => {
+      return selectedOptions.every((opt, index) => v.options[index] === opt);
+    });
+
+    if (variant) {
+      variantSelect.value = variant.id;
+      updateAddToCartButton(variant, form);
+      updatePrice(variant, form, productJson);
+      updateVariantAvailability(productJson, variantPicker, selectedOptions);
+    }
+  }
+
+  function updateAddToCartButton(variant, form) {
+    const btn = form.querySelector('[data-add-to-cart]');
+    const text = form.querySelector('[data-add-to-cart-text]');
+
+    if (variant.available) {
+      btn.disabled = false;
+      text.textContent = '{{ "product.add_to_cart" | t }}';
+    } else {
+      btn.disabled = true;
+      text.textContent = '{{ "product.sold_out" | t }}';
+    }
+  }
+
+  function updatePrice(variant, form, productJson) {
+    const priceContainer = form.querySelector('[data-quick-shop-price]');
+    if (!priceContainer) return;
+
+    const formatMoney = (cents) => {
+      return Shopify.formatMoney ? Shopify.formatMoney(cents) : '$' + (cents / 100).toFixed(2);
+    };
+
+    const isOnSale = variant.compare_at_price && variant.compare_at_price > variant.price;
+
+    if (isOnSale) {
+      priceContainer.innerHTML = `
+        <span class="price__sale">${formatMoney(variant.price)}</span>
+        <span class="price__compare">${formatMoney(variant.compare_at_price)}</span>
+      `;
+    } else {
+      priceContainer.innerHTML = `
+        <span class="price__regular">${formatMoney(variant.price)}</span>
+      `;
+    }
+  }
+
+  function updateVariantAvailability(productJson, variantPicker, selectedOptions) {
+    const options = variantPicker.querySelectorAll('[data-option-index]');
+
+    options.forEach((optionContainer, optionIndex) => {
+      const buttons = optionContainer.querySelectorAll('button[data-value]');
+
+      buttons.forEach(button => {
+        const value = button.dataset.value;
+        const testOptions = [...selectedOptions];
+        testOptions[optionIndex] = value;
+
+        const matchingVariant = productJson.variants.find(v => {
+          return testOptions.every((opt, idx) => v.options[idx] === opt);
+        });
+
+        const isAvailable = matchingVariant && matchingVariant.available;
+        button.classList.toggle('is-unavailable', !isAvailable);
+        button.disabled = !isAvailable;
+      });
+    });
+  }
+
+  function initQuantityButtons() {
+    const minus = quickShop.querySelector('[data-quantity-minus]');
+    const plus = quickShop.querySelector('[data-quantity-plus]');
+    const input = quickShop.querySelector('input[name="quantity"]');
+
+    if (minus && plus && input) {
+      minus.addEventListener('click', () => {
+        const value = parseInt(input.value);
+        if (value > 1) input.value = value - 1;
+      });
+      plus.addEventListener('click', () => {
+        input.value = parseInt(input.value) + 1;
+      });
+    }
+  }
+
+  function initAddToCart() {
+    const form = quickShop.querySelector('[data-quick-shop-form]');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const btn = form.querySelector('[data-add-to-cart]');
+      const text = form.querySelector('[data-add-to-cart-text]');
+      const formData = new FormData(form);
+
+      btn.disabled = true;
+      const originalText = text.textContent;
+      text.textContent = '{{ "product.adding" | t }}';
+
+      try {
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: [{
+              id: parseInt(formData.get('id')),
+              quantity: parseInt(formData.get('quantity') || 1)
+            }],
+            sections: 'cart-drawer',
+            sections_url: window.location.pathname
+          })
+        });
+
+        if (!response.ok) throw new Error('Failed to add to cart');
+
+        const data = await response.json();
+
+        const cartResponse = await fetch('/cart.js');
+        const cartData = await cartResponse.json();
+        document.querySelectorAll('[data-cart-count]').forEach(el => {
+          if (el.closest('.cart-drawer')) {
+            el.textContent = `(${cartData.item_count})`;
+          } else {
+            el.textContent = cartData.item_count;
+          }
+        });
+
+        const cartDrawer = document.querySelector('[data-cart-drawer]');
+        if (data.sections && data.sections['cart-drawer'] && cartDrawer) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(data.sections['cart-drawer'], 'text/html');
+          const newDrawer = doc.querySelector('[data-cart-drawer]');
+          if (newDrawer) cartDrawer.innerHTML = newDrawer.innerHTML;
+        }
+
+        closeQuickShop();
+
+        if (typeof window.openCartDrawer === 'function') {
+          setTimeout(() => window.openCartDrawer(), 150);
+        }
+
+        announce('{{ "quick_shop.added_to_cart" | t }}');
+
+      } catch (error) {
+        console.error('Add to cart error:', error);
+        text.textContent = '{{ "product.error" | t }}';
+        setTimeout(() => {
+          text.textContent = originalText;
+          btn.disabled = false;
+        }, 2000);
+      }
+    });
+  }
+
+  function openQuickShop(productHandle, trigger = null) {
+    if (!quickShop) return;
+
+    triggerElement = trigger || document.activeElement;
+
+    quickShop.classList.add('is-open');
+    quickShop.setAttribute('aria-hidden', 'false');
+    quickShopOverlay.classList.add('is-active');
+    document.body.style.overflow = 'hidden';
+
+    loadProductContent(productHandle);
+
+    setTimeout(() => {
+      const focusables = getFocusableElements();
+      if (focusables.length > 0) {
+        focusables[0].focus();
+      }
+    }, 100);
+
+    quickShop.addEventListener('keydown', trapFocus);
+  }
+
+  function closeQuickShop() {
+    if (!quickShop) return;
+
+    quickShop.classList.remove('is-open');
+    quickShop.setAttribute('aria-hidden', 'true');
+    quickShopOverlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+
+    quickShop.removeEventListener('keydown', trapFocus);
+
+    if (triggerElement && typeof triggerElement.focus === 'function') {
+      triggerElement.focus();
+    }
+  }
+
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('[data-quick-shop-trigger]');
+    if (trigger) {
+      e.preventDefault();
+      const productHandle = trigger.dataset.quickShopTrigger;
+      openQuickShop(productHandle, trigger);
+    }
+
+    if (e.target.closest('[data-quick-shop-close]')) {
+      closeQuickShop();
+    }
+  });
+
+  if (quickShopOverlay) {
+    quickShopOverlay.addEventListener('click', closeQuickShop);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && quickShop.classList.contains('is-open')) {
+      closeQuickShop();
+    }
+  });
+
+  window.openQuickShop = openQuickShop;
+  window.closeQuickShop = closeQuickShop;
+})();
+</script>
+
+{% stylesheet %}
+  .quick-shop {
+    width: min(100vw, 32.5rem);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background);
+    box-shadow: var(--shadow-2xl);
+  }
+
+  @media (max-width: 749px) {
+    .quick-shop {
+      width: 100vw;
+    }
+  }
+
+  .quick-shop__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
+
+  .quick-shop__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    margin: 0;
+  }
+
+  .quick-shop__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-full);
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+
+  .quick-shop__close:hover {
+    background-color: var(--color-background-subtle);
+  }
+
+  .quick-shop__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+  }
+
+  .quick-shop__loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(var(--color-background-rgb, 255 255 255), 0.9);
+    z-index: 10;
+  }
+
+  .quick-shop__loading-overlay.is-active {
+    display: flex;
+  }
+
+  .quick-shop__spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-foreground);
+    border-radius: var(--radius-full);
+    animation: quickShopSpin 0.8s linear infinite;
+  }
+
+  @keyframes quickShopSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  .quick-shop__overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    z-index: calc(var(--z-modal) - 1);
+    transition: opacity var(--duration-normal) var(--ease-out),
+                visibility var(--duration-normal) var(--ease-out);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  .quick-shop__overlay.is-active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .quick-shop__placeholder,
+  .quick-shop__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 12rem;
+    color: var(--color-muted);
+  }
+
+  /* Quick Shop Product Content */
+  .quick-shop__product {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .quick-shop__media {
+    position: relative;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-background-subtle);
+  }
+
+  .quick-shop__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .quick-shop__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .quick-shop__product-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-tight);
+    margin: 0;
+  }
+
+  .quick-shop__vendor {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  .quick-shop__price {
+    font-size: var(--font-size-lg);
+  }
+
+  .quick-shop__variants {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .quick-shop__quantity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .quick-shop__view-details {
+    display: block;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    color: var(--color-muted);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .quick-shop__view-details:hover {
+    color: var(--color-foreground);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.quick_shop.name",
+  "class": "section-quick-shop",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme_1"
+    }
+  ]
+}
+{% endschema %}

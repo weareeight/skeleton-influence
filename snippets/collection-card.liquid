@@ -13,17 +13,19 @@
 
   case image_ratio
     when 'landscape'
-      assign aspect_ratio = '3-2'
+      assign aspect_class = 'aspect-landscape'
     when 'portrait'
-      assign aspect_ratio = '2-3'
+      assign aspect_class = 'aspect-portrait'
     when 'square'
-      assign aspect_ratio = '1-1'
+      assign aspect_class = 'aspect-square'
+    else
+      assign aspect_class = 'aspect-landscape'
   endcase
 -%}
 
 <div class="collection-card{% if settings.enable_image_zoom %} hover-zoom{% endif %}">
   <a href="{{ collection.url }}" class="collection-card__link">
-    <div class="collection-card__media media aspect-{{ aspect_ratio }}">
+    <div class="collection-card__media media {{ aspect_class }}">
       {%- if collection.image -%}
         {{
           collection.image

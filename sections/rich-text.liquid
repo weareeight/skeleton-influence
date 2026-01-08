@@ -1,54 +1,62 @@
 {% comment %}
   Rich Text Section - Influence Theme
-  Editorial typography with drop cap option
+  Editorial typography with flexible width options
 {% endcomment %}
 
 {%- liquid
   assign content_alignment = section.settings.content_alignment
   assign text_style = section.settings.text_style
+  assign padding = section.settings.padding
 -%}
 
-<section class="rich-text section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
-  <div class="rich-text__inner text-{{ content_alignment }}{% if section.settings.narrow_width %} container--narrow{% endif %}">
-    {%- for block in section.blocks -%}
-      {%- case block.type -%}
-        {%- when 'subheading' -%}
-          {%- if block.settings.text != blank -%}
-            <p class="rich-text__subheading subheading" {{ block.shopify_attributes }}>
-              {{ block.settings.text }}
-            </p>
-          {%- endif -%}
+<section class="rich-text section section--{{ padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+  <div class="container">
+    <div class="rich-text__inner text-{{ content_alignment }}{% if section.settings.narrow_width %} rich-text__inner--narrow{% endif %}">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'subheading' -%}
+            {%- if block.settings.text != blank -%}
+              <p class="rich-text__subheading subheading" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </p>
+            {%- endif -%}
 
-        {%- when 'heading' -%}
-          {%- if block.settings.text != blank -%}
-            <h2 class="rich-text__heading {{ block.settings.size }}" {{ block.shopify_attributes }}>
-              {{ block.settings.text }}
-            </h2>
-          {%- endif -%}
+          {%- when 'heading' -%}
+            {%- if block.settings.text != blank -%}
+              <h2 class="rich-text__heading {{ block.settings.size }}" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </h2>
+            {%- endif -%}
 
-        {%- when 'text' -%}
-          {%- if block.settings.text != blank -%}
-            <div
-              class="rich-text__text rte{% if text_style == 'large' %} text-lg{% endif %}{% if section.settings.enable_drop_cap %} drop-cap{% endif %}"
-              {{ block.shopify_attributes }}
-            >
-              {{ block.settings.text }}
-            </div>
-          {%- endif -%}
-
-        {%- when 'button' -%}
-          {%- if block.settings.label != blank -%}
-            <div class="rich-text__button" {{ block.shopify_attributes }}>
-              <a
-                href="{{ block.settings.link }}"
-                class="btn btn--{{ block.settings.style }}"
+          {%- when 'text' -%}
+            {%- if block.settings.text != blank -%}
+              <div
+                class="rich-text__text rte{% if text_style == 'large' %} text-lg{% endif %}"
+                {{ block.shopify_attributes }}
               >
-                {{ block.settings.label }}
-              </a>
+                {{ block.settings.text }}
+              </div>
+            {%- endif -%}
+
+          {%- when 'button' -%}
+            {%- if block.settings.label != blank -%}
+              <div class="rich-text__button" {{ block.shopify_attributes }}>
+                <a
+                  href="{{ block.settings.link }}"
+                  class="btn btn--{{ block.settings.style }}"
+                >
+                  {{ block.settings.label }}
+                </a>
+              </div>
+            {%- endif -%}
+
+          {%- when 'custom_liquid' -%}
+            <div class="rich-text__custom-liquid" {{ block.shopify_attributes }}>
+              {{ block.settings.liquid }}
             </div>
-          {%- endif -%}
-      {%- endcase -%}
-    {%- endfor -%}
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
   </div>
 </section>
 
@@ -61,6 +69,30 @@
 
   .rich-text__inner.text-center {
     align-items: center;
+  }
+
+  .rich-text__inner.text-left {
+    align-items: flex-start;
+  }
+
+  /* Narrow width variant - respects alignment */
+  .rich-text__inner--narrow {
+    max-width: 50%;
+  }
+
+  .rich-text__inner--narrow.text-center {
+    margin-inline: auto;
+  }
+
+  .rich-text__inner--narrow.text-left {
+    margin-inline-start: 0;
+    margin-inline-end: auto;
+  }
+
+  @media (max-width: 749px) {
+    .rich-text__inner--narrow {
+      max-width: 100%;
+    }
   }
 
   .rich-text__subheading {
@@ -77,6 +109,23 @@
 
   .rich-text__button {
     margin-top: var(--space-4);
+  }
+
+  /* Section padding variants */
+  .rich-text.section--none {
+    padding-block: 0;
+  }
+
+  .rich-text.section--small {
+    padding-block: var(--section-spacing-sm);
+  }
+
+  .rich-text.section--medium {
+    padding-block: var(--section-spacing-md);
+  }
+
+  .rich-text.section--large {
+    padding-block: var(--section-spacing-lg);
   }
 {% endstylesheet %}
 
@@ -113,10 +162,20 @@
       "default": true
     },
     {
-      "type": "checkbox",
-      "id": "enable_drop_cap",
-      "label": "t:sections.rich_text.settings.enable_drop_cap.label",
-      "default": false
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
+      "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
     },
     {
       "type": "color_scheme",
@@ -195,12 +254,24 @@
         {
           "type": "select",
           "id": "style",
-          "label": "Style",
+          "label": "t:labels.button_style",
           "options": [
-            { "value": "primary", "label": "Primary" },
-            { "value": "secondary", "label": "Secondary" }
+            { "value": "filled", "label": "t:options.button_style.filled" },
+            { "value": "outline", "label": "t:options.button_style.outline" },
+            { "value": "underline", "label": "t:options.button_style.underline" }
           ],
-          "default": "primary"
+          "default": "filled"
+        }
+      ]
+    },
+    {
+      "type": "custom_liquid",
+      "name": "t:blocks.custom_liquid.name",
+      "settings": [
+        {
+          "type": "liquid",
+          "id": "liquid",
+          "label": "t:blocks.custom_liquid.settings.liquid.label"
         }
       ]
     }

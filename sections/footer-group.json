@@ -29,7 +29,7 @@
       },
       "block_order": ["menu-1", "menu-2", "newsletter"],
       "settings": {
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme_1",
         "show_social": true,
         "show_payment_icons": true,
         "show_country_selector": true,

@@ -34,7 +34,7 @@
     {{ content_for_header }}
   </head>
 
-  <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}">
+  <body class="template-{{ template.name }}{% if template.suffix %} template-{{ template.name }}-{{ template.suffix }}{% endif %}{% unless settings.enable_animations %} animations-disabled{% endunless %}">
     <a href="#main-content" class="skip-link visually-hidden">
       {{ 'accessibility.skip_to_content' | t }}
     </a>
@@ -43,6 +43,8 @@
     {% render 'icons-sprite' %}
 
     {% sections 'header-group' %}
+    {% section 'cart-drawer' %}
+    {% section 'quick-shop' %}
 
     <main id="main-content" role="main">
       {{ content_for_layout }}
@@ -50,7 +52,16 @@
 
     {% sections 'footer-group' %}
 
+    {% comment %} Newsletter popup {% endcomment %}
+    {% section 'popup-newsletter' %}
+
     {% comment %} Overlay for drawers/modals {% endcomment %}
     <div class="overlay" data-overlay></div>
+
+    {% comment %} Search overlay {% endcomment %}
+    {% render 'search-overlay' %}
+
+    {% comment %} Animation controller - scroll-triggered animations {% endcomment %}
+    <script src="{{ 'animations.js' | asset_url }}" defer></script>
   </body>
 </html>

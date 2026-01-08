@@ -17,39 +17,28 @@
     <header class="search-header">
       <h1 class="search-header__title h2">{{ 'search.title' | t }}</h1>
 
-      {%- comment -%} Search Form with Predictive Search {%- endcomment -%}
+      {%- comment -%} Search Form {%- endcomment -%}
       <div class="search-header__form">
-        <predictive-search data-loading-text="{{ 'search.loading' | t }}">
-          <form action="{{ routes.search_url }}" method="get" role="search" class="search-form search-form--large">
-            <label for="Search-{{ section.id }}" class="visually-hidden">{{ 'search.placeholder' | t }}</label>
-            <input
-              type="search"
-              id="Search-{{ section.id }}"
-              name="q"
-              value="{{ search.terms | escape }}"
-              class="search-form__input form-input"
-              placeholder="{{ 'search.placeholder' | t }}"
-              autocomplete="off"
-              autocorrect="off"
-              autocapitalize="off"
-              spellcheck="false"
-              data-predictive-search-input
-            >
-            <input type="hidden" name="type" value="product,article,page">
-            <button type="submit" class="search-form__submit btn btn--primary">
-              {% render 'icon', icon: 'search' %}
-              <span class="visually-hidden">{{ 'search.search' | t }}</span>
-            </button>
-
-            {%- comment -%} Predictive Search Results Container {%- endcomment -%}
-            <div class="predictive-search" data-predictive-search-results hidden>
-              <div class="predictive-search__loading" data-predictive-search-loading>
-                <span class="spinner"></span>
-              </div>
-              <div class="predictive-search__results" data-predictive-search-results-container></div>
-            </div>
-          </form>
-        </predictive-search>
+        <form action="{{ routes.search_url }}" method="get" role="search" class="search-form search-form--large">
+          <label for="Search-{{ section.id }}" class="visually-hidden">{{ 'search.placeholder' | t }}</label>
+          <input
+            type="search"
+            id="Search-{{ section.id }}"
+            name="q"
+            value="{{ search.terms | escape }}"
+            class="search-form__input form-input"
+            placeholder="{{ 'search.placeholder' | t }}"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          >
+          <input type="hidden" name="type" value="product,article,page,collection">
+          <button type="submit" class="search-form__submit btn btn--filled">
+            {% render 'icon', icon: 'search' %}
+            <span class="visually-hidden">{{ 'search.search' | t }}</span>
+          </button>
+        </form>
       </div>
 
       {%- if search.performed -%}
@@ -189,7 +178,7 @@
                 {%- endfor -%}
 
                 <noscript>
-                  <button type="submit" class="btn btn--primary">{{ 'collection.filters.apply' | t }}</button>
+                  <button type="submit" class="btn btn--filled">{{ 'collection.filters.apply' | t }}</button>
                 </noscript>
               </form>
             </aside>
@@ -283,162 +272,6 @@
 </section>
 
 <script>
-// Predictive Search Component
-class PredictiveSearch extends HTMLElement {
-  constructor() {
-    super();
-    this.input = this.querySelector('[data-predictive-search-input]');
-    this.results = this.querySelector('[data-predictive-search-results]');
-    this.resultsContainer = this.querySelector('[data-predictive-search-results-container]');
-    this.loading = this.querySelector('[data-predictive-search-loading]');
-
-    this.cachedResults = {};
-    this.debounceTimer = null;
-
-    this.setupEventListeners();
-  }
-
-  setupEventListeners() {
-    this.input.addEventListener('input', this.onInput.bind(this));
-    this.input.addEventListener('focus', this.onFocus.bind(this));
-    document.addEventListener('click', this.onClickOutside.bind(this));
-  }
-
-  onInput() {
-    clearTimeout(this.debounceTimer);
-    const searchTerm = this.input.value.trim();
-
-    if (searchTerm.length < 2) {
-      this.close();
-      return;
-    }
-
-    this.debounceTimer = setTimeout(() => {
-      this.getResults(searchTerm);
-    }, 300);
-  }
-
-  onFocus() {
-    if (this.input.value.trim().length >= 2) {
-      this.open();
-    }
-  }
-
-  onClickOutside(event) {
-    if (!this.contains(event.target)) {
-      this.close();
-    }
-  }
-
-  async getResults(searchTerm) {
-    if (this.cachedResults[searchTerm]) {
-      this.renderResults(this.cachedResults[searchTerm]);
-      return;
-    }
-
-    this.loading.hidden = false;
-    this.open();
-
-    try {
-      const response = await fetch(
-        `${window.Shopify.routes.root}search/suggest.json?q=${encodeURIComponent(searchTerm)}&resources[type]=product,article,page&resources[limit]=10`
-      );
-      const data = await response.json();
-
-      this.cachedResults[searchTerm] = data;
-      this.renderResults(data);
-    } catch (error) {
-      console.error('Predictive search error:', error);
-      this.close();
-    } finally {
-      this.loading.hidden = true;
-    }
-  }
-
-  renderResults(data) {
-    const resources = data.resources.results;
-    let html = '';
-
-    // Products
-    if (resources.products && resources.products.length > 0) {
-      html += `<div class="predictive-search__section">
-        <h3 class="predictive-search__section-title">{{ 'search.products' | t }}</h3>
-        <ul class="predictive-search__list">`;
-
-      resources.products.forEach(product => {
-        const image = product.image ? `<img src="${product.image}" alt="${product.title}" width="50" height="50" loading="lazy">` : '';
-        html += `<li class="predictive-search__item">
-          <a href="${product.url}" class="predictive-search__link">
-            <span class="predictive-search__image">${image}</span>
-            <span class="predictive-search__info">
-              <span class="predictive-search__title">${product.title}</span>
-              <span class="predictive-search__price">${product.price}</span>
-            </span>
-          </a>
-        </li>`;
-      });
-
-      html += '</ul></div>';
-    }
-
-    // Articles
-    if (resources.articles && resources.articles.length > 0) {
-      html += `<div class="predictive-search__section">
-        <h3 class="predictive-search__section-title">{{ 'search.articles' | t }}</h3>
-        <ul class="predictive-search__list">`;
-
-      resources.articles.forEach(article => {
-        html += `<li class="predictive-search__item">
-          <a href="${article.url}" class="predictive-search__link">
-            <span class="predictive-search__title">${article.title}</span>
-          </a>
-        </li>`;
-      });
-
-      html += '</ul></div>';
-    }
-
-    // Pages
-    if (resources.pages && resources.pages.length > 0) {
-      html += `<div class="predictive-search__section">
-        <h3 class="predictive-search__section-title">{{ 'search.pages' | t }}</h3>
-        <ul class="predictive-search__list">`;
-
-      resources.pages.forEach(page => {
-        html += `<li class="predictive-search__item">
-          <a href="${page.url}" class="predictive-search__link">
-            <span class="predictive-search__title">${page.title}</span>
-          </a>
-        </li>`;
-      });
-
-      html += '</ul></div>';
-    }
-
-    if (html === '') {
-      html = `<p class="predictive-search__empty">{{ 'search.no_results' | t: terms: '' }}</p>`;
-    }
-
-    // View all results link
-    html += `<a href="${window.Shopify.routes.root}search?q=${encodeURIComponent(this.input.value)}" class="predictive-search__view-all">
-      {{ 'search.view_all' | t }}
-    </a>`;
-
-    this.resultsContainer.innerHTML = html;
-    this.open();
-  }
-
-  open() {
-    this.results.hidden = false;
-  }
-
-  close() {
-    this.results.hidden = true;
-  }
-}
-
-customElements.define('predictive-search', PredictiveSearch);
-
 // Sort change handler
 document.addEventListener('DOMContentLoaded', () => {
   const sortSelect = document.querySelector('[data-search-sort]');
@@ -508,14 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
       "default": "2"
     },
     {
-      "type": "select",
+      "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
-      "options": [
-        { "value": "scheme-1", "label": "t:options.color_scheme.scheme_1" },
-        { "value": "scheme-2", "label": "t:options.color_scheme.scheme_2" }
-      ],
-      "default": "scheme-1"
+      "default": "scheme_1"
     }
   ]
 }

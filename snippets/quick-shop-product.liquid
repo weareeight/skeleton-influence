@@ -1,0 +1,191 @@
+{% comment %}
+  Quick Shop Product Content - Influence Theme
+  Renders product details within the quick shop drawer
+
+  Usage:
+  {% render 'quick-shop-product', product: product %}
+{% endcomment %}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign on_sale = false
+  if current_variant.compare_at_price > current_variant.price
+    assign on_sale = true
+  endif
+-%}
+
+<div class="quick-shop__product" data-quick-shop-product data-product-handle="{{ product.handle }}">
+  {%- comment -%} Product Image {%- endcomment -%}
+  <div class="quick-shop__media">
+    {%- if product.featured_media -%}
+      {{
+        product.featured_media
+        | image_url: width: 800
+        | image_tag:
+          loading: 'eager',
+          sizes: '(min-width: 750px) 400px, 100vw',
+          widths: '200, 400, 600, 800',
+          class: 'quick-shop__image'
+      }}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'quick-shop__placeholder-image' }}
+    {%- endif -%}
+  </div>
+
+  {%- comment -%} Product Info {%- endcomment -%}
+  <div class="quick-shop__info">
+    {%- if settings.show_vendor and product.vendor != blank -%}
+      <p class="quick-shop__vendor">{{ product.vendor }}</p>
+    {%- endif -%}
+
+    <h2 class="quick-shop__product-title">{{ product.title }}</h2>
+
+    {%- comment -%} Product Form {%- endcomment -%}
+    {%- form 'product', product, data-quick-shop-form: '', data-product-id: product.id -%}
+
+      {%- comment -%} Price {%- endcomment -%}
+      <div class="quick-shop__price price" data-quick-shop-price>
+        {%- if on_sale -%}
+          <span class="price__sale">{{ current_variant.price | money }}</span>
+          <span class="price__compare">{{ current_variant.compare_at_price | money }}</span>
+        {%- else -%}
+          <span class="price__regular">{{ current_variant.price | money }}</span>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Variant Picker {%- endcomment -%}
+      {%- unless product.has_only_default_variant -%}
+        <div class="quick-shop__variants" data-quick-shop-variant-picker>
+          {%- for option in product.options_with_values -%}
+            {%- liquid
+              assign option_index = forloop.index0
+              assign option_name_downcase = option.name | downcase
+              assign is_color = false
+              if option_name_downcase == 'color' or option_name_downcase == 'colour'
+                assign is_color = true
+              endif
+            -%}
+
+            <div class="variant-picker__option" data-option-index="{{ option_index }}">
+              <label class="variant-picker__label">
+                {{ option.name }}:
+                <span data-selected-value>{{ option.selected_value }}</span>
+              </label>
+
+              <div class="variant-picker__values">
+                {%- for value in option.values -%}
+                  {%- liquid
+                    assign variant_for_value = product.variants | where: option.name, value | first
+                    assign is_available = variant_for_value.available
+                  -%}
+
+                  {%- if is_color -%}
+                    {%- liquid
+                      assign swatch_color = value | handle | replace: '-', ''
+                      assign swatch_image = ''
+                      if variant_for_value.featured_image
+                        assign swatch_image = variant_for_value.featured_image | image_url: width: 50
+                      endif
+                    -%}
+                    <button
+                      type="button"
+                      class="variant-picker__swatch{% if value == option.selected_value %} is-selected{% endif %}{% unless is_available %} is-unavailable{% endunless %}"
+                      data-value="{{ value }}"
+                      style="--swatch-color: {{ swatch_color }};{% if swatch_image != blank %} --swatch-image: url('{{ swatch_image }}');{% endif %}"
+                      title="{{ value }}"
+                      {% unless is_available %}disabled{% endunless %}
+                    >
+                      <span class="visually-hidden">{{ value }}</span>
+                    </button>
+                  {%- else -%}
+                    <button
+                      type="button"
+                      class="variant-picker__value{% if value == option.selected_value %} is-selected{% endif %}{% unless is_available %} is-unavailable{% endunless %}"
+                      data-value="{{ value }}"
+                      {% unless is_available %}disabled{% endunless %}
+                    >
+                      {{ value }}
+                    </button>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endfor -%}
+
+          <select name="id" class="visually-hidden" data-variant-select>
+            {%- for variant in product.variants -%}
+              <option
+                value="{{ variant.id }}"
+                {% if variant == current_variant %}selected{% endif %}
+                data-available="{{ variant.available }}"
+              >
+                {{ variant.title }} - {{ variant.price | money }}
+              </option>
+            {%- endfor -%}
+          </select>
+        </div>
+      {%- else -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+      {%- endunless -%}
+
+      {%- comment -%} Quantity Selector {%- endcomment -%}
+      <div class="quick-shop__quantity">
+        <label class="form-label" for="quick-shop-quantity">{{ 'product.quantity' | t }}</label>
+        <div class="quantity-input">
+          <button
+            type="button"
+            class="quantity-input__button"
+            data-quantity-minus
+            aria-label="{{ 'product.decrease_quantity' | t }}"
+          >
+            {% render 'icon', icon: 'minus' %}
+          </button>
+          <input
+            type="number"
+            id="quick-shop-quantity"
+            name="quantity"
+            class="quantity-input__field"
+            value="1"
+            min="1"
+            aria-label="{{ 'product.quantity' | t }}"
+          >
+          <button
+            type="button"
+            class="quantity-input__button"
+            data-quantity-plus
+            aria-label="{{ 'product.increase_quantity' | t }}"
+          >
+            {% render 'icon', icon: 'plus' %}
+          </button>
+        </div>
+      </div>
+
+      {%- comment -%} Add to Cart Button {%- endcomment -%}
+      <button
+        type="submit"
+        name="add"
+        class="btn btn--filled btn--full btn--lg"
+        {% unless current_variant.available %}disabled{% endunless %}
+        data-add-to-cart
+      >
+        <span data-add-to-cart-text>
+          {%- if current_variant.available -%}
+            {{ 'product.add_to_cart' | t }}
+          {%- else -%}
+            {{ 'product.sold_out' | t }}
+          {%- endif -%}
+        </span>
+      </button>
+    {%- endform -%}
+
+    {%- comment -%} View Full Details Link {%- endcomment -%}
+    <a href="{{ product.url }}" class="quick-shop__view-details" data-quick-shop-close>
+      {{ 'product.view_full_details' | t }}
+    </a>
+  </div>
+</div>
+
+{%- comment -%} Product JSON for variant switching {%- endcomment -%}
+<script type="application/json" data-product-json>
+  {{ product | json }}
+</script>

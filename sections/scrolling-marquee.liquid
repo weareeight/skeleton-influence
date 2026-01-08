@@ -31,7 +31,7 @@
 
 <section
   id="{{ section_id }}"
-  class="marquee section marquee--{{ text_size }} marquee--{{ font }} marquee--{{ spacing }}{% if text_transform == 'uppercase' %} marquee--uppercase{% elsif text_transform == 'italic' %} marquee--italic{% endif %}{% if enable_stroke %} marquee--stroke{% endif %} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
+  class="marquee section marquee--{{ text_size }} marquee--{{ font }} marquee--{{ spacing }}{% if text_transform == 'uppercase' %} marquee--uppercase{% elsif text_transform == 'italic' %} marquee--italic{% endif %}{% if enable_stroke %} marquee--stroke{% endif %}{% if divider == 'custom' %} marquee--custom-divider{% endif %} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
   style="--marquee-duration: {{ speed }}s;"
   {% if section.settings.pause_on_hover %}data-pause-on-hover{% endif %}
   data-section-id="{{ section.id }}"
@@ -194,6 +194,11 @@
     opacity: 0.4;
   }
 
+  /* Custom dividers should have full opacity */
+  .marquee--custom-divider .marquee__divider {
+    opacity: 1;
+  }
+
   /* Text sizes */
   .marquee--small {
     font-size: var(--font-size-sm);
@@ -237,14 +242,14 @@
   /* Stroke text effect - high fashion aesthetic */
   .marquee--stroke .marquee__item {
     color: transparent;
-    -webkit-text-stroke: 1px currentColor;
-    text-stroke: 1px currentColor;
+    -webkit-text-stroke: 1px var(--color-foreground);
+    text-stroke: 1px var(--color-foreground);
   }
 
   .marquee--stroke.marquee--large .marquee__item,
   .marquee--stroke.marquee--xl .marquee__item {
-    -webkit-text-stroke: 2px currentColor;
-    text-stroke: 2px currentColor;
+    -webkit-text-stroke: 2px var(--color-foreground);
+    text-stroke: 2px var(--color-foreground);
   }
 
   .marquee--stroke .marquee__divider {
@@ -300,7 +305,7 @@
 {
   "name": "t:sections.marquee.name",
   "tag": "section",
-  "class": "section-marquee",
+  "class": "section-scrolling-marquee",
   "settings": [
     {
       "type": "header",
@@ -413,14 +418,10 @@
       "default": "normal"
     },
     {
-      "type": "select",
+      "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
-      "options": [
-        { "value": "scheme-1", "label": "t:options.color_scheme.scheme_1" },
-        { "value": "scheme-2", "label": "t:options.color_scheme.scheme_2" }
-      ],
-      "default": "scheme-2"
+      "default": "scheme_2"
     }
   ],
   "blocks": [

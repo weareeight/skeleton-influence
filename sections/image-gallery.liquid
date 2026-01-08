@@ -1,7 +1,6 @@
 {% comment %}
   Image Gallery Section - Influence Theme
-  Multi-image gallery with grid, masonry, and asymmetric layouts
-  Essential for campaign imagery and editorial storytelling
+  Multi-image gallery with grid and carousel layouts
 {% endcomment %}
 
 {%- liquid
@@ -11,42 +10,47 @@
   assign columns_mobile = section.settings.columns_mobile
   assign enable_lightbox = section.settings.enable_lightbox
   assign hover_effect = section.settings.hover_effect
+  assign padding = section.settings.padding
 -%}
 
 <section
   id="{{ section_id }}"
-  class="image-gallery section {% render 'color-scheme', scheme: section.settings.color_scheme %}"
+  class="image-gallery section section--{{ padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
   data-section-id="{{ section.id }}"
   data-section-type="image-gallery"
+  data-layout="{{ layout }}"
 >
   <div class="{% if section.settings.full_width %}container--full{% else %}container{% endif %}">
-    {%- if section.settings.heading != blank -%}
-      <h2 class="image-gallery__heading section-heading text-{{ section.settings.heading_alignment }}">
-        {{ section.settings.heading }}
-      </h2>
+    {%- if section.settings.subheading != blank or section.settings.heading != blank -%}
+      <div class="image-gallery__header text-{{ section.settings.heading_alignment }}">
+        {%- if section.settings.subheading != blank -%}
+          <p class="image-gallery__subheading subheading">{{ section.settings.subheading }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="image-gallery__heading h2" data-animate>
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+      </div>
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
       <div
-        class="image-gallery__grid image-gallery__grid--{{ layout }} image-gallery--hover-{{ hover_effect }}"
+        class="image-gallery__grid {% if layout == 'carousel' %}image-gallery__carousel{% else %}image-gallery__grid--grid{% endif %} image-gallery--hover-{{ hover_effect }}"
+        {% if layout == 'carousel' %}data-carousel{% endif %}
         style="--gallery-columns: {{ columns }}; --gallery-columns-mobile: {{ columns_mobile }}; --gallery-gap: var(--space-{{ section.settings.gap }});"
       >
         {%- for block in section.blocks -%}
-          {%- liquid
-            assign size_class = ''
-            if layout == 'asymmetric'
-              assign size_class = 'image-gallery__item--' | append: block.settings.size
-            endif
-          -%}
-          <figure class="image-gallery__item {{ size_class }}" {{ block.shopify_attributes }}>
-            {%- if enable_lightbox -%}
+          {%- assign item_delay = forloop.index0 | times: 75 | plus: 100 -%}
+          <figure class="image-gallery__item" data-animate="reveal-up" style="--delay: {{ item_delay }}ms" {{ block.shopify_attributes }}>
+            {%- if enable_lightbox and block.settings.image != blank -%}
               <button
                 type="button"
                 class="image-gallery__link"
                 data-lightbox-trigger
                 data-image-index="{{ forloop.index0 }}"
                 data-image-src="{{ block.settings.image | image_url: width: 2000 }}"
-                data-image-alt="{{ block.settings.image.alt | default: block.settings.caption }}"
+                data-image-alt="{{ block.settings.image.alt | escape | default: block.settings.caption | escape }}"
                 aria-label="{{ 'accessibility.gallery_image' | t: index: forloop.index, total: section.blocks.size }}"
               >
             {%- elsif block.settings.link != blank -%}
@@ -87,7 +91,7 @@
                 </figcaption>
               {%- endif -%}
 
-            {%- if enable_lightbox -%}
+            {%- if enable_lightbox and block.settings.image != blank -%}
               </button>
             {%- elsif block.settings.link != blank -%}
               </a>
@@ -97,6 +101,27 @@
           </figure>
         {%- endfor -%}
       </div>
+
+      {%- if layout == 'carousel' -%}
+        <div class="image-gallery__nav">
+          <button
+            type="button"
+            class="image-gallery__nav-btn image-gallery__nav-btn--prev"
+            data-carousel-prev
+            aria-label="{{ 'accessibility.previous' | t }}"
+          >
+            {% render 'icon', icon: 'chevron-left' %}
+          </button>
+          <button
+            type="button"
+            class="image-gallery__nav-btn image-gallery__nav-btn--next"
+            data-carousel-next
+            aria-label="{{ 'accessibility.next' | t }}"
+          >
+            {% render 'icon', icon: 'chevron-right' %}
+          </button>
+        </div>
+      {%- endif -%}
     {%- endif -%}
   </div>
 
@@ -144,6 +169,9 @@
         {%- endif -%}
 
         <div class="image-gallery__lightbox-content">
+          <div class="image-gallery__lightbox-loader" data-lightbox-loader>
+            <div class="image-gallery__lightbox-spinner"></div>
+          </div>
           <img
             src=""
             alt=""
@@ -161,171 +189,305 @@
   {%- endif -%}
 </section>
 
-{%- if enable_lightbox and section.blocks.size > 0 -%}
-  <script>
-    (function() {
-      const section = document.getElementById('{{ section_id }}');
-      const lightbox = document.getElementById('gallery-lightbox-{{ section.id }}');
-      if (!section || !lightbox) return;
+<script>
+  (function() {
+    const section = document.getElementById('{{ section_id }}');
+    if (!section) return;
 
-      const triggers = section.querySelectorAll('[data-lightbox-trigger]');
-      const image = lightbox.querySelector('[data-lightbox-image]');
-      const caption = lightbox.querySelector('[data-lightbox-caption]');
-      const currentCounter = lightbox.querySelector('[data-lightbox-current]');
-      const prevBtn = lightbox.querySelector('[data-lightbox-prev]');
-      const nextBtn = lightbox.querySelector('[data-lightbox-next]');
-      const closeElements = lightbox.querySelectorAll('[data-lightbox-close]');
+    // Carousel functionality
+    if (section.dataset.layout === 'carousel') {
+      const carousel = section.querySelector('[data-carousel]');
+      const prevBtn = section.querySelector('[data-carousel-prev]');
+      const nextBtn = section.querySelector('[data-carousel-next]');
 
-      let currentIndex = 0;
-      let focusedElementBeforeOpen = null;
-      const totalImages = triggers.length;
+      if (carousel && prevBtn && nextBtn) {
+        const updateButtons = () => {
+          const scrollLeft = carousel.scrollLeft;
+          const maxScroll = carousel.scrollWidth - carousel.clientWidth;
 
-      const images = Array.from(triggers).map(trigger => ({
-        src: trigger.dataset.imageSrc,
-        alt: trigger.dataset.imageAlt || ''
-      }));
+          prevBtn.disabled = scrollLeft <= 0;
+          nextBtn.disabled = scrollLeft >= maxScroll - 1;
+        };
 
-      function openLightbox(index) {
-        currentIndex = index;
-        focusedElementBeforeOpen = document.activeElement;
-        updateImage();
-        lightbox.hidden = false;
-        document.body.style.overflow = 'hidden';
-        lightbox.querySelector('[data-lightbox-close]').focus();
+        const getScrollAmount = () => {
+          const item = carousel.querySelector('.image-gallery__item');
+          if (item) {
+            const style = getComputedStyle(carousel);
+            const gap = parseFloat(style.gap) || 0;
+            return item.offsetWidth + gap;
+          }
+          return carousel.clientWidth * 0.8;
+        };
+
+        prevBtn.addEventListener('click', () => {
+          carousel.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+        });
+
+        nextBtn.addEventListener('click', () => {
+          carousel.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+        });
+
+        carousel.addEventListener('scroll', updateButtons);
+        window.addEventListener('resize', updateButtons);
+
+        updateButtons();
+      }
+    }
+
+    {%- if enable_lightbox and section.blocks.size > 0 -%}
+    // Lightbox functionality
+    const lightbox = document.getElementById('gallery-lightbox-{{ section.id }}');
+    if (!lightbox) return;
+
+    const triggers = Array.from(section.querySelectorAll('[data-lightbox-trigger]'));
+    const image = lightbox.querySelector('[data-lightbox-image]');
+    const loader = lightbox.querySelector('[data-lightbox-loader]');
+    const caption = lightbox.querySelector('[data-lightbox-caption]');
+    const currentCounter = lightbox.querySelector('[data-lightbox-current]');
+    const prevBtn = lightbox.querySelector('[data-lightbox-prev]');
+    const nextBtn = lightbox.querySelector('[data-lightbox-next]');
+    const closeElements = lightbox.querySelectorAll('[data-lightbox-close]');
+
+    let currentIndex = 0;
+    let focusedElementBeforeOpen = null;
+    const totalImages = triggers.length;
+
+    function showLoader() {
+      loader.hidden = false;
+      image.style.opacity = '0';
+    }
+
+    function hideLoader() {
+      loader.hidden = true;
+      image.style.opacity = '1';
+    }
+
+    function loadImage(src, alt) {
+      showLoader();
+      const newImage = new Image();
+      newImage.onload = function() {
+        image.src = src;
+        image.alt = alt;
+        hideLoader();
+      };
+      newImage.onerror = function() {
+        image.src = src;
+        image.alt = alt;
+        hideLoader();
+      };
+      newImage.src = src;
+
+      caption.textContent = alt;
+      caption.hidden = !alt;
+    }
+
+    function openLightbox(index) {
+      currentIndex = index;
+      focusedElementBeforeOpen = document.activeElement;
+
+      const trigger = triggers[currentIndex];
+      if (trigger) {
+        loadImage(trigger.dataset.imageSrc, trigger.dataset.imageAlt || '');
       }
 
-      function closeLightbox() {
-        lightbox.hidden = true;
-        document.body.style.overflow = '';
-        if (focusedElementBeforeOpen) {
-          focusedElementBeforeOpen.focus();
+      if (currentCounter) {
+        currentCounter.textContent = currentIndex + 1;
+      }
+      updateNavButtons();
+
+      lightbox.hidden = false;
+      document.body.style.overflow = 'hidden';
+      lightbox.querySelector('[data-lightbox-close]').focus();
+    }
+
+    function closeLightbox() {
+      lightbox.hidden = true;
+      document.body.style.overflow = '';
+      if (focusedElementBeforeOpen) {
+        focusedElementBeforeOpen.focus();
+      }
+    }
+
+    function updateNavButtons() {
+      if (prevBtn) prevBtn.disabled = currentIndex === 0;
+      if (nextBtn) nextBtn.disabled = currentIndex === totalImages - 1;
+    }
+
+    function goToPrev() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        const trigger = triggers[currentIndex];
+        if (trigger) {
+          loadImage(trigger.dataset.imageSrc, trigger.dataset.imageAlt || '');
         }
-      }
-
-      function updateImage() {
-        const imageData = images[currentIndex];
-        image.src = imageData.src;
-        image.alt = imageData.alt;
-        caption.textContent = imageData.alt;
-        caption.hidden = !imageData.alt;
         if (currentCounter) {
           currentCounter.textContent = currentIndex + 1;
         }
         updateNavButtons();
       }
+    }
 
-      function updateNavButtons() {
-        if (prevBtn) prevBtn.disabled = currentIndex === 0;
-        if (nextBtn) nextBtn.disabled = currentIndex === totalImages - 1;
+    function goToNext() {
+      if (currentIndex < totalImages - 1) {
+        currentIndex++;
+        const trigger = triggers[currentIndex];
+        if (trigger) {
+          loadImage(trigger.dataset.imageSrc, trigger.dataset.imageAlt || '');
+        }
+        if (currentCounter) {
+          currentCounter.textContent = currentIndex + 1;
+        }
+        updateNavButtons();
       }
+    }
 
-      function goToPrev() {
-        if (currentIndex > 0) {
-          currentIndex--;
-          updateImage();
-        }
+    // Event listeners - read index from trigger's position in array
+    triggers.forEach((trigger, index) => {
+      trigger.addEventListener('click', () => {
+        openLightbox(index);
+      });
+    });
+
+    closeElements.forEach(el => {
+      el.addEventListener('click', closeLightbox);
+    });
+
+    if (prevBtn) prevBtn.addEventListener('click', goToPrev);
+    if (nextBtn) nextBtn.addEventListener('click', goToNext);
+
+    // Keyboard navigation
+    lightbox.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'Escape':
+          closeLightbox();
+          break;
+        case 'ArrowLeft':
+          goToPrev();
+          break;
+        case 'ArrowRight':
+          goToNext();
+          break;
       }
+    });
 
-      function goToNext() {
-        if (currentIndex < totalImages - 1) {
-          currentIndex++;
-          updateImage();
-        }
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    lightbox.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    lightbox.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) goToNext();
+        else goToPrev();
       }
-
-      // Event listeners
-      triggers.forEach(trigger => {
-        trigger.addEventListener('click', () => {
-          openLightbox(parseInt(trigger.dataset.imageIndex, 10));
-        });
-      });
-
-      closeElements.forEach(el => {
-        el.addEventListener('click', closeLightbox);
-      });
-
-      if (prevBtn) prevBtn.addEventListener('click', goToPrev);
-      if (nextBtn) nextBtn.addEventListener('click', goToNext);
-
-      // Keyboard navigation
-      lightbox.addEventListener('keydown', (e) => {
-        switch (e.key) {
-          case 'Escape':
-            closeLightbox();
-            break;
-          case 'ArrowLeft':
-            goToPrev();
-            break;
-          case 'ArrowRight':
-            goToNext();
-            break;
-        }
-      });
-
-      // Touch swipe support
-      let touchStartX = 0;
-      let touchEndX = 0;
-
-      lightbox.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-      }, { passive: true });
-
-      lightbox.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        const diff = touchStartX - touchEndX;
-        if (Math.abs(diff) > 50) {
-          if (diff > 0) goToNext();
-          else goToPrev();
-        }
-      }, { passive: true });
-    })();
-  </script>
-{%- endif -%}
+    }, { passive: true });
+    {%- endif -%}
+  })();
+</script>
 
 {% stylesheet %}
-  .image-gallery__heading {
+  .image-gallery__header {
     margin-bottom: var(--space-8);
+  }
+
+  .image-gallery__subheading {
+    margin-bottom: var(--space-2);
   }
 
   /* Grid Layout */
   .image-gallery__grid--grid {
     display: grid;
-    grid-template-columns: repeat(var(--gallery-columns, 3), 1fr);
+    grid-template-columns: repeat(var(--gallery-columns-mobile, 2), 1fr);
     gap: var(--gallery-gap, var(--space-4));
   }
 
-  /* Masonry Layout */
-  .image-gallery__grid--masonry {
-    columns: var(--gallery-columns, 3);
-    column-gap: var(--gallery-gap, var(--space-4));
+  @media (min-width: 750px) {
+    .image-gallery__grid--grid {
+      grid-template-columns: repeat(var(--gallery-columns, 3), 1fr);
+    }
   }
 
-  .image-gallery__grid--masonry .image-gallery__item {
-    break-inside: avoid;
-    margin-bottom: var(--gallery-gap, var(--space-4));
-  }
-
-  /* Asymmetric Layout */
-  .image-gallery__grid--asymmetric {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-auto-rows: minmax(200px, auto);
+  /* Carousel Layout */
+  .image-gallery__carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
     gap: var(--gallery-gap, var(--space-4));
+    margin-inline: calc(var(--page-margin) * -1);
+    padding-inline: var(--page-margin);
   }
 
-  .image-gallery__grid--asymmetric .image-gallery__item--small {
-    grid-column: span 2;
-    grid-row: span 1;
+  .image-gallery__carousel::-webkit-scrollbar {
+    display: none;
   }
 
-  .image-gallery__grid--asymmetric .image-gallery__item--medium {
-    grid-column: span 3;
-    grid-row: span 1;
+  .image-gallery__carousel .image-gallery__item {
+    flex: 0 0 calc((100% - (var(--gallery-columns-mobile, 2) - 1) * var(--gallery-gap, var(--space-4))) / var(--gallery-columns-mobile, 2));
+    scroll-snap-align: start;
   }
 
-  .image-gallery__grid--asymmetric .image-gallery__item--large {
-    grid-column: span 3;
-    grid-row: span 2;
+  @media (min-width: 750px) {
+    .image-gallery__carousel {
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+
+    .image-gallery__carousel .image-gallery__item {
+      flex: 0 0 calc((100% - (var(--gallery-columns, 3) - 1) * var(--gallery-gap, var(--space-4))) / var(--gallery-columns, 3));
+    }
+  }
+
+  /* Carousel navigation */
+  .image-gallery__nav {
+    display: none;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+  }
+
+  @media (min-width: 750px) {
+    .image-gallery__nav {
+      display: flex;
+    }
+  }
+
+  .image-gallery__nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    cursor: pointer;
+    transition: all var(--duration-short) var(--ease-out);
+  }
+
+  .image-gallery__nav-btn:hover {
+    background: var(--color-foreground);
+    color: var(--color-background);
+    border-color: var(--color-foreground);
+  }
+
+  .image-gallery__nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .image-gallery__nav-btn:disabled:hover {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    border-color: var(--color-border);
   }
 
   /* Gallery Item */
@@ -335,6 +497,8 @@
 
   .image-gallery__link {
     display: block;
+    position: relative;
+    overflow: hidden;
     text-decoration: none;
     color: inherit;
     background: none;
@@ -356,10 +520,6 @@
   .image-gallery__media--landscape { aspect-ratio: 4 / 3; }
   .image-gallery__media--square { aspect-ratio: 1 / 1; }
   .image-gallery__media--natural { aspect-ratio: auto; }
-
-  .image-gallery__grid--masonry .image-gallery__media {
-    aspect-ratio: auto;
-  }
 
   .image-gallery__image {
     width: 100%;
@@ -457,6 +617,10 @@
     justify-content: center;
   }
 
+  .image-gallery__lightbox[hidden] {
+    display: none;
+  }
+
   .image-gallery__lightbox-backdrop {
     position: absolute;
     inset: 0;
@@ -538,10 +702,37 @@
     align-items: center;
   }
 
+  /* Lightbox loader */
+  .image-gallery__lightbox-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .image-gallery__lightbox-loader[hidden] {
+    display: none;
+  }
+
+  .image-gallery__lightbox-spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: lightbox-spin 0.8s linear infinite;
+  }
+
+  @keyframes lightbox-spin {
+    to { transform: rotate(360deg); }
+  }
+
   .image-gallery__lightbox-image {
     max-width: 100%;
     max-height: 70vh;
     object-fit: contain;
+    transition: opacity var(--duration-normal);
   }
 
   .image-gallery__lightbox-caption {
@@ -561,24 +752,6 @@
   }
 
   /* Mobile adjustments */
-  @media (max-width: 989px) {
-    .image-gallery__grid--grid,
-    .image-gallery__grid--asymmetric {
-      grid-template-columns: repeat(var(--gallery-columns-mobile, 2), 1fr);
-    }
-
-    .image-gallery__grid--masonry {
-      columns: var(--gallery-columns-mobile, 2);
-    }
-
-    .image-gallery__grid--asymmetric .image-gallery__item--small,
-    .image-gallery__grid--asymmetric .image-gallery__item--medium,
-    .image-gallery__grid--asymmetric .image-gallery__item--large {
-      grid-column: span 1;
-      grid-row: span 1;
-    }
-  }
-
   @media (max-width: 749px) {
     .image-gallery__lightbox-container {
       padding: var(--space-4);
@@ -599,9 +772,28 @@
     .image-gallery__image,
     .image-gallery__overlay,
     .image-gallery__zoom-icon,
-    .image-gallery__caption--reveal {
+    .image-gallery__caption--reveal,
+    .image-gallery__lightbox-spinner {
       transition: none;
+      animation: none;
     }
+  }
+
+  /* Section padding variants */
+  .image-gallery.section--none {
+    padding-block: 0;
+  }
+
+  .image-gallery.section--small {
+    padding-block: var(--section-spacing-sm);
+  }
+
+  .image-gallery.section--medium {
+    padding-block: var(--section-spacing-md);
+  }
+
+  .image-gallery.section--large {
+    padding-block: var(--section-spacing-lg);
   }
 {% endstylesheet %}
 
@@ -611,6 +803,11 @@
   "tag": "section",
   "class": "section-image-gallery",
   "settings": [
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "t:labels.subheading"
+    },
     {
       "type": "text",
       "id": "heading",
@@ -627,13 +824,16 @@
       "default": "center"
     },
     {
+      "type": "header",
+      "content": "t:labels.layout"
+    },
+    {
       "type": "select",
       "id": "layout",
-      "label": "t:sections.image_gallery.settings.layout.label",
+      "label": "t:labels.layout",
       "options": [
-        { "value": "grid", "label": "t:sections.image_gallery.settings.layout.options.grid" },
-        { "value": "masonry", "label": "t:sections.image_gallery.settings.layout.options.masonry" },
-        { "value": "asymmetric", "label": "t:sections.image_gallery.settings.layout.options.asymmetric" }
+        { "value": "grid", "label": "t:options.layout.grid" },
+        { "value": "carousel", "label": "t:options.layout.carousel" }
       ],
       "default": "grid"
     },
@@ -671,15 +871,18 @@
     {
       "type": "select",
       "id": "image_ratio",
-      "label": "t:sections.image_gallery.settings.image_ratio.label",
+      "label": "t:labels.image_ratio",
       "options": [
-        { "value": "portrait", "label": "t:options.aspect_ratio.portrait" },
-        { "value": "landscape", "label": "t:options.aspect_ratio.landscape" },
-        { "value": "square", "label": "t:options.aspect_ratio.square" },
+        { "value": "portrait", "label": "t:options.image_ratio.portrait" },
+        { "value": "landscape", "label": "t:options.image_ratio.landscape" },
+        { "value": "square", "label": "t:options.image_ratio.square" },
         { "value": "natural", "label": "t:sections.image_gallery.settings.image_ratio.options.natural" }
       ],
-      "default": "natural",
-      "info": "t:sections.image_gallery.settings.image_ratio.info"
+      "default": "square"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.image_gallery.settings.header_interaction.content"
     },
     {
       "type": "checkbox",
@@ -706,14 +909,26 @@
       "default": false
     },
     {
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
       "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
-      "options": [
-        { "value": "scheme-1", "label": "t:options.color_scheme.scheme_1" },
-        { "value": "scheme-2", "label": "t:options.color_scheme.scheme_2" }
-      ],
-      "default": "scheme-1"
+      "default": "scheme_1"
     }
   ],
   "blocks": [
@@ -736,18 +951,6 @@
           "id": "link",
           "label": "t:sections.image_gallery.blocks.image.settings.link.label",
           "info": "t:sections.image_gallery.blocks.image.settings.link.info"
-        },
-        {
-          "type": "select",
-          "id": "size",
-          "label": "t:sections.image_gallery.blocks.image.settings.size.label",
-          "options": [
-            { "value": "small", "label": "t:sections.image_gallery.blocks.image.settings.size.options.small" },
-            { "value": "medium", "label": "t:sections.image_gallery.blocks.image.settings.size.options.medium" },
-            { "value": "large", "label": "t:sections.image_gallery.blocks.image.settings.size.options.large" }
-          ],
-          "default": "medium",
-          "info": "t:sections.image_gallery.blocks.image.settings.size.info"
         }
       ]
     }

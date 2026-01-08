@@ -216,7 +216,7 @@
               <button type="submit" name="update" class="btn btn--outline btn--full">
                 {{ 'cart.update' | t }}
               </button>
-              <button type="submit" name="checkout" class="btn btn--primary btn--full">
+              <button type="submit" name="checkout" class="btn btn--filled btn--full">
                 {{ 'cart.checkout' | t }}
               </button>
 
@@ -243,7 +243,7 @@
           {% render 'icon', icon: 'cart', size: 'lg' %}
         </div>
         <p class="cart-empty__text">{{ 'cart.empty' | t }}</p>
-        <a href="{{ routes.all_products_collection_url }}" class="btn btn--primary">
+        <a href="{{ routes.all_products_collection_url }}" class="btn btn--filled">
           {{ 'cart.continue_shopping' | t }}
         </a>
       </div>
@@ -322,14 +322,10 @@
       "default": true
     },
     {
-      "type": "select",
+      "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
-      "options": [
-        { "value": "scheme-1", "label": "t:options.color_scheme.scheme_1" },
-        { "value": "scheme-2", "label": "t:options.color_scheme.scheme_2" }
-      ],
-      "default": "scheme-1"
+      "default": "scheme_1"
     }
   ]
 }

@@ -58,7 +58,10 @@
     "gallery_lightbox": "Image gallery lightbox",
     "gallery_lightbox_close": "Close gallery",
     "gallery_lightbox_prev": "Previous image",
-    "gallery_lightbox_next": "Next image"
+    "gallery_lightbox_next": "Next image",
+    "announcement": "Announcement",
+    "dismiss_announcement": "Dismiss announcement",
+    "back_to_top": "Back to top"
   },
   "labels": {
     "heading": "Heading",
@@ -100,6 +103,8 @@
     "lookbook": {
       "name": "Lookbook",
       "view_product": "View {{ product }}",
+      "select_product": "Select a product",
+      "select_product_hint": "Click this hotspot in the theme editor to assign a product",
       "settings": {
         "image": {
           "label": "Image"
@@ -662,7 +667,15 @@
   },
   "product": {
     "add_to_cart": "Add to cart",
+    "trust_badges": {
+      "free_shipping": "Free shipping",
+      "easy_returns": "Easy returns",
+      "secure_checkout": "Secure checkout"
+    },
+    "adding": "Adding...",
+    "added": "Added!",
     "added_to_cart": "Added to cart",
+    "error": "Error adding to cart",
     "choose_options": "Choose options",
     "sold_out": "Sold out",
     "on_sale": "Sale",
@@ -719,6 +732,15 @@
     },
     "installments": "Buy now, pay later with Shop Pay Installments"
   },
+  "quick_shop": {
+    "title": "Quick shop",
+    "loading": "Loading product...",
+    "quick_view": "Quick view",
+    "open": "Quick view {{ product }}",
+    "close": "Close quick shop",
+    "added_to_cart": "Added to cart",
+    "error_loading": "Error loading product. Please try again."
+  },
   "cart": {
     "title": "Your cart",
     "empty": "Your cart is empty",
@@ -732,10 +754,19 @@
     "checkout": "Checkout",
     "view_cart": "View cart",
     "remove": "Remove",
+    "remove_item": "Remove {{ title }} from cart",
     "note": "Order note",
     "note_placeholder": "Add a note to your order",
+    "note_toggle": "Add order instructions",
+    "note_saving": "Saving...",
+    "note_saved": "Saved",
     "decrease_quantity": "Decrease quantity",
     "increase_quantity": "Increase quantity",
+    "item_removed": "Item removed from cart",
+    "cart_updated": "Cart updated",
+    "error_updating": "Error updating cart. Please try again.",
+    "shipping_progress": "You're {{ remaining }} away from free shipping",
+    "shipping_success": "You've unlocked free shipping!",
     "taxes_included_but_shipping_at_checkout": "Taxes included. Shipping calculated at checkout.",
     "taxes_included_and_shipping_policy_html": "Taxes included. <a href=\"{{ link }}\">Shipping</a> calculated at checkout.",
     "taxes_and_shipping_policy_at_checkout_html": "Taxes and <a href=\"{{ link }}\">shipping</a> calculated at checkout.",

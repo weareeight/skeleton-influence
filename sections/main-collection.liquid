@@ -14,7 +14,7 @@
   assign enable_sticky_filters = section.settings.enable_sticky_filters
 -%}
 
-<section class="main-collection section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+<section class="main-collection section{% if filter_type == 'sidebar' %} main-collection--sidebar{% endif %} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
   <div class="container">
     {%- comment -%} Collection Header {%- endcomment -%}
     {%- if section.settings.show_collection_header -%}
@@ -62,7 +62,7 @@
               {%- assign active_filters_count = active_filters_count | plus: filter.active_values.size -%}
             {%- endfor -%}
             {%- if active_filters_count > 0 -%}
-              <span class="collection-toolbar__filter-count">({{ active_filters_count }})</span>
+              <span class="collection-toolbar__filter-count">{{ active_filters_count }}</span>
             {%- endif -%}
           </button>
         {%- endif -%}
@@ -141,7 +141,7 @@
       </div>
     </div>
 
-    <div class="collection-content">
+    <div class="collection-content{% if filter_type == 'sidebar' %} collection-content--sidebar{% endif %}">
       {%- comment -%} Filters Sidebar / Drawer {%- endcomment -%}
       {%- if show_filters and collection.filters.size > 0 -%}
         <aside
@@ -150,18 +150,19 @@
           data-filters
           {% if filter_type == 'drawer' %}aria-hidden="true"{% endif %}
         >
-          {%- if filter_type == 'drawer' -%}
-            <div class="collection-filters__header">
-              <h2 class="collection-filters__title h4">{{ 'collection.filters.filter' | t }}</h2>
-              <button
-                type="button"
-                class="collection-filters__close"
-                data-filter-close
-                aria-label="{{ 'accessibility.close' | t }}"
-              >
-                {% render 'icon', icon: 'close' %}
-              </button>
-            </div>
+          <div class="collection-filters__header">
+            <h2 class="collection-filters__title h4">{{ 'collection.filters.filter' | t }}</h2>
+            <button
+              type="button"
+              class="collection-filters__close"
+              data-filter-close
+              aria-label="{{ 'accessibility.close' | t }}"
+            >
+              {% render 'icon', icon: 'close' %}
+            </button>
+          </div>
+          {%- if filter_type != 'drawer' -%}
+            <h2 class="collection-filters__sidebar-title">{{ 'collection.filters.filter' | t }}</h2>
           {%- endif -%}
 
           <form id="CollectionFiltersForm" data-collection-filters-form>
@@ -271,29 +272,25 @@
               {%- endfor -%}
             </div>
 
-            {%- comment -%} Filter Actions (drawer only) {%- endcomment -%}
-            {%- if filter_type == 'drawer' -%}
-              <div class="collection-filters__actions">
-                <a href="{{ collection.url }}" class="btn btn--outline btn--full">
-                  {{ 'collection.filters.clear' | t }}
-                </a>
-                <button type="submit" class="btn btn--primary btn--full">
-                  {{ 'collection.filters.apply' | t }}
-                </button>
-              </div>
-            {%- endif -%}
+            {%- comment -%} Filter Actions (always rendered, CSS controls visibility) {%- endcomment -%}
+            <div class="collection-filters__actions">
+              <a href="{{ collection.url }}" class="btn btn--outline btn--full">
+                {{ 'collection.filters.clear' | t }}
+              </a>
+              <button type="submit" class="btn btn--filled btn--full">
+                {{ 'collection.filters.apply' | t }}
+              </button>
+            </div>
 
             <noscript>
-              <button type="submit" class="btn btn--primary">
+              <button type="submit" class="btn btn--filled">
                 {{ 'collection.filters.apply' | t }}
               </button>
             </noscript>
           </form>
         </aside>
 
-        {%- if filter_type == 'drawer' -%}
-          <div class="collection-filters__overlay" data-filter-overlay></div>
-        {%- endif -%}
+        <div class="collection-filters__overlay" data-filter-overlay></div>
       {%- endif -%}
 
       {%- comment -%} Products Grid {%- endcomment -%}
@@ -301,12 +298,13 @@
         {%- paginate collection.products by products_per_page -%}
           {%- if collection.products.size > 0 -%}
             <div
-              class="collection-products__grid grid"
+              class="collection-products__grid"
               style="--grid-columns-desktop: {{ columns_desktop }}; --grid-columns-mobile: {{ columns_mobile }};"
               data-products-grid
             >
               {%- for product in collection.products -%}
-                <div class="collection-products__item">
+                {%- assign card_delay = forloop.index0 | times: 50 | plus: 100 -%}
+                <div class="collection-products__item" data-animate="fade" style="--delay: {{ card_delay }}ms">
                   {% render 'product-card', product: product %}
                 </div>
               {%- endfor -%}
@@ -471,6 +469,809 @@
 })();
 </script>
 
+{% stylesheet %}
+  /* ========================================
+     Collection Header
+     ======================================== */
+  .collection-header {
+    margin-bottom: var(--space-8);
+  }
+
+  .collection-header__image {
+    position: relative;
+    aspect-ratio: 21 / 9;
+    overflow: hidden;
+    margin-bottom: var(--space-6);
+  }
+
+  .collection-header__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .collection-header__content {
+    text-align: center;
+    max-width: 48rem;
+    margin-inline: auto;
+  }
+
+  .collection-header__title {
+    margin-bottom: var(--space-2);
+  }
+
+  .collection-header__description {
+    color: var(--color-foreground-muted);
+  }
+
+  /* ========================================
+     Toolbar
+     ======================================== */
+  .collection-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: var(--space-6);
+    margin-bottom: var(--space-6);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  .collection-toolbar__left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .collection-toolbar__right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .collection-toolbar__filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .collection-toolbar__filter-toggle svg {
+    transition: transform var(--duration-short) var(--ease-out);
+  }
+
+  .collection-toolbar__filter-toggle:hover svg {
+    transform: scale(1.1);
+  }
+
+  .collection-toolbar__filter-count {
+    font-size: var(--font-size-xs);
+    background: var(--color-foreground);
+    color: var(--color-background);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-full);
+    min-width: 1.25rem;
+    text-align: center;
+  }
+
+  .collection-toolbar__count {
+    font-size: var(--font-size-xs);
+    color: var(--color-foreground-muted);
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+
+  .collection-toolbar__sort {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .collection-toolbar__view {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .collection-toolbar__view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-foreground-muted);
+    cursor: pointer;
+    transition: all var(--duration-short) var(--ease-out);
+  }
+
+  .collection-toolbar__view-btn:hover,
+  .collection-toolbar__view-btn.is-active {
+    background: var(--color-foreground);
+    color: var(--color-background);
+    border-color: var(--color-foreground);
+  }
+
+  /* ========================================
+     Active Filter Tags
+     ======================================== */
+  .collection-active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .active-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+    font-size: var(--font-size-xs);
+    background: var(--color-foreground);
+    color: var(--color-background);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: all var(--duration-short) var(--ease-out);
+  }
+
+  .active-filter-tag:hover {
+    background: var(--color-foreground-muted);
+  }
+
+  .active-filter-tag svg {
+    opacity: 0.7;
+    transition: opacity var(--duration-short) var(--ease-out);
+  }
+
+  .active-filter-tag:hover svg {
+    opacity: 1;
+  }
+
+  .active-filter-clear {
+    font-size: var(--font-size-xs);
+    color: var(--color-foreground-muted);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    transition: color var(--duration-short) var(--ease-out);
+  }
+
+  .active-filter-clear:hover {
+    color: var(--color-foreground);
+  }
+
+  /* ========================================
+     Content Layout
+     ======================================== */
+  .collection-content {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+
+  /* Layout when sidebar is active - sidebar is fixed to left edge */
+  .collection-content--sidebar {
+    display: block;
+  }
+
+  /* Hide filter toggle on desktop when sidebar is visible */
+  @media (min-width: 990px) {
+    .main-collection--sidebar .collection-toolbar__filter-toggle {
+      display: none;
+    }
+  }
+
+  @media (max-width: 989px) {
+    .collection-content--sidebar {
+      display: block;
+    }
+
+    /* Hide sidebar on mobile, show filter toggle instead */
+    .collection-content--sidebar .collection-filters:not(.collection-filters--drawer) {
+      display: none;
+    }
+  }
+
+  /* Products container - stacks children vertically */
+  .collection-products {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  /* ========================================
+     Filter Sidebar (fixed to left edge)
+     ======================================== */
+  @media (min-width: 990px) {
+    .collection-filters:not(.collection-filters--drawer) {
+      position: fixed;
+      left: 0;
+      top: var(--header-height, 4rem);
+      width: 14rem;
+      height: calc(100vh - var(--header-height, 4rem));
+      height: calc(100dvh - var(--header-height, 4rem));
+      background: var(--color-background);
+      border-right: var(--border-width) solid var(--color-border);
+      overflow-y: auto;
+      z-index: calc(var(--z-header) - 1);
+      padding: var(--space-6) var(--space-4);
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-border) transparent;
+    }
+
+    .collection-filters:not(.collection-filters--drawer)::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .collection-filters:not(.collection-filters--drawer)::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .collection-filters:not(.collection-filters--drawer)::-webkit-scrollbar-thumb {
+      background-color: var(--color-border);
+      border-radius: 2px;
+    }
+
+    /* Offset main content to account for fixed sidebar */
+    .main-collection--sidebar .container {
+      margin-left: 14rem;
+      max-width: calc(var(--container-max-width) - 14rem);
+    }
+  }
+
+  /* Sidebar-specific content styling (without drawer chrome) */
+  .collection-filters:not(.collection-filters--drawer) .collection-filters__content {
+    padding: 0;
+    overflow: visible;
+  }
+
+  /* Hide drawer header on desktop for sidebar mode */
+  .collection-filters:not(.collection-filters--drawer) .collection-filters__header {
+    display: none;
+  }
+
+  /* Sidebar title styling (desktop only) */
+  .collection-filters__sidebar-title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    color: var(--color-foreground-muted);
+  }
+
+  /* Remove top border on first filter in sidebar (cleaner look) */
+  .collection-filters:not(.collection-filters--drawer) .collection-filter:first-child {
+    border-top: none;
+  }
+
+  /* Hide actions on desktop for sidebar mode (filters auto-submit) */
+  .collection-filters:not(.collection-filters--drawer) .collection-filters__actions {
+    display: none;
+  }
+
+  /* Mobile: Sidebar transforms to drawer behavior */
+  @media (max-width: 989px) {
+    .collection-filters:not(.collection-filters--drawer) {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: var(--z-modal);
+      display: flex;
+      flex-direction: column;
+      width: min(100vw, 26rem);
+      height: 100vh;
+      height: 100dvh;
+      background: var(--color-background);
+      box-shadow: 4px 0 24px rgb(0 0 0 / 0.1);
+      transform: translateX(-100%);
+      transition: transform var(--duration-normal) var(--ease-elegant);
+      visibility: hidden;
+    }
+
+    .collection-filters:not(.collection-filters--drawer).is-open {
+      transform: translateX(0);
+      visibility: visible;
+    }
+
+    /* Show drawer header on mobile */
+    .collection-filters:not(.collection-filters--drawer) .collection-filters__header {
+      display: flex;
+    }
+
+    /* Hide sidebar title on mobile (header shows instead) */
+    .collection-filters:not(.collection-filters--drawer) .collection-filters__sidebar-title {
+      display: none;
+    }
+
+    /* Restore content padding for drawer behavior */
+    .collection-filters:not(.collection-filters--drawer) .collection-filters__content {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-2) var(--space-6);
+      min-height: 0;
+    }
+
+    /* Show overlay on mobile when sidebar opens */
+    .collection-filters:not(.collection-filters--drawer).is-open ~ .collection-filters__overlay {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Show actions on mobile for sidebar mode (acts as drawer) */
+    .collection-filters:not(.collection-filters--drawer) .collection-filters__actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+      padding: var(--space-6);
+      border-top: var(--border-width) solid var(--color-border);
+      background: var(--color-background);
+    }
+  }
+
+  /* ========================================
+     Filter Drawer (slide-in)
+     ======================================== */
+  .collection-filters--drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    flex-direction: column;
+    width: min(100vw, 26rem);
+    height: 100vh;
+    height: 100dvh;
+    background: var(--color-background);
+    box-shadow: 4px 0 24px rgb(0 0 0 / 0.1);
+    transform: translateX(-100%);
+    transition: transform var(--duration-normal) var(--ease-elegant);
+    visibility: hidden;
+  }
+
+  .collection-filters--drawer.is-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  .collection-filters__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-modal) - 1);
+    background: rgb(0 0 0 / 0.4);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--duration-normal) var(--ease-out),
+                visibility var(--duration-normal) var(--ease-out);
+  }
+
+  .collection-filters--drawer.is-open ~ .collection-filters__overlay {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .collection-filters__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-6);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  .collection-filters__title {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+  }
+
+  .collection-filters__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    margin-right: calc(var(--space-2) * -1);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    color: var(--color-foreground);
+    transition: background-color var(--duration-short) var(--ease-out);
+  }
+
+  .collection-filters__close:hover {
+    background-color: var(--color-muted);
+  }
+
+  /* Form needs to be a flex container to enable scrolling */
+  .collection-filters--drawer form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Critical for flex child scrolling */
+  }
+
+  .collection-filters__content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-2) var(--space-6);
+    min-height: 0; /* Critical for flex child scrolling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  .collection-filters__content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .collection-filters__content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .collection-filters__content::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 3px;
+  }
+
+  .collection-filters__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    border-top: var(--border-width) solid var(--color-border);
+    background: var(--color-background);
+  }
+
+  /* ========================================
+     Filter Groups (Accordion)
+     ======================================== */
+  .collection-filter {
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  .collection-filter:first-child {
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  .collection-filter__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--space-5) 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    list-style: none;
+    transition: color var(--duration-short) var(--ease-out);
+  }
+
+  .collection-filter__heading:hover {
+    color: var(--color-foreground-muted);
+  }
+
+  .collection-filter__heading::-webkit-details-marker {
+    display: none;
+  }
+
+  .collection-filter__heading svg {
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: transform var(--duration-short) var(--ease-out),
+                opacity var(--duration-short) var(--ease-out);
+  }
+
+  .collection-filter__heading:hover svg {
+    opacity: 1;
+  }
+
+  .collection-filter[open] .collection-filter__heading svg {
+    transform: rotate(180deg);
+    opacity: 1;
+  }
+
+  .collection-filter__count {
+    font-size: var(--font-size-xs);
+    color: var(--color-background);
+    background: var(--color-foreground);
+    font-weight: normal;
+    margin-left: var(--space-2);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+  }
+
+  .collection-filter__content {
+    padding-bottom: var(--space-5);
+  }
+
+  /* Filter List (Checkboxes) */
+  .collection-filter__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .collection-filter__item {
+    margin: 0;
+  }
+
+  .collection-filter__label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    cursor: pointer;
+    transition: opacity var(--duration-short) var(--ease-out);
+  }
+
+  .collection-filter__label:hover {
+    opacity: 0.7;
+  }
+
+  .collection-filter__label:has(input:disabled) {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .collection-filter__label:has(input:disabled):hover {
+    opacity: 0.35;
+  }
+
+  .collection-filter__checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .collection-filter__checkbox-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 1.5px solid var(--color-foreground);
+    border-radius: 2px;
+    background: transparent;
+    flex-shrink: 0;
+    transition: all var(--duration-short) var(--ease-out);
+  }
+
+  .collection-filter__checkbox:checked + .collection-filter__checkbox-visual {
+    background: var(--color-foreground);
+    border-color: var(--color-foreground);
+  }
+
+  .collection-filter__checkbox:checked + .collection-filter__checkbox-visual::after {
+    content: '';
+    width: 0.375rem;
+    height: 0.1875rem;
+    border-left: 1.5px solid var(--color-background);
+    border-bottom: 1.5px solid var(--color-background);
+    transform: rotate(-45deg) translateY(-1px);
+  }
+
+  .collection-filter__checkbox:focus-visible + .collection-filter__checkbox-visual {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  .collection-filter__text {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: 1;
+    font-size: var(--font-size-sm);
+  }
+
+  .collection-filter__label .collection-filter__count {
+    background: transparent;
+    color: var(--color-foreground-muted);
+    padding: 0;
+    font-size: var(--font-size-xs);
+  }
+
+  /* Color Swatches */
+  .collection-filter__swatch {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: var(--radius-full);
+    background-color: var(--swatch-color, #ccc);
+    border: 1.5px solid var(--color-border);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
+  }
+
+  /* Price Range */
+  .collection-filter__price-range {
+    padding-top: var(--space-3);
+  }
+
+  .collection-filter__price-inputs {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-3);
+  }
+
+  .collection-filter__price-field {
+    flex: 1;
+    position: relative;
+  }
+
+  .collection-filter__price-field label {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-foreground-muted);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .collection-filter__price-currency {
+    position: absolute;
+    left: var(--space-3);
+    bottom: 0.875rem;
+    font-size: var(--font-size-sm);
+    color: var(--color-foreground-muted);
+    pointer-events: none;
+  }
+
+  .collection-filter__price-input {
+    width: 100%;
+    padding-left: var(--space-6);
+    font-size: var(--font-size-sm);
+    height: 2.75rem;
+  }
+
+  .collection-filter__price-separator {
+    color: var(--color-foreground-muted);
+    padding-bottom: 0.875rem;
+    font-size: var(--font-size-sm);
+  }
+
+  /* ========================================
+     Products Grid
+     ======================================== */
+  .collection-products__grid {
+    display: grid;
+    gap: var(--grid-gap-md);
+    grid-template-columns: repeat(var(--grid-columns-mobile, 2), 1fr);
+  }
+
+  @media (min-width: 750px) {
+    .collection-products__grid {
+      grid-template-columns: repeat(var(--grid-columns-desktop, 4), 1fr);
+    }
+  }
+
+  /* List View */
+  .collection-products__grid.grid--list {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .collection-products__grid.grid--list .product-card {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  @media (min-width: 750px) {
+    .collection-products__grid.grid--list .product-card {
+      grid-template-columns: 280px 1fr;
+    }
+  }
+
+  /* ========================================
+     Pagination
+     ======================================== */
+  .pagination {
+    margin-top: var(--space-12);
+    padding-top: var(--space-8);
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  .pagination__list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-1);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .pagination__link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    padding: 0 var(--space-3);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    color: var(--color-foreground);
+    border-radius: var(--radius-sm);
+    transition: all var(--duration-short) var(--ease-out);
+  }
+
+  .pagination__link:hover {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+
+  .pagination__link--current {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+
+  .pagination__link--ellipsis {
+    pointer-events: none;
+  }
+
+  .pagination__link--prev,
+  .pagination__link--next {
+    gap: var(--space-1);
+  }
+
+  /* ========================================
+     Empty State
+     ======================================== */
+  .collection-empty {
+    text-align: center;
+    padding: var(--space-16) var(--space-4);
+  }
+
+  .collection-empty p {
+    margin-bottom: var(--space-4);
+    color: var(--color-foreground-muted);
+  }
+
+  /* ========================================
+     Responsive
+     ======================================== */
+  @media (max-width: 749px) {
+    .collection-header__image {
+      aspect-ratio: 16 / 9;
+      margin-inline: calc(var(--page-margin) * -1);
+    }
+
+    .collection-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .collection-toolbar__left,
+    .collection-toolbar__right {
+      justify-content: space-between;
+    }
+
+    .collection-toolbar__count {
+      order: -1;
+    }
+
+    .hide-mobile {
+      display: none;
+    }
+  }
+
+  /* Body scroll lock when filters open */
+  body.filters-open {
+    overflow: hidden;
+  }
+{% endstylesheet %}
+
 {% schema %}
 {
   "name": "t:sections.main_collection.name",
@@ -518,7 +1319,7 @@
         { "value": "sidebar", "label": "t:sections.main_collection.settings.filter_type.options.sidebar" },
         { "value": "drawer", "label": "t:sections.main_collection.settings.filter_type.options.drawer" }
       ],
-      "default": "sidebar"
+      "default": "drawer"
     },
     {
       "type": "checkbox",
@@ -575,14 +1376,10 @@
       "default": "2"
     },
     {
-      "type": "select",
+      "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
-      "options": [
-        { "value": "scheme-1", "label": "t:options.color_scheme.scheme_1" },
-        { "value": "scheme-2", "label": "t:options.color_scheme.scheme_2" }
-      ],
-      "default": "scheme-1"
+      "default": "scheme_1"
     }
   ]
 }

@@ -50,7 +50,7 @@
         "cta_style": "primary",
         "height": "large",
         "carousel_radius": 500,
-        "color_scheme": "scheme-2"
+        "color_scheme": "scheme_2"
       }
     },
     "featured_collection": {
@@ -198,7 +198,7 @@
       },
       "block_order": ["subheading", "heading", "text", "form"],
       "settings": {
-        "color_scheme": "scheme-2",
+        "color_scheme": "scheme_2",
         "narrow_container": true
       }
     }

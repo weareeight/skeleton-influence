@@ -12,17 +12,22 @@
   assign vertical_alignment = section.settings.vertical_alignment
   assign content_alignment = section.settings.content_alignment
   assign mobile_image_position = section.settings.mobile_image_position
+  assign padding = section.settings.padding
 -%}
 
 <section
   id="{{ section_id }}"
-  class="split-hero section split-hero--{{ image_position }} split-hero--{{ height }} split-hero--mobile-image-{{ mobile_image_position }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
+  class="split-hero section section--{{ padding }} split-hero--{{ image_position }} split-hero--{{ height }} split-hero--mobile-image-{{ mobile_image_position }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
   data-section-id="{{ section.id }}"
   data-section-type="split-hero"
 >
   <div class="split-hero__grid split-hero__grid--{{ split_ratio }}">
-    {%- comment -%} Image Side {%- endcomment -%}
-    <div class="split-hero__media">
+    {%- comment -%} Image Side with reveal animation {%- endcomment -%}
+    {%- assign image_reveal = 'reveal' -%}
+    {%- if image_position == 'right' -%}
+      {%- assign image_reveal = 'reveal-right' -%}
+    {%- endif -%}
+    <div class="split-hero__media" data-animate="{{ image_reveal }}">
       <div class="split-hero__media-inner{% if section.settings.enable_parallax %} split-hero__media-inner--parallax{% endif %}">
         {%- if section.settings.image != blank -%}
           {{
@@ -43,47 +48,73 @@
       </div>
     </div>
 
-    {%- comment -%} Content Side {%- endcomment -%}
+    {%- comment -%} Content Side with staggered animations {%- endcomment -%}
     <div class="split-hero__content split-hero__content--{{ vertical_alignment }} text-{{ content_alignment }}">
       <div class="split-hero__content-inner{% if content_alignment == 'center' %} split-hero__content-inner--center{% endif %}">
+        {%- assign animation_index = 0 -%}
         {%- for block in section.blocks -%}
+          {%- assign animation_delay = animation_index | times: 100 | plus: 200 -%}
           {%- case block.type -%}
             {%- when 'subheading' -%}
               {%- if block.settings.text != blank -%}
-                <p class="split-hero__subheading subheading" {{ block.shopify_attributes }}>
+                <p
+                  class="split-hero__subheading subheading"
+                  data-animate="fade"
+                  style="--delay: {{ animation_delay }}ms"
+                  {{ block.shopify_attributes }}
+                >
                   {{ block.settings.text }}
                 </p>
+                {%- assign animation_index = animation_index | plus: 1 -%}
               {%- endif -%}
 
             {%- when 'heading' -%}
               {%- if block.settings.text != blank -%}
-                <h1 class="split-hero__heading" {{ block.shopify_attributes }}>
+                <h1
+                  class="split-hero__heading"
+                  data-animate="up-lg"
+                  style="--delay: {{ animation_delay }}ms"
+                  {{ block.shopify_attributes }}
+                >
                   {{ block.settings.text }}
                 </h1>
+                {%- assign animation_index = animation_index | plus: 1 -%}
               {%- endif -%}
 
             {%- when 'text' -%}
               {%- if block.settings.text != blank -%}
-                <div class="split-hero__text rte" {{ block.shopify_attributes }}>
+                <div
+                  class="split-hero__text rte"
+                  data-animate
+                  style="--delay: {{ animation_delay }}ms"
+                  {{ block.shopify_attributes }}
+                >
                   {{ block.settings.text }}
                 </div>
+                {%- assign animation_index = animation_index | plus: 1 -%}
               {%- endif -%}
 
             {%- when 'button' -%}
               {%- if block.settings.label != blank -%}
-                <div class="split-hero__buttons" {{ block.shopify_attributes }}>
+                <div
+                  class="split-hero__buttons"
+                  data-animate="pop"
+                  style="--delay: {{ animation_delay }}ms"
+                  {{ block.shopify_attributes }}
+                >
                   <a
                     href="{{ block.settings.link }}"
                     class="split-hero__btn btn btn--{{ block.settings.style }}"
                   >
                     <span>{{ block.settings.label }}</span>
                     {%- if block.settings.show_arrow -%}
-                      <svg class="split-hero__btn-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                        <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <svg class="split-hero__btn-arrow" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+                        <path d="M218.83,130.83l-72,72a4,4,0,0,1-5.66-5.66L206.34,132H40a4,4,0,0,1,0-8H206.34L141.17,58.83a4,4,0,0,1,5.66-5.66l72,72A4,4,0,0,1,218.83,130.83Z"/>
                       </svg>
                     {%- endif -%}
                   </a>
                 </div>
+                {%- assign animation_index = animation_index | plus: 1 -%}
               {%- endif -%}
           {%- endcase -%}
         {%- endfor -%}
@@ -116,7 +147,7 @@
             // Only animate when section is in view
             if (rect.bottom > 0 && rect.top < windowHeight) {
               const scrollProgress = (windowHeight - rect.top) / (windowHeight + rect.height);
-              const parallaxOffset = (scrollProgress - 0.5) * 50; // ±25px range
+              const parallaxOffset = (scrollProgress - 0.5) * 120; // ±60px range
               mediaInner.style.transform = `translateY(${parallaxOffset}px)`;
             }
 
@@ -195,7 +226,7 @@
   }
 
   .split-hero__media-inner--parallax {
-    inset: -25px 0;
+    inset: -60px 0;
     will-change: transform;
   }
 
@@ -221,18 +252,21 @@
   /* Content side */
   .split-hero__content {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     padding: var(--space-12) var(--page-margin);
   }
 
   @media (min-width: 990px) {
     .split-hero__content {
       padding: var(--space-16) var(--space-12);
+      min-height: 100%;
     }
   }
 
-  .split-hero__content--top { align-items: flex-start; }
-  .split-hero__content--center { align-items: center; }
-  .split-hero__content--bottom { align-items: flex-end; }
+  .split-hero__content--top { justify-content: flex-start; }
+  .split-hero__content--center { justify-content: center; }
+  .split-hero__content--bottom { justify-content: flex-end; }
 
   .split-hero__content-inner {
     display: flex;
@@ -323,6 +357,23 @@
       transition: none;
     }
   }
+
+  /* Section padding variants */
+  .split-hero.section--none {
+    padding-block: 0;
+  }
+
+  .split-hero.section--small {
+    padding-block: var(--section-spacing-sm);
+  }
+
+  .split-hero.section--medium {
+    padding-block: var(--section-spacing-md);
+  }
+
+  .split-hero.section--large {
+    padding-block: var(--section-spacing-lg);
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -407,14 +458,26 @@
       "default": "top"
     },
     {
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
       "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
-      "options": [
-        { "value": "scheme-1", "label": "t:options.color_scheme.scheme_1" },
-        { "value": "scheme-2", "label": "t:options.color_scheme.scheme_2" }
-      ],
-      "default": "scheme-1"
+      "default": "scheme_1"
     }
   ],
   "blocks": [
@@ -478,10 +541,11 @@
           "id": "style",
           "label": "t:labels.button_style",
           "options": [
-            { "value": "primary", "label": "t:options.button_style.primary" },
-            { "value": "secondary", "label": "t:options.button_style.secondary" }
+            { "value": "filled", "label": "t:options.button_style.filled" },
+            { "value": "outline", "label": "t:options.button_style.outline" },
+            { "value": "underline", "label": "t:options.button_style.underline" }
           ],
-          "default": "primary"
+          "default": "filled"
         },
         {
           "type": "checkbox",

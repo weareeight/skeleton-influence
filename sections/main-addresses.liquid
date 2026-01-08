@@ -86,7 +86,7 @@
           </div>
 
           <div class="address-form__actions">
-            <button type="submit" class="btn btn--primary">{{ 'customer.addresses.add' | t }}</button>
+            <button type="submit" class="btn btn--filled">{{ 'customer.addresses.add' | t }}</button>
             <button type="button" class="btn btn--outline" data-address-toggle-new>{{ 'customer.addresses.cancel' | t }}</button>
           </div>
         {%- endform -%}
@@ -181,7 +181,7 @@
                   </div>
 
                   <div class="address-form__actions">
-                    <button type="submit" class="btn btn--primary">{{ 'customer.addresses.update' | t }}</button>
+                    <button type="submit" class="btn btn--filled">{{ 'customer.addresses.update' | t }}</button>
                     <button type="button" class="btn btn--outline" data-address-toggle-edit="{{ address.id }}">{{ 'customer.addresses.cancel' | t }}</button>
                   </div>
                 {%- endform -%}
@@ -286,14 +286,10 @@
   "class": "section-main-addresses",
   "settings": [
     {
-      "type": "select",
+      "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
-      "options": [
-        { "value": "scheme-1", "label": "t:options.color_scheme.scheme_1" },
-        { "value": "scheme-2", "label": "t:options.color_scheme.scheme_2" }
-      ],
-      "default": "scheme-1"
+      "default": "scheme_1"
     }
   ]
 }

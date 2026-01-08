@@ -5,11 +5,12 @@
 
 {%- liquid
   assign section_id = 'Newsletter-' | append: section.id
+  assign padding = section.settings.padding
 -%}
 
-<section id="{{ section_id }}" class="newsletter section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
-  <div class="container{% if section.settings.narrow_container %} container--narrow{% endif %}">
-    <div class="newsletter__inner text-{{ section.settings.text_alignment }}">
+<section id="{{ section_id }}" class="newsletter section section--{{ padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+  <div class="container">
+    <div class="newsletter__inner text-{{ section.settings.text_alignment }}{% if section.settings.narrow_content %} newsletter__inner--narrow{% endif %}">
       {%- for block in section.blocks -%}
         {%- case block.type -%}
           {%- when 'subheading' -%}
@@ -68,14 +69,18 @@
                       {% endif %}
                     >
                     <button type="submit" class="btn btn--{{ block.settings.button_style }} newsletter-form__btn">
-                      {{ block.settings.button_label | default: 'newsletter.subscribe' | t }}
+                      {%- if block.settings.button_label != blank -%}
+                        {{ block.settings.button_label }}
+                      {%- else -%}
+                        {{ 'newsletter.subscribe' | t }}
+                      {%- endif -%}
                     </button>
                   </div>
                 {%- endif -%}
               {%- endform -%}
 
               {%- if block.settings.disclaimer != blank -%}
-                <p class="newsletter-form__disclaimer">{{ block.settings.disclaimer }}</p>
+                <div class="newsletter-form__disclaimer rte">{{ block.settings.disclaimer }}</div>
               {%- endif -%}
             </div>
         {%- endcase -%}
@@ -83,6 +88,67 @@
     </div>
   </div>
 </section>
+
+{% stylesheet %}
+  .newsletter__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .newsletter__inner.text-center {
+    align-items: center;
+  }
+
+  .newsletter__inner.text-left {
+    align-items: flex-start;
+  }
+
+  /* Narrow content variant - respects alignment */
+  .newsletter__inner--narrow {
+    max-width: 50%;
+  }
+
+  .newsletter__inner--narrow.text-center {
+    margin-inline: auto;
+  }
+
+  .newsletter__inner--narrow.text-left {
+    margin-inline-start: 0;
+    margin-inline-end: auto;
+  }
+
+  @media (max-width: 749px) {
+    .newsletter__inner--narrow {
+      max-width: 100%;
+    }
+  }
+
+  .newsletter__inner--narrow .newsletter__heading {
+    max-width: 30rem;
+  }
+
+  .newsletter__inner--narrow .newsletter__text {
+    max-width: 30rem;
+  }
+
+  /* Section padding variants */
+  .newsletter.section--none {
+    padding-block: 0;
+  }
+
+  .newsletter.section--small {
+    padding-block: var(--section-spacing-sm);
+  }
+
+  .newsletter.section--medium {
+    padding-block: var(--section-spacing-md);
+  }
+
+  .newsletter.section--large {
+    padding-block: var(--section-spacing-lg);
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -102,9 +168,25 @@
     },
     {
       "type": "checkbox",
-      "id": "narrow_container",
-      "label": "t:sections.newsletter.settings.narrow_container.label",
+      "id": "narrow_content",
+      "label": "Narrow content",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
+      "type": "select",
+      "id": "padding",
+      "label": "t:labels.padding",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
     },
     {
       "type": "color_scheme",
@@ -173,23 +255,24 @@
           "type": "text",
           "id": "button_label",
           "label": "t:labels.button_label",
-          "default": "Subscribe"
+          "info": "t:sections.newsletter.settings.button_label.info"
         },
         {
           "type": "select",
           "id": "button_style",
           "label": "t:labels.button_style",
           "options": [
-            { "value": "primary", "label": "t:options.button_style.primary" },
-            { "value": "secondary", "label": "t:options.button_style.secondary" }
+            { "value": "filled", "label": "t:options.button_style.filled" },
+            { "value": "outline", "label": "t:options.button_style.outline" },
+            { "value": "underline", "label": "t:options.button_style.underline" }
           ],
-          "default": "primary"
+          "default": "filled"
         },
         {
-          "type": "text",
+          "type": "richtext",
           "id": "disclaimer",
           "label": "t:sections.newsletter.settings.disclaimer.label",
-          "default": "By subscribing, you agree to our privacy policy."
+          "default": "<p>By subscribing, you agree to our privacy policy.</p>"
         }
       ]
     }

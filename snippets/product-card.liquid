@@ -5,12 +5,20 @@
   Usage:
   {% render 'product-card', product: product %}
   {% render 'product-card', product: product, show_vendor: true %}
+  {% render 'product-card', product: product, show_swatches: false %}
 {% endcomment %}
 
 {%- liquid
   assign show_vendor = show_vendor | default: settings.show_vendor
   assign show_secondary_image = show_secondary_image | default: settings.show_secondary_image
   assign enable_quick_add = enable_quick_add | default: settings.enable_quick_add
+
+  comment
+    show_swatches: Use explicit nil check because `false | default: true` returns true
+  endcomment
+  if show_swatches == nil
+    assign show_swatches = true
+  endif
 
   assign first_variant = product.selected_or_first_available_variant
   assign on_sale = false
@@ -58,22 +66,42 @@
       {%- endif -%}
     </div>
 
-    {%- comment -%} Quick Add {%- endcomment -%}
+    {%- comment -%} Quick Add / Quick Shop {%- endcomment -%}
     {%- if enable_quick_add and product.available -%}
       <div class="product-card__quick-add">
         {%- if product.variants.size == 1 -%}
-          <form action="{{ routes.cart_add_url }}" method="post" class="product-card__quick-add-form">
+          {%- comment -%} Single variant: Direct add to cart {%- endcomment -%}
+          <form action="{{ routes.cart_add_url }}" method="post" class="product-card__quick-add-form" data-quick-add-form>
             <input type="hidden" name="id" value="{{ first_variant.id }}">
-            <button type="submit" class="btn btn--primary btn--full btn--sm">
-              {{ 'product.add_to_cart' | t }}
+            <button type="submit" class="btn btn--filled btn--full btn--sm" data-quick-add-btn>
+              <span data-quick-add-text>{{ 'product.add_to_cart' | t }}</span>
             </button>
           </form>
         {%- else -%}
-          <a href="{{ product.url }}" class="btn btn--primary btn--full btn--sm">
+          {%- comment -%} Multi-variant: Open Quick Shop drawer {%- endcomment -%}
+          <button
+            type="button"
+            class="btn btn--filled btn--full btn--sm"
+            data-quick-shop-trigger="{{ product.handle }}"
+            aria-label="{{ 'quick_shop.open' | t: product: product.title }}"
+          >
             {{ 'product.choose_options' | t }}
-          </a>
+          </button>
         {%- endif -%}
       </div>
+    {%- endif -%}
+
+    {%- comment -%} Quick View Button (optional) {%- endcomment -%}
+    {%- if settings.show_quick_view_button and product.available -%}
+      <button
+        type="button"
+        class="product-card__quick-view"
+        data-quick-shop-trigger="{{ product.handle }}"
+        aria-label="{{ 'quick_shop.open' | t: product: product.title }}"
+      >
+        {% render 'icon', icon: 'eye', size: 'sm' %}
+        <span class="visually-hidden">{{ 'quick_shop.quick_view' | t }}</span>
+      </button>
     {%- endif -%}
   </div>
 
@@ -108,23 +136,25 @@
     </div>
 
     {%- comment -%} Color swatches if available {%- endcomment -%}
-    {%- for option in product.options_with_values -%}
-      {%- assign option_name_downcase = option.name | downcase -%}
-      {%- if option_name_downcase == 'color' or option_name_downcase == 'colour' -%}
-        <div class="product-card__swatches">
-          {%- for value in option.values limit: 5 -%}
-            {%- assign swatch = value | handle | append: '.png' | file_url -%}
-            <span
-              class="product-card__swatch"
-              style="--swatch-color: {{ value | handle | replace: '-', '' }}; --swatch-image: url('{{ swatch }}')"
-              title="{{ value }}"
-            ></span>
-          {%- endfor -%}
-          {%- if option.values.size > 5 -%}
-            <span class="product-card__swatch-more">+{{ option.values.size | minus: 5 }}</span>
-          {%- endif -%}
-        </div>
-      {%- endif -%}
-    {%- endfor -%}
+    {%- if show_swatches -%}
+      {%- for option in product.options_with_values -%}
+        {%- assign option_name_downcase = option.name | downcase -%}
+        {%- if option_name_downcase == 'color' or option_name_downcase == 'colour' -%}
+          <div class="product-card__swatches">
+            {%- for value in option.values limit: 5 -%}
+              {%- assign swatch = value | handle | append: '.png' | file_url -%}
+              <span
+                class="product-card__swatch"
+                style="--swatch-color: {{ value | handle | replace: '-', '' }}; --swatch-image: url('{{ swatch }}')"
+                title="{{ value }}"
+              ></span>
+            {%- endfor -%}
+            {%- if option.values.size > 5 -%}
+              <span class="product-card__swatch-more">+{{ option.values.size | minus: 5 }}</span>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
   </div>
 </div>
