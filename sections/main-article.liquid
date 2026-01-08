@@ -6,7 +6,7 @@
 <article class="main-article section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
   <div class="container container--narrow">
     {%- comment -%} Article Header {%- endcomment -%}
-    <header class="article-header">
+    <header class="article-header" data-animate="fade-up">
       {%- if section.settings.show_breadcrumb -%}
         <nav class="article-breadcrumb" aria-label="{{ 'accessibility.breadcrumb' | t }}">
           <a href="{{ routes.root_url }}">{{ 'breadcrumb.home' | t }}</a>
@@ -50,7 +50,7 @@
 
     {%- comment -%} Featured Image {%- endcomment -%}
     {%- if section.settings.show_featured_image and article.image -%}
-      <figure class="article-featured-image">
+      <figure class="article-featured-image" data-animate="fade-up" data-animate-delay="100">
         {{
           article.image
           | image_url: width: 1400
@@ -70,7 +70,7 @@
     {%- endif -%}
 
     {%- comment -%} Article Content {%- endcomment -%}
-    <div class="article-content rte">
+    <div class="article-content rte" data-animate="fade-up" data-animate-delay="200">
       {{ article.content }}
     </div>
 

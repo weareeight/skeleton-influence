@@ -11,10 +11,12 @@
   assign show_sorting = section.settings.show_sorting
 -%}
 
-<section class="main-search section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+<section
+  class="main-search section {% render 'color-scheme', scheme: section.settings.color_scheme %} section-padding--top-{{ section.settings.padding_top }} section-padding--bottom-{{ section.settings.padding_bottom }}"
+>
   <div class="container">
     {%- comment -%} Search Header {%- endcomment -%}
-    <header class="search-header">
+    <header class="search-header" data-animate="fade-up">
       <h1 class="search-header__title h2">{{ 'search.title' | t }}</h1>
 
       {%- comment -%} Search Form {%- endcomment -%}
@@ -192,7 +194,8 @@
             style="--grid-columns-desktop: {{ columns_desktop }}; --grid-columns-mobile: {{ columns_mobile }};"
           >
             {%- for item in search.results -%}
-              <div class="search-results__item">
+              {%- assign animation_delay = forloop.index0 | modulo: columns_desktop | times: 100 -%}
+              <div class="search-results__item" data-animate="fade-up" data-animate-delay="{{ animation_delay }}">
                 {%- case item.object_type -%}
                   {%- when 'product' -%}
                     {% render 'product-card', product: item %}
@@ -268,6 +271,13 @@
         </div>
       {%- endif -%}
     {%- endif -%}
+
+    {%- comment -%} Screen Reader Announcements {%- endcomment -%}
+    <div class="visually-hidden" aria-live="polite" aria-atomic="true" data-search-announce>
+      {%- if search.performed and search.results_count > 0 -%}
+        {{ 'search.results_count' | t: count: search.results_count, terms: search.terms }}
+      {%- endif -%}
+    </div>
   </div>
 </section>
 
@@ -292,6 +302,291 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+
+{% stylesheet %}
+/* Main Search Section */
+.main-search {
+  padding: var(--section-padding-top) 0 var(--section-padding-bottom);
+}
+
+/* Search Header */
+.search-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.search-header__title {
+  margin: 0 0 var(--space-4);
+}
+
+.search-header__form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-header__results-count {
+  margin-top: var(--space-4);
+  color: var(--color-muted);
+}
+
+/* Search Toolbar */
+.search-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.search-toolbar__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.search-toolbar__tab {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: all var(--duration-fast);
+}
+
+.search-toolbar__tab:hover,
+.search-toolbar__tab.is-active {
+  background: var(--color-foreground);
+  color: var(--color-background);
+  border-color: var(--color-foreground);
+}
+
+.search-toolbar__sort {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Search Layout with Filters */
+.search-filters-container {
+  margin-bottom: var(--space-6);
+}
+
+@media (min-width: 990px) {
+  .search-filters-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-8);
+  }
+}
+
+/* Search Filters */
+.search-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.search-filter {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.search-filter__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) 0;
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  list-style: none;
+}
+
+.search-filter__heading::-webkit-details-marker {
+  display: none;
+}
+
+.search-filter__heading svg {
+  transition: transform var(--duration-fast);
+}
+
+.search-filter[open] .search-filter__heading svg {
+  transform: rotate(180deg);
+}
+
+.search-filter__content {
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+.search-filter__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.search-filter__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.search-filter__checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-foreground);
+}
+
+.search-filter__checkbox-visual {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.search-filter__checkbox:checked + .search-filter__checkbox-visual {
+  background-color: var(--color-foreground);
+  border-color: var(--color-foreground);
+}
+
+.search-filter__checkbox:checked + .search-filter__checkbox-visual::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 0.25rem;
+  height: 0.5rem;
+  border: solid var(--color-background);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.search-filter__count {
+  color: var(--color-muted);
+  font-size: var(--font-size-xs);
+  margin-left: auto;
+}
+
+.search-filter__price-range {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.search-filter__price-inputs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.search-filter__price-field {
+  flex: 1;
+}
+
+.search-filter__price-field label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  margin-bottom: var(--space-1);
+}
+
+.search-filter__price-field .form-input {
+  width: 100%;
+}
+
+/* Search Results Grid */
+.search-results__grid {
+  display: grid;
+  gap: var(--grid-gap, var(--space-6));
+  grid-template-columns: repeat(var(--grid-columns-mobile, 1), 1fr);
+}
+
+@media (min-width: 750px) {
+  .search-results__grid {
+    grid-template-columns: repeat(var(--grid-columns-desktop, 4), 1fr);
+  }
+}
+
+.search-results__item {
+  display: flex;
+}
+
+/* Page Card (for page results) */
+.page-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.page-card:hover {
+  border-color: var(--color-foreground);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.page-card__title {
+  margin: 0 0 var(--space-2);
+}
+
+.page-card__title a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.page-card__title a:hover {
+  text-decoration: underline;
+}
+
+.page-card__excerpt {
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Search Empty State */
+.search-empty {
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+}
+
+.search-empty p {
+  margin-bottom: var(--space-6);
+}
+
+.search-empty h2 {
+  margin-bottom: var(--space-4);
+}
+
+.search-empty ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.search-empty li {
+  margin-bottom: var(--space-2);
+}
+
+/* Pagination */
+.main-search .pagination {
+  margin-top: var(--space-12);
+}
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -341,10 +636,38 @@ document.addEventListener('DOMContentLoaded', () => {
       "default": "2"
     },
     {
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
       "default": "scheme_1"
+    },
+    {
+      "type": "select",
+      "id": "padding_top",
+      "label": "t:labels.padding_top",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "padding_bottom",
+      "label": "t:labels.padding_bottom",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
     }
   ]
 }

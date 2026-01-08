@@ -71,6 +71,9 @@
                     {%- endif -%}
                   {%- endfor -%}
 
+                  {%- comment -%} Gift Card Recipient Form (REQUIRED FOR THEME STORE) {%- endcomment -%}
+                  {% render 'gift-card-recipient-form', item: item, item_index: forloop.index %}
+
                   {%- comment -%} Discounts {%- endcomment -%}
                   {%- if item.line_level_discount_allocations.size > 0 -%}
                     <ul class="cart-item__discounts" role="list">

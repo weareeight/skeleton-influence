@@ -14,10 +14,12 @@
   assign image_ratio = section.settings.image_ratio
 -%}
 
-<section class="main-blog section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+<section
+  class="main-blog section {% render 'color-scheme', scheme: section.settings.color_scheme %} section-padding--top-{{ section.settings.padding_top }} section-padding--bottom-{{ section.settings.padding_bottom }}"
+>
   <div class="container">
     {%- comment -%} Blog Header {%- endcomment -%}
-    <header class="blog-header">
+    <header class="blog-header" data-animate="fade-up">
       <h1 class="blog-header__title h2">{{ blog.title }}</h1>
 
       {%- if section.settings.show_tag_filter and blog.all_tags.size > 0 -%}
@@ -45,9 +47,12 @@
         <div
           class="blog-grid grid"
           style="--grid-columns-desktop: {{ columns_desktop }}; --grid-columns-mobile: {{ columns_mobile }};"
+          role="feed"
+          aria-label="{{ 'blog.articles_list' | t }}"
         >
           {%- for article in blog.articles -%}
-            <article class="blog-grid__item">
+            {%- assign animation_delay = forloop.index0 | modulo: columns_desktop | times: 100 -%}
+            <article class="blog-grid__item" data-animate="fade-up" data-animate-delay="{{ animation_delay }}">
               {% render 'article-card',
                 article: article,
                 show_date: show_date,
@@ -110,6 +115,74 @@
     {%- endpaginate -%}
   </div>
 </section>
+
+{% stylesheet %}
+/* Main Blog Section */
+.main-blog {
+  padding: var(--section-padding-top) 0 var(--section-padding-bottom);
+}
+
+/* Blog Header */
+.blog-header {
+  margin-bottom: var(--space-8);
+}
+
+.blog-header__title {
+  margin: 0;
+}
+
+.blog-header__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.blog-header__tag {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast);
+}
+
+.blog-header__tag:hover,
+.blog-header__tag.is-active {
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+  border-color: var(--color-foreground);
+}
+
+/* Blog Grid */
+.blog-grid {
+  display: grid;
+  gap: var(--grid-gap, var(--space-6));
+  grid-template-columns: repeat(var(--grid-columns-mobile, 1), 1fr);
+}
+
+@media (min-width: 750px) {
+  .blog-grid {
+    grid-template-columns: repeat(var(--grid-columns-desktop, 3), 1fr);
+  }
+}
+
+.blog-grid__item {
+  display: flex;
+}
+
+/* Blog Empty State */
+.blog-empty {
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+  color: var(--color-muted);
+}
+
+/* Pagination */
+.main-blog .pagination {
+  margin-top: var(--space-12);
+}
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -191,10 +264,38 @@
       "default": true
     },
     {
+      "type": "header",
+      "content": "t:labels.section"
+    },
+    {
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
       "default": "scheme_1"
+    },
+    {
+      "type": "select",
+      "id": "padding_top",
+      "label": "t:labels.padding_top",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "padding_bottom",
+      "label": "t:labels.padding_bottom",
+      "options": [
+        { "value": "none", "label": "t:options.padding.none" },
+        { "value": "small", "label": "t:options.padding.small" },
+        { "value": "medium", "label": "t:options.padding.medium" },
+        { "value": "large", "label": "t:options.padding.large" }
+      ],
+      "default": "medium"
     }
   ]
 }
