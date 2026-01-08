@@ -1512,6 +1512,13 @@
         "enable_cart_note": {
           "label": "Enable order note field"
         },
+        "header_checkout": {
+          "content": "Checkout"
+        },
+        "show_dynamic_checkout": {
+          "label": "Show dynamic checkout buttons",
+          "info": "Display accelerated checkout buttons like Shop Pay, Apple Pay, and Google Pay"
+        },
         "header_display": {
           "content": "Display"
         }
@@ -1927,6 +1934,8 @@
     "link": "Link",
     "menu": "Menu",
     "padding": "Padding",
+    "padding_top": "Top padding",
+    "padding_bottom": "Bottom padding",
     "layout": "Layout",
     "product_card": "Product card",
     "section": "Section",

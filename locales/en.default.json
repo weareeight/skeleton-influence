@@ -770,7 +770,8 @@
     "taxes_included_but_shipping_at_checkout": "Taxes included. Shipping calculated at checkout.",
     "taxes_included_and_shipping_policy_html": "Taxes included. <a href=\"{{ link }}\">Shipping</a> calculated at checkout.",
     "taxes_and_shipping_policy_at_checkout_html": "Taxes and <a href=\"{{ link }}\">shipping</a> calculated at checkout.",
-    "taxes_and_shipping_at_checkout": "Taxes and shipping calculated at checkout."
+    "taxes_and_shipping_at_checkout": "Taxes and shipping calculated at checkout.",
+    "items_list": "Cart items"
   },
   "customer": {
     "account": {
@@ -880,6 +881,7 @@
     "view_all": "View all articles",
     "empty": "No articles found",
     "tags_label": "Tags",
+    "articles_list": "Blog posts",
     "article_comments": "Comments",
     "comment_form_title": "Leave a comment",
     "comment_form_name": "Name",

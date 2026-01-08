@@ -1,0 +1,157 @@
+{% comment %}
+  Gift Card Recipient Form - Influence Theme
+  Allows customers to send gift cards directly to recipients
+
+  Usage:
+  {% render 'gift-card-recipient-form', item: item, item_index: forloop.index %}
+
+  Required for Theme Store compliance
+{% endcomment %}
+
+{%- if item.product.gift_card? -%}
+  {%- liquid
+    # Check if recipient fields are already filled
+    assign has_recipient = false
+    assign recipient_email = ''
+    assign recipient_name = ''
+    assign recipient_message = ''
+    assign send_on_date = ''
+
+    for property in item.properties
+      if property.first == '__shopify_send_gift_card_to_recipient' and property.last == 'true'
+        assign has_recipient = true
+      endif
+      if property.first == 'Recipient email'
+        assign recipient_email = property.last
+      endif
+      if property.first == 'Recipient name'
+        assign recipient_name = property.last
+      endif
+      if property.first == 'Message'
+        assign recipient_message = property.last
+      endif
+      if property.first == 'Send on'
+        assign send_on_date = property.last
+      endif
+    endfor
+
+    assign form_id = 'GiftCardRecipient-' | append: item.key | replace: ':', '-' | replace: '/', '-'
+  -%}
+
+  <div class="gift-card-recipient" data-gift-card-recipient data-line-key="{{ item.key }}">
+    <label class="gift-card-recipient__checkbox">
+      <input
+        type="checkbox"
+        name="updates[{{ item.key }}][properties][__shopify_send_gift_card_to_recipient]"
+        value="true"
+        {% if has_recipient %}checked{% endif %}
+        data-gift-card-toggle
+        aria-controls="{{ form_id }}"
+      >
+      <span class="gift-card-recipient__checkbox-visual"></span>
+      <span class="gift-card-recipient__checkbox-label">{{ 'gift_card.recipient.checkbox' | t }}</span>
+    </label>
+
+    <div
+      id="{{ form_id }}"
+      class="gift-card-recipient__fields"
+      {% unless has_recipient %}hidden{% endunless %}
+      data-gift-card-fields
+    >
+      <div class="gift-card-recipient__field">
+        <label for="{{ form_id }}-email" class="form-label">
+          {{ 'gift_card.recipient.email_label' | t }} <span aria-hidden="true">*</span>
+        </label>
+        <input
+          type="email"
+          id="{{ form_id }}-email"
+          name="updates[{{ item.key }}][properties][Recipient email]"
+          class="form-input"
+          value="{{ recipient_email }}"
+          placeholder="{{ 'gift_card.recipient.email_placeholder' | t }}"
+          {% if has_recipient %}required{% endif %}
+          data-gift-card-email
+        >
+      </div>
+
+      <div class="gift-card-recipient__field">
+        <label for="{{ form_id }}-name" class="form-label">
+          {{ 'gift_card.recipient.name_label' | t }}
+        </label>
+        <input
+          type="text"
+          id="{{ form_id }}-name"
+          name="updates[{{ item.key }}][properties][Recipient name]"
+          class="form-input"
+          value="{{ recipient_name }}"
+          placeholder="{{ 'gift_card.recipient.name_placeholder' | t }}"
+        >
+      </div>
+
+      <div class="gift-card-recipient__field">
+        <label for="{{ form_id }}-message" class="form-label">
+          {{ 'gift_card.recipient.message_label' | t }}
+        </label>
+        <textarea
+          id="{{ form_id }}-message"
+          name="updates[{{ item.key }}][properties][Message]"
+          class="form-input form-textarea"
+          rows="3"
+          maxlength="200"
+          placeholder="{{ 'gift_card.recipient.message_placeholder' | t }}"
+        >{{ recipient_message }}</textarea>
+        <span class="gift-card-recipient__char-count" data-char-count>
+          <span data-char-current>{{ recipient_message | size }}</span>/200
+        </span>
+      </div>
+
+      <div class="gift-card-recipient__field">
+        <label for="{{ form_id }}-send-on" class="form-label">
+          {{ 'gift_card.recipient.send_on_label' | t }}
+        </label>
+        <input
+          type="date"
+          id="{{ form_id }}-send-on"
+          name="updates[{{ item.key }}][properties][Send on]"
+          class="form-input"
+          value="{{ send_on_date }}"
+          min="{{ 'now' | date: '%Y-%m-%d' }}"
+        >
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const container = document.querySelector('[data-gift-card-recipient][data-line-key="{{ item.key }}"]');
+      if (!container) return;
+
+      const checkbox = container.querySelector('[data-gift-card-toggle]');
+      const fields = container.querySelector('[data-gift-card-fields]');
+      const emailInput = container.querySelector('[data-gift-card-email]');
+      const messageTextarea = container.querySelector('textarea');
+      const charCount = container.querySelector('[data-char-current]');
+
+      if (checkbox && fields) {
+        checkbox.addEventListener('change', () => {
+          const isChecked = checkbox.checked;
+          fields.hidden = !isChecked;
+
+          if (emailInput) {
+            emailInput.required = isChecked;
+            if (isChecked) {
+              emailInput.focus();
+            }
+          }
+        });
+      }
+
+      // Character count for message
+      if (messageTextarea && charCount) {
+        messageTextarea.addEventListener('input', () => {
+          charCount.textContent = messageTextarea.value.length;
+        });
+      }
+    })();
+  </script>
+{%- endif -%}
