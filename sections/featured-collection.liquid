@@ -34,9 +34,10 @@
       {%- endfor -%}
     {%- else -%}
       {%- for i in (1..products_to_show) -%}
+        {%- assign placeholder_index = i | minus: 1 | modulo: 6 | plus: 1 -%}
         <div class="product-card">
           <div class="product-card__media aspect-portrait">
-            {{ 'product-' | append: i | placeholder_svg_tag: 'product-card__placeholder' }}
+            {{ 'product-' | append: placeholder_index | placeholder_svg_tag: 'product-card__placeholder' }}
           </div>
           <div class="product-card__info">
             <p class="product-card__vendor text-muted">Vendor</p>

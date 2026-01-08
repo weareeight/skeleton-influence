@@ -5,6 +5,21 @@
       "subtext": "The page you're looking for doesn't exist or has been moved.",
       "back_home": "Back to home"
     },
+    "article": "Article",
+    "blog": "Blog",
+    "cart": "Cart",
+    "collection": "Collection",
+    "collections_grid": "Collections",
+    "column": "Column",
+    "custom_section": "Custom section",
+    "group": "Group",
+    "layout": "Layout",
+    "page": "Page",
+    "password": "Password",
+    "product": "Product",
+    "row": "Row",
+    "search": "Search",
+    "text": "Text",
     "skip_to_content": "Skip to content",
     "view_all": "View all",
     "social": {
@@ -13,6 +28,11 @@
       "share_on_twitter": "Share on Twitter",
       "share_on_pinterest": "Pin on Pinterest"
     }
+  },
+  "404": {
+    "title": "Page not found",
+    "not_found": "The page you're looking for doesn't exist or has been moved.",
+    "back_to_shopping": "Continue shopping"
   },
   "accessibility": {
     "skip_to_content": "Skip to content",
@@ -34,7 +54,14 @@
     "share_email": "Share by email",
     "announcement": "Announcement",
     "dismiss_announcement": "Dismiss announcement",
-    "back_to_top": "Back to top"
+    "back_to_top": "Back to top",
+    "gallery_lightbox": "Gallery lightbox",
+    "gallery_lightbox_close": "Close gallery",
+    "gallery_lightbox_prev": "Previous image",
+    "gallery_lightbox_next": "Next image",
+    "gallery_image": "Image {{ index }} of {{ total }}",
+    "play_video": "Play video",
+    "pause_video": "Pause video"
   },
   "newsletter": {
     "email_placeholder": "Enter your email",
@@ -45,6 +72,7 @@
     "title": "Search",
     "placeholder": "Search our store",
     "search": "Search",
+    "submit": "Search",
     "results": "Search results",
     "no_results": "No results found for \"{{ terms }}\"",
     "no_results_html": "No results found for \"{{ terms }}\"",
@@ -73,9 +101,13 @@
     "minutes": "m",
     "seconds": "s"
   },
+  "collections": {
+    "title": "Collections"
+  },
   "collection": {
     "products_count": "{{ count }} products",
     "empty": "No products found",
+    "view_all": "View all",
     "view": {
       "label": "View",
       "grid": "Grid view",
@@ -107,6 +139,16 @@
     "share": "Share",
     "description": "Description",
     "view_full_details": "View full details",
+    "zoom": "Zoom",
+    "decrease_quantity": "Decrease quantity",
+    "increase_quantity": "Increase quantity",
+    "one_time_purchase": "One-time purchase",
+    "low_stock": "Low stock",
+    "in_stock": "In stock",
+    "out_of_stock": "Out of stock",
+    "from": "From",
+    "regular_price": "Regular price",
+    "unit_price": "Unit price",
     "pickup_availability": {
       "view_store_info": "View store information",
       "check_other_stores": "Check availability at other stores",
@@ -132,8 +174,11 @@
       "recipient": {
         "checkbox": "Send as a gift",
         "email_label": "Recipient email",
+        "email_placeholder": "Enter recipient email",
         "name_label": "Recipient name (optional)",
+        "name_placeholder": "Enter recipient name",
         "message_label": "Message (optional)",
+        "message_placeholder": "Enter a personal message",
         "send_on_label": "Send on (optional)"
       }
     },
@@ -268,6 +313,13 @@
     "by": "By",
     "view_all": "View all articles",
     "empty": "No articles found",
+    "tags_label": "Tags",
+    "article_comments": "Comments",
+    "comment_form_title": "Leave a comment",
+    "comment_form_name": "Name",
+    "comment_form_email": "Email",
+    "comment_form_body": "Comment",
+    "comment_form_submit": "Post comment",
     "comments": {
       "title": "{{ count }} comments",
       "leave_comment": "Leave a comment",
@@ -314,12 +366,23 @@
     "scan_code": "Scan to redeem",
     "add_to_apple_wallet": "Add to Apple Wallet",
     "use_at_checkout": "Use this code at checkout",
-    "print": "Print"
+    "print": "Print",
+    "recipient": {
+      "checkbox": "Send as a gift",
+      "email_label": "Recipient email",
+      "email_placeholder": "Enter recipient email",
+      "name_label": "Recipient name (optional)",
+      "name_placeholder": "Enter recipient name",
+      "message_label": "Message (optional)",
+      "message_placeholder": "Enter a personal message",
+      "send_on_label": "Send on (optional)"
+    }
   },
   "password": {
     "title": "Password protected",
     "enter_password": "Enter store using password",
     "password": "Password",
+    "enter": "Enter",
     "submit": "Enter",
     "wrong_password": "Wrong password. Please try again."
   },

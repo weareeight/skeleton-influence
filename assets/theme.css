@@ -56,7 +56,8 @@
 .header__inner {
   display: flex;
   align-items: center;
-  height: var(--header-height);
+  min-height: var(--header-height);
+  padding-block: var(--space-3);
   gap: var(--space-6);
   position: relative;
   z-index: 1;
@@ -104,8 +105,9 @@
 .header__logo img,
 .header__logo svg {
   display: block;
-  max-height: 2.5rem;
-  width: auto;
+  width: var(--logo-width, 120px);
+  height: auto;
+  transition: width var(--duration-normal) var(--ease-out);
 }
 
 .header__nav {
@@ -1656,8 +1658,8 @@ a.mega-menu__heading:hover {
 }
 
 .header--reduced .header__logo img {
-  max-height: 2rem;
-  transition: max-height var(--duration-normal) var(--ease-out);
+  width: calc(var(--logo-width, 120px) * 0.75);
+  transition: width var(--duration-normal) var(--ease-out);
 }
 
 /* Cart dot badge style */

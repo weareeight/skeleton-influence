@@ -23,6 +23,9 @@
     assign enable_transparent = true
   endif
   assign cart_badge_style = section.settings.cart_badge_style | default: 'number'
+
+  # Use section logo if set, otherwise fall back to global theme logo
+  assign logo = section.settings.logo | default: settings.logo
 -%}
 
 <header
@@ -30,6 +33,7 @@
   data-header
   data-sticky-behavior="{{ sticky_behavior }}"
   data-transparent-home="{{ enable_transparent }}"
+  style="--logo-width: {{ logo_width }}px;"
 >
   {%- comment -%} Utility Navigation (optional) {%- endcomment -%}
   {%- if section.settings.show_utility_nav and section.settings.utility_menu != blank -%}
@@ -71,18 +75,18 @@
       {%- comment -%} Logo {%- endcomment -%}
       <div class="header__logo{% if section.settings.logo_position == 'center' %} header__logo--center{% endif %}">
         <a href="{{ routes.root_url }}" class="header__logo-link">
-          {%- if settings.logo != blank -%}
-            {%- assign logo_height = logo_width | divided_by: settings.logo.aspect_ratio -%}
-            {{
-              settings.logo
-              | image_url: width: logo_width
-              | image_tag:
-                width: logo_width,
-                height: logo_height,
-                alt: settings.logo.alt | default: shop.name,
-                loading: 'eager',
-                class: 'header__logo-image'
-            }}
+          {%- if logo != blank -%}
+            {%- assign logo_height = logo_width | divided_by: logo.aspect_ratio -%}
+            {%- assign logo_width_2x = logo_width | times: 2 -%}
+            <img
+              src="{{ logo | image_url: width: logo_width_2x }}"
+              srcset="{{ logo | image_url: width: logo_width }} 1x, {{ logo | image_url: width: logo_width_2x }} 2x"
+              width="{{ logo_width }}"
+              height="{{ logo_height }}"
+              alt="{{ logo.alt | default: shop.name }}"
+              loading="eager"
+              class="header__logo-image"
+            >
           {%- else -%}
             <span class="header__logo-text h4">{{ shop.name }}</span>
           {%- endif -%}
@@ -509,6 +513,11 @@
       "content": "t:sections.header.settings.logo.header"
     },
     {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "t:sections.header.settings.logo.label"
+    },
+    {
       "type": "select",
       "id": "logo_position",
       "label": "t:sections.header.settings.logo_position.label",
@@ -527,7 +536,7 @@
     {
       "type": "range",
       "id": "logo_width",
-      "label": "t:settings_schema.logo.settings.logo_width.label",
+      "label": "t:sections.header.settings.logo_width.label",
       "min": 50,
       "max": 250,
       "step": 10,

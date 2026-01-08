@@ -47,6 +47,12 @@
             "info": "t:settings_schema.colors.settings.background.info"
           },
           {
+            "type": "color_background",
+            "id": "background_gradient",
+            "label": "t:settings_schema.colors.settings.background_gradient.label",
+            "info": "t:settings_schema.colors.settings.background_gradient.info"
+          },
+          {
             "type": "color",
             "id": "text",
             "label": "t:settings_schema.colors.settings.text.label",
@@ -91,40 +97,6 @@
           "secondary_button": "background",
           "on_secondary_button": "secondary_button_label",
           "secondary_button_border": "secondary_button_label"
-        },
-        "default": {
-          "scheme_1": {
-            "background": "#FFFFFF",
-            "text": "#1A1A1A",
-            "button": "#1A1A1A",
-            "button_label": "#FFFFFF",
-            "secondary_button_label": "#1A1A1A",
-            "shadow": "#1A1A1A"
-          },
-          "scheme_2": {
-            "background": "#1A1A1A",
-            "text": "#FFFFFF",
-            "button": "#FFFFFF",
-            "button_label": "#1A1A1A",
-            "secondary_button_label": "#FFFFFF",
-            "shadow": "#1A1A1A"
-          },
-          "scheme_3": {
-            "background": "#F5F5F5",
-            "text": "#1A1A1A",
-            "button": "#1A1A1A",
-            "button_label": "#FFFFFF",
-            "secondary_button_label": "#1A1A1A",
-            "shadow": "#1A1A1A"
-          },
-          "scheme_4": {
-            "background": "#C4A87C",
-            "text": "#1A1A1A",
-            "button": "#1A1A1A",
-            "button_label": "#FFFFFF",
-            "secondary_button_label": "#1A1A1A",
-            "shadow": "#1A1A1A"
-          }
         }
       },
       {
@@ -135,19 +107,19 @@
         "type": "color",
         "id": "color_sale",
         "label": "t:settings_schema.colors.settings.sale.label",
-        "default": "#B22222"
+        "default": "#8B4049"
       },
       {
         "type": "color",
         "id": "color_error",
         "label": "t:settings_schema.colors.settings.error.label",
-        "default": "#DC3545"
+        "default": "#8B4049"
       },
       {
         "type": "color",
         "id": "color_success",
         "label": "t:settings_schema.colors.settings.success.label",
-        "default": "#198754"
+        "default": "#4A6B52"
       }
     ]
   },
