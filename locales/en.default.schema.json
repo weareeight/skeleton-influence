@@ -1258,6 +1258,20 @@
         "show_tag_filter": {
           "label": "Show tag filter"
         },
+        "header_layout": {
+          "content": "Layout"
+        },
+        "layout_style": {
+          "label": "Layout style",
+          "options": {
+            "editorial": "Editorial",
+            "grid": "Grid"
+          }
+        },
+        "feature_first_post": {
+          "label": "Feature first post",
+          "info": "Display the first post as a larger hero card on the first page"
+        },
         "articles_per_page": {
           "label": "Posts per page"
         },
@@ -1281,17 +1295,51 @@
         },
         "show_excerpt": {
           "label": "Show excerpt"
+        },
+        "show_read_time": {
+          "label": "Show read time",
+          "info": "Display estimated reading time on article cards"
         }
       }
     },
     "main_article": {
       "name": "Blog post",
       "settings": {
+        "header_reading_experience": {
+          "content": "Reading experience"
+        },
+        "show_progress_bar": {
+          "label": "Show reading progress bar",
+          "info": "Displays a progress bar at the top of the page as readers scroll"
+        },
+        "show_read_time": {
+          "label": "Show estimated read time",
+          "info": "Calculated based on 250 words per minute"
+        },
+        "enable_drop_caps": {
+          "label": "Enable drop caps",
+          "info": "Large decorative first letter in the first paragraph"
+        },
+        "drop_cap_style": {
+          "label": "Drop cap style",
+          "options": {
+            "default": "Default",
+            "serif": "Serif",
+            "square": "Square"
+          }
+        },
+        "header_article_display": {
+          "content": "Article display"
+        },
         "show_breadcrumb": {
           "label": "Show breadcrumb"
         },
         "show_featured_image": {
           "label": "Show featured image"
+        },
+        "show_excerpt": {
+          "label": "Show excerpt",
+          "info": "Display the article excerpt below the title"
         },
         "show_tags": {
           "label": "Show tags"
@@ -1305,8 +1353,16 @@
         "show_share": {
           "label": "Show share buttons"
         },
+        "show_author_bio": {
+          "label": "Show author bio",
+          "info": "Display author information section. Add author details via metafields."
+        },
         "show_navigation": {
           "label": "Show article navigation"
+        },
+        "show_related_articles": {
+          "label": "Show related articles",
+          "info": "Displays articles with shared tags at the end of the article"
         }
       },
       "blocks": {

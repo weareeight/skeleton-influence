@@ -43,13 +43,13 @@
             <div class="contact-form__row">
               <div class="form-group">
                 <label for="ContactForm-name" class="form-label">
-                  {{ 'contact.form.name' | t }}
+                  {{ 'common.name' | t }}
                   <span aria-hidden="true">*</span>
                 </label>
                 <input
                   type="text"
                   id="ContactForm-name"
-                  name="contact[{{ 'contact.form.name' | t }}]"
+                  name="contact[{{ 'common.name' | t }}]"
                   class="form-input"
                   autocomplete="name"
                   required
@@ -58,7 +58,7 @@
 
               <div class="form-group">
                 <label for="ContactForm-email" class="form-label">
-                  {{ 'contact.form.email' | t }}
+                  {{ 'common.email' | t }}
                   <span aria-hidden="true">*</span>
                 </label>
                 <input
@@ -80,12 +80,12 @@
             {%- if section.settings.show_phone -%}
               <div class="form-group">
                 <label for="ContactForm-phone" class="form-label">
-                  {{ 'contact.form.phone' | t }}
+                  {{ 'common.phone' | t }}
                 </label>
                 <input
                   type="tel"
                   id="ContactForm-phone"
-                  name="contact[{{ 'contact.form.phone' | t }}]"
+                  name="contact[{{ 'common.phone' | t }}]"
                   class="form-input"
                   autocomplete="tel"
                 >
@@ -108,12 +108,12 @@
 
             <div class="form-group">
               <label for="ContactForm-message" class="form-label">
-                {{ 'contact.form.message' | t }}
+                {{ 'common.message' | t }}
                 <span aria-hidden="true">*</span>
               </label>
               <textarea
                 id="ContactForm-message"
-                name="contact[{{ 'contact.form.message' | t }}]"
+                name="contact[{{ 'common.message' | t }}]"
                 class="form-input form-textarea"
                 rows="6"
                 required

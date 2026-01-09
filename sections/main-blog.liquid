@@ -1,7 +1,10 @@
 {% comment %}
   Main Blog Section - Influence Theme
   Displays blog articles with filtering and pagination
+  Editorial layouts with featured post option
 {% endcomment %}
+
+{{ 'blog.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
   assign articles_per_page = section.settings.articles_per_page
@@ -11,55 +14,62 @@
   assign show_author = section.settings.show_author
   assign show_tags = section.settings.show_tags
   assign show_excerpt = section.settings.show_excerpt
+  assign show_read_time = section.settings.show_read_time
   assign image_ratio = section.settings.image_ratio
+  assign layout_style = section.settings.layout_style
+  assign feature_first_post = section.settings.feature_first_post
 -%}
 
 <section
   class="main-blog section {% render 'color-scheme', scheme: section.settings.color_scheme %} section-padding--top-{{ section.settings.padding_top }} section-padding--bottom-{{ section.settings.padding_bottom }}"
 >
-  <div class="container">
-    {%- comment -%} Blog Header {%- endcomment -%}
-    <header class="blog-header" data-animate="fade-up">
-      <h1 class="blog-header__title h2">{{ blog.title }}</h1>
+  {% render 'page-header', title: blog.title %}
 
-      {%- if section.settings.show_tag_filter and blog.all_tags.size > 0 -%}
-        <nav class="blog-header__tags" aria-label="{{ 'blog.tags_label' | t }}">
+  <div class="container">
+    {%- comment -%} Blog Tag Filter {%- endcomment -%}
+    {%- if section.settings.show_tag_filter and blog.all_tags.size > 0 -%}
+      <nav class="blog-tags" aria-label="{{ 'blog.tags_label' | t }}" data-animate="fade-up">
+        <a
+          href="{{ blog.url }}"
+          class="blog-tags__tag{% unless current_tags %} is-active{% endunless %}"
+        >
+          {{ 'blog.all' | t }}
+        </a>
+        {%- for tag in blog.all_tags -%}
           <a
-            href="{{ blog.url }}"
-            class="blog-header__tag{% unless current_tags %} is-active{% endunless %}"
+            href="{{ blog.url }}/tagged/{{ tag | handle }}"
+            class="blog-tags__tag{% if current_tags contains tag %} is-active{% endif %}"
           >
-            {{ 'blog.all' | t }}
+            {{ tag }}
           </a>
-          {%- for tag in blog.all_tags -%}
-            <a
-              href="{{ blog.url }}/tagged/{{ tag | handle }}"
-              class="blog-header__tag{% if current_tags contains tag %} is-active{% endif %}"
-            >
-              {{ tag }}
-            </a>
-          {%- endfor -%}
-        </nav>
-      {%- endif -%}
-    </header>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
 
     {%- paginate blog.articles by articles_per_page -%}
       {%- if blog.articles.size > 0 -%}
         <div
-          class="blog-grid grid"
+          class="blog-grid{% if layout_style == 'editorial' %} blog-grid--editorial{% endif %}"
           style="--grid-columns-desktop: {{ columns_desktop }}; --grid-columns-mobile: {{ columns_mobile }};"
           role="feed"
           aria-label="{{ 'blog.articles_list' | t }}"
         >
           {%- for article in blog.articles -%}
             {%- assign animation_delay = forloop.index0 | modulo: columns_desktop | times: 100 -%}
-            <article class="blog-grid__item" data-animate="fade-up" data-animate-delay="{{ animation_delay }}">
+            {%- assign is_featured = false -%}
+            {%- if feature_first_post and forloop.first and paginate.current_page == 1 -%}
+              {%- assign is_featured = true -%}
+            {%- endif -%}
+            <article class="blog-grid__item{% if is_featured %} blog-grid__item--featured{% endif %}" data-animate="fade-up" data-animate-delay="{{ animation_delay }}">
               {% render 'article-card',
                 article: article,
                 show_date: show_date,
                 show_author: show_author,
                 show_tags: show_tags,
                 show_excerpt: show_excerpt,
-                image_ratio: image_ratio
+                show_read_time: show_read_time,
+                image_ratio: image_ratio,
+                featured: is_featured
               %}
             </article>
           {%- endfor -%}
@@ -122,42 +132,10 @@
   padding: var(--section-padding-top) 0 var(--section-padding-bottom);
 }
 
-/* Blog Header */
-.blog-header {
-  margin-bottom: var(--space-8);
-}
-
-.blog-header__title {
-  margin: 0;
-}
-
-.blog-header__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
-}
-
-.blog-header__tag {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  font-size: var(--font-size-sm);
-  transition: background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast);
-}
-
-.blog-header__tag:hover,
-.blog-header__tag.is-active {
-  background-color: var(--color-foreground);
-  color: var(--color-background);
-  border-color: var(--color-foreground);
-}
-
-/* Blog Grid */
+/* Blog Grid - Standard */
 .blog-grid {
   display: grid;
-  gap: var(--grid-gap, var(--space-6));
+  gap: var(--space-8, 2rem);
   grid-template-columns: repeat(var(--grid-columns-mobile, 1), 1fr);
 }
 
@@ -169,6 +147,17 @@
 
 .blog-grid__item {
   display: flex;
+}
+
+/* Featured Item - Spans 2 columns */
+.blog-grid__item--featured {
+  grid-column: span 2;
+}
+
+@media (max-width: 749px) {
+  .blog-grid__item--featured {
+    grid-column: span 1;
+  }
 }
 
 /* Blog Empty State */
@@ -190,6 +179,27 @@
   "tag": "section",
   "class": "section-main-blog",
   "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.main_blog.settings.header_layout.content"
+    },
+    {
+      "type": "select",
+      "id": "layout_style",
+      "label": "t:sections.main_blog.settings.layout_style.label",
+      "options": [
+        { "value": "editorial", "label": "t:sections.main_blog.settings.layout_style.options.editorial" },
+        { "value": "grid", "label": "t:sections.main_blog.settings.layout_style.options.grid" }
+      ],
+      "default": "editorial"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_first_post",
+      "label": "t:sections.main_blog.settings.feature_first_post.label",
+      "info": "t:sections.main_blog.settings.feature_first_post.info",
+      "default": true
+    },
     {
       "type": "checkbox",
       "id": "show_tag_filter",
@@ -261,6 +271,12 @@
       "type": "checkbox",
       "id": "show_excerpt",
       "label": "t:sections.main_blog.settings.show_excerpt.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_read_time",
+      "label": "t:sections.main_blog.settings.show_read_time.label",
       "default": true
     },
     {

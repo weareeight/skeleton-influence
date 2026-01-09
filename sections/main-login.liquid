@@ -4,9 +4,10 @@
 {% endcomment %}
 
 <section class="main-login section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+  {% render 'page-header', title: 'customer.login.title' | t %}
+
   <div class="container container--narrow">
     <div class="account-form">
-      <h1 class="account-form__title h2">{{ 'customer.login.title' | t }}</h1>
 
       {%- form 'customer_login', class: 'account-form__form' -%}
         {%- if form.errors -%}
@@ -16,7 +17,7 @@
         {%- endif -%}
 
         <div class="form-group">
-          <label for="CustomerEmail" class="form-label">{{ 'customer.login.email' | t }}</label>
+          <label for="CustomerEmail" class="form-label">{{ 'common.email' | t }}</label>
           <input
             type="email"
             id="CustomerEmail"
@@ -30,7 +31,7 @@
         </div>
 
         <div class="form-group">
-          <label for="CustomerPassword" class="form-label">{{ 'customer.login.password' | t }}</label>
+          <label for="CustomerPassword" class="form-label">{{ 'common.password' | t }}</label>
           <input
             type="password"
             id="CustomerPassword"
@@ -73,7 +74,7 @@
         {%- endif -%}
 
         <div class="form-group">
-          <label for="RecoverEmail" class="form-label">{{ 'customer.recover_password.email' | t }}</label>
+          <label for="RecoverEmail" class="form-label">{{ 'common.email' | t }}</label>
           <input
             type="email"
             id="RecoverEmail"

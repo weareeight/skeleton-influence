@@ -4,17 +4,18 @@
 {% endcomment %}
 
 <section class="main-order section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+  {% render 'page-header', title: 'customer.order.title' | t: name: order.name %}
+
   <div class="container">
-    <header class="order-header">
-      <a href="{{ routes.account_url }}" class="order-header__back link-with-arrow link-with-arrow--reverse">
+    <div class="order-meta">
+      <a href="{{ routes.account_url }}" class="link-with-arrow link-with-arrow--reverse">
         {% render 'icon', icon: 'arrow-left', size: 'sm' %}
         {{ 'customer.account.return' | t }}
       </a>
-      <h1 class="order-header__title h2">{{ 'customer.order.title' | t: name: order.name }}</h1>
-      <p class="order-header__date">
+      <p class="order-meta__date">
         {{ 'customer.order.date' | t: date: order.created_at | date: format: 'date' }}
       </p>
-    </header>
+    </div>
 
     {%- if order.cancelled -%}
       <div class="order-cancelled">

@@ -13,8 +13,10 @@
   - show_tags: (optional) Show article tags, default false
   - show_excerpt: (optional) Show excerpt, default true
   - show_image: (optional) Show featured image, default true
+  - show_read_time: (optional) Show estimated read time, default true
   - image_ratio: (optional) 'landscape', 'portrait', 'square', default 'landscape'
   - heading_size: (optional) 'h3', 'h4', 'h5', default 'h4'
+  - featured: (optional) Is this a featured/hero card, default false
 {% endcomment %}
 
 {%- liquid
@@ -23,8 +25,10 @@
   assign show_tags = show_tags | default: false
   assign show_excerpt = show_excerpt | default: true
   assign show_image = show_image | default: true
+  assign show_read_time = show_read_time | default: true
   assign image_ratio = image_ratio | default: 'landscape'
   assign heading_size = heading_size | default: 'h4'
+  assign featured = featured | default: false
 
   case image_ratio
     when 'landscape'
@@ -34,19 +38,26 @@
     when 'square'
       assign aspect_ratio = '1-1'
   endcase
+
+  # Calculate read time
+  assign word_count = article.content | strip_html | split: ' ' | size
+  assign read_time = word_count | divided_by: 250
+  if read_time < 1
+    assign read_time = 1
+  endif
 -%}
 
-<div class="article-card{% if settings.enable_image_zoom %} hover-zoom{% endif %}">
+<div class="article-card{% if featured %} article-card--featured{% endif %}{% if settings.enable_image_zoom %} hover-zoom{% endif %}">
   {%- if show_image and article.image -%}
     <a href="{{ article.url }}" class="article-card__media-link" aria-hidden="true" tabindex="-1">
       <div class="article-card__media media aspect-{{ aspect_ratio }}">
         {{
           article.image
-          | image_url: width: 800
+          | image_url: width: 1200
           | image_tag:
             loading: 'lazy',
-            sizes: '(min-width: 1200px) 33vw, (min-width: 750px) 50vw, 100vw',
-            widths: '165, 360, 535, 750, 1000',
+            sizes: '(min-width: 1200px) 50vw, (min-width: 750px) 50vw, 100vw',
+            widths: '300, 450, 600, 800, 1000, 1200',
             class: 'article-card__image',
             alt: article.image.alt | default: article.title
         }}
@@ -63,15 +74,22 @@
   {%- endif -%}
 
   <div class="article-card__content">
-    {%- if show_tags and article.tags.size > 0 -%}
-      <div class="article-card__tags" aria-label="{{ 'blog.tags_label' | t }}">
-        {%- for tag in article.tags limit: 2 -%}
-          <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="article-card__tag">
-            {{ tag }}
-          </a>
-        {%- endfor -%}
-      </div>
-    {%- endif -%}
+    {%- comment -%} Category + Read Time Row {%- endcomment -%}
+    <div class="article-card__meta-top">
+      {%- if article.tags.size > 0 -%}
+        <a href="{{ blog.url }}/tagged/{{ article.tags.first | handle }}" class="article-card__category">
+          {{ article.tags.first }}
+        </a>
+      {%- endif -%}
+      {%- if article.tags.size > 0 and show_read_time -%}
+        <span class="article-card__divider" aria-hidden="true"></span>
+      {%- endif -%}
+      {%- if show_read_time -%}
+        <span class="article-card__read-time">
+          {{ read_time }} {{ 'article.min_read' | t }}
+        </span>
+      {%- endif -%}
+    </div>
 
     <h3 class="article-card__title {{ heading_size }}">
       <a href="{{ article.url }}">{{ article.title }}</a>
@@ -79,7 +97,11 @@
 
     {%- if show_excerpt and article.excerpt_or_content != blank -%}
       <p class="article-card__excerpt">
-        {{ article.excerpt_or_content | strip_html | truncate: 150 }}
+        {%- if featured -%}
+          {{ article.excerpt_or_content | strip_html | truncate: 250 }}
+        {%- else -%}
+          {{ article.excerpt_or_content | strip_html | truncate: 120 }}
+        {%- endif -%}
       </p>
     {%- endif -%}
 
@@ -87,12 +109,11 @@
       <div class="article-card__meta">
         {%- if show_author -%}
           <span class="article-card__author">
-            <span class="visually-hidden">{{ 'blog.by' | t }}</span>
             {{ article.author }}
           </span>
         {%- endif -%}
         {%- if show_author and show_date -%}
-          <span class="article-card__separator" aria-hidden="true">·</span>
+          <span class="article-card__separator" aria-hidden="true"></span>
         {%- endif -%}
         {%- if show_date -%}
           <time class="article-card__date" datetime="{{ article.published_at | date: '%Y-%m-%d' }}">

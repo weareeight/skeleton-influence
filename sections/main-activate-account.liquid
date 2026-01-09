@@ -4,9 +4,10 @@
 {% endcomment %}
 
 <section class="main-activate-account section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+  {% render 'page-header', title: 'customer.activate_account.title' | t %}
+
   <div class="container container--narrow">
     <div class="account-form">
-      <h1 class="account-form__title h2">{{ 'customer.activate_account.title' | t }}</h1>
       <p class="account-form__subtitle">{{ 'customer.activate_account.subtext' | t }}</p>
 
       {%- form 'activate_customer_password', class: 'account-form__form' -%}

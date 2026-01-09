@@ -15,33 +15,16 @@
 -%}
 
 <section class="main-collection section{% if filter_type == 'sidebar' %} main-collection--sidebar{% endif %} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
-  <div class="container">
-    {%- comment -%} Collection Header {%- endcomment -%}
-    {%- if section.settings.show_collection_header -%}
-      <header class="collection-header">
-        {%- if section.settings.show_collection_image and collection.image -%}
-          <div class="collection-header__image">
-            {{
-              collection.image
-              | image_url: width: 1920
-              | image_tag:
-                loading: 'eager',
-                sizes: '100vw',
-                widths: '375, 750, 1100, 1500, 1920',
-                class: 'collection-header__img'
-            }}
-          </div>
-        {%- endif -%}
+  {%- comment -%} Collection Header {%- endcomment -%}
+  {%- if section.settings.show_collection_header -%}
+    {% render 'page-header', title: collection.title %}
+  {%- endif -%}
 
-        <div class="collection-header__content">
-          <h1 class="collection-header__title h2">{{ collection.title }}</h1>
-          {%- if section.settings.show_description and collection.description != blank -%}
-            <div class="collection-header__description rte">
-              {{ collection.description }}
-            </div>
-          {%- endif -%}
-        </div>
-      </header>
+  <div class="container">
+    {%- if section.settings.show_collection_header and section.settings.show_description and collection.description != blank -%}
+      <div class="collection-description rte">
+        {{ collection.description }}
+      </div>
     {%- endif -%}
 
     {%- comment -%} Toolbar: Filters Toggle, Active Filters, Sorting, View Toggle {%- endcomment -%}
@@ -156,7 +139,7 @@
               type="button"
               class="collection-filters__close"
               data-filter-close
-              aria-label="{{ 'accessibility.close' | t }}"
+              aria-label="{{ 'common.close' | t }}"
             >
               {% render 'icon', icon: 'close' %}
             </button>
@@ -175,7 +158,7 @@
                   <summary class="collection-filter__heading">
                     <span>{{ filter.label }}</span>
                     {%- if filter.active_values.size > 0 -%}
-                      <span class="collection-filter__count">({{ filter.active_values.size }})</span>
+                      <span class="collection-filter__count">{{ filter.active_values.size }}</span>
                     {%- endif -%}
                     {% render 'icon', icon: 'chevron-down', size: 'sm' %}
                   </summary>
@@ -199,14 +182,30 @@
                                 <span class="collection-filter__checkbox-visual"></span>
                                 <span class="collection-filter__text">
                                   {%- if filter.param_name == 'filter.v.option.color' or filter.param_name contains 'filter.v.option.colour' -%}
+                                    {%- liquid
+                                      comment
+                                        Use Shopify swatch API when available, fall back to color name
+                                      endcomment
+                                      assign filter_swatch_style = ''
+                                      if value.swatch.color != blank
+                                        assign filter_swatch_style = '--swatch-color: ' | append: value.swatch.color | append: ';'
+                                      else
+                                        assign filter_color_value = value.value | handle | replace: '-', ''
+                                        assign filter_swatch_style = '--swatch-color: ' | append: filter_color_value | append: ';'
+                                      endif
+                                      if value.swatch.image
+                                        assign filter_swatch_image_url = value.swatch.image | image_url: width: 50
+                                        assign filter_swatch_style = filter_swatch_style | append: ' --swatch-image: url(' | append: filter_swatch_image_url | append: ');'
+                                      endif
+                                    -%}
                                     <span
                                       class="collection-filter__swatch"
-                                      style="--swatch-color: {{ value.value | handle | replace: '-', '' }}"
+                                      style="{{ filter_swatch_style }}"
                                     ></span>
                                   {%- endif -%}
                                   {{ value.label }}
                                 </span>
-                                <span class="collection-filter__count">({{ value.count }})</span>
+                                <span class="collection-filter__count">{{ value.count }}</span>
                               </label>
                             </li>
                           {%- endfor -%}
@@ -648,22 +647,20 @@
      ======================================== */
   .collection-content {
     position: relative;
-    display: block;
     width: 100%;
   }
 
-  /* Layout when sidebar is active - sidebar is fixed to left edge */
-  .collection-content--sidebar {
-    display: block;
-  }
-
-  /* Hide filter toggle on desktop when sidebar is visible */
+  /* Desktop: Two-column grid when sidebar active */
   @media (min-width: 990px) {
-    .main-collection--sidebar .collection-toolbar__filter-toggle {
-      display: none;
+    .collection-content--sidebar {
+      display: grid;
+      grid-template-columns: 16rem 1fr;
+      gap: var(--space-8);
+      align-items: start;
     }
   }
 
+  /* Mobile: Single column, hide inline sidebar */
   @media (max-width: 989px) {
     .collection-content--sidebar {
       display: block;
@@ -675,50 +672,31 @@
     }
   }
 
+  /* Hide filter toggle on desktop when sidebar is visible */
+  @media (min-width: 990px) {
+    .main-collection--sidebar .collection-toolbar__filter-toggle {
+      display: none;
+    }
+  }
+
   /* Products container - stacks children vertically */
   .collection-products {
     display: flex;
     flex-direction: column;
     width: 100%;
+    min-width: 0; /* Prevent grid blowout */
   }
 
   /* ========================================
-     Filter Sidebar (fixed to left edge)
+     Filter Sidebar (Integrated - Sticky)
      ======================================== */
   @media (min-width: 990px) {
     .collection-filters:not(.collection-filters--drawer) {
-      position: fixed;
-      left: 0;
-      top: var(--header-height, 4rem);
-      width: 14rem;
-      height: calc(100vh - var(--header-height, 4rem));
-      height: calc(100dvh - var(--header-height, 4rem));
-      background: var(--color-background);
+      position: sticky;
+      top: calc(var(--header-height, 4rem) + var(--space-4));
+      align-self: start;
+      padding-right: var(--space-4);
       border-right: var(--border-width) solid var(--color-border);
-      overflow-y: auto;
-      z-index: calc(var(--z-header) - 1);
-      padding: var(--space-6) var(--space-4);
-      scrollbar-width: thin;
-      scrollbar-color: var(--color-border) transparent;
-    }
-
-    .collection-filters:not(.collection-filters--drawer)::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .collection-filters:not(.collection-filters--drawer)::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .collection-filters:not(.collection-filters--drawer)::-webkit-scrollbar-thumb {
-      background-color: var(--color-border);
-      border-radius: 2px;
-    }
-
-    /* Offset main content to account for fixed sidebar */
-    .main-collection--sidebar .container {
-      margin-left: 14rem;
-      max-width: calc(var(--container-max-width) - 14rem);
     }
   }
 
@@ -1088,6 +1066,9 @@
     height: 1.25rem;
     border-radius: var(--radius-full);
     background-color: var(--swatch-color, #ccc);
+    background-image: var(--swatch-image);
+    background-size: cover;
+    background-position: center;
     border: 1.5px solid var(--color-border);
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
   }

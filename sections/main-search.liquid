@@ -14,13 +14,12 @@
 <section
   class="main-search section {% render 'color-scheme', scheme: section.settings.color_scheme %} section-padding--top-{{ section.settings.padding_top }} section-padding--bottom-{{ section.settings.padding_bottom }}"
 >
-  <div class="container">
-    {%- comment -%} Search Header {%- endcomment -%}
-    <header class="search-header" data-animate="fade-up">
-      <h1 class="search-header__title h2">{{ 'search.title' | t }}</h1>
+  {% render 'page-header', title: 'search.title' | t %}
 
-      {%- comment -%} Search Form {%- endcomment -%}
-      <div class="search-header__form">
+  <div class="container">
+    {%- comment -%} Search Form {%- endcomment -%}
+    <div class="search-form-wrapper" data-animate="fade-up">
+      <div class="search-form-container">
         <form action="{{ routes.search_url }}" method="get" role="search" class="search-form search-form--large">
           <label for="Search-{{ section.id }}" class="visually-hidden">{{ 'search.placeholder' | t }}</label>
           <input
@@ -44,7 +43,7 @@
       </div>
 
       {%- if search.performed -%}
-        <p class="search-header__results-count">
+        <p class="search-results-count">
           {%- if search.results_count == 0 -%}
             {{ 'search.no_results' | t: terms: search.terms }}
           {%- else -%}
@@ -52,7 +51,7 @@
           {%- endif -%}
         </p>
       {%- endif -%}
-    </header>
+    </div>
 
     {%- if search.performed -%}
       {%- if search.results_count > 0 -%}

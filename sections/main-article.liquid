@@ -1,10 +1,33 @@
 {% comment %}
   Main Article Section - Influence Theme
   Displays a single blog article with featured image, content, and comments
+  Editorial reading experience with progress bar, read time, and drop caps
 {% endcomment %}
 
-<article class="main-article section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
-  <div class="container container--narrow">
+{%- comment -%} Load blog styles and scripts {%- endcomment -%}
+{{ 'blog.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'blog.js' | asset_url }}" defer></script>
+
+{%- comment -%} Calculate estimated read time {%- endcomment -%}
+{%- liquid
+  assign word_count = article.content | strip_html | split: ' ' | size
+  assign read_time = word_count | divided_by: 250
+  if read_time < 1
+    assign read_time = 1
+  endif
+-%}
+
+{%- comment -%} Reading Progress Bar {%- endcomment -%}
+{%- if section.settings.show_progress_bar -%}
+  {% render 'reading-progress' %}
+{%- endif -%}
+
+<article
+  class="main-article section {% render 'color-scheme', scheme: section.settings.color_scheme %}"
+  {% if section.settings.enable_drop_caps %}data-drop-caps{% endif %}
+  {% if section.settings.drop_cap_style != 'default' %}data-drop-cap-style="{{ section.settings.drop_cap_style }}"{% endif %}
+>
+  <div class="container">
     {%- comment -%} Article Header {%- endcomment -%}
     <header class="article-header" data-animate="fade-up">
       {%- if section.settings.show_breadcrumb -%}
@@ -17,17 +40,28 @@
         </nav>
       {%- endif -%}
 
-      {%- if section.settings.show_tags and article.tags.size > 0 -%}
-        <div class="article-header__tags">
-          {%- for tag in article.tags -%}
-            <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="article-header__tag">
-              {{ tag }}
-            </a>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
+      {%- comment -%} Category (first tag) + Read Time {%- endcomment -%}
+      <div class="article-header__meta-top">
+        {%- if section.settings.show_tags and article.tags.size > 0 -%}
+          <a href="{{ blog.url }}/tagged/{{ article.tags.first | handle }}" class="article-header__category">
+            {{ article.tags.first }}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.show_tags and article.tags.size > 0 and section.settings.show_read_time -%}
+          <span class="article-header__divider"></span>
+        {%- endif -%}
+        {%- if section.settings.show_read_time -%}
+          <span class="article-header__read-time" data-read-time>
+            {{ read_time }} {{ 'article.min_read' | t }}
+          </span>
+        {%- endif -%}
+      </div>
 
-      <h1 class="article-header__title h1">{{ article.title }}</h1>
+      <h1 class="article-header__title article__title">{{ article.title }}</h1>
+
+      {%- if article.excerpt != blank and section.settings.show_excerpt -%}
+        <p class="article-header__excerpt article__excerpt">{{ article.excerpt | strip_html }}</p>
+      {%- endif -%}
 
       {%- if section.settings.show_date or section.settings.show_author -%}
         <div class="article-header__meta">
@@ -70,7 +104,7 @@
     {%- endif -%}
 
     {%- comment -%} Article Content {%- endcomment -%}
-    <div class="article-content rte" data-animate="fade-up" data-animate-delay="200">
+    <div class="article-content article__content rte" data-article-content data-animate="fade-up" data-animate-delay="200">
       {{ article.content }}
     </div>
 
@@ -117,30 +151,75 @@
       </div>
     {%- endif -%}
 
-    {%- comment -%} Article Navigation {%- endcomment -%}
+    {%- comment -%} Author Bio {%- endcomment -%}
+    {%- if section.settings.show_author_bio -%}
+      {% render 'author-bio', article: article %}
+    {%- endif -%}
+
+    {%- comment -%} Article Navigation - Enhanced with Thumbnails {%- endcomment -%}
     {%- if section.settings.show_navigation -%}
       {%- if blog.previous_article or blog.next_article -%}
-        <nav class="article-navigation" aria-label="{{ 'article.navigation' | t }}">
+        <nav class="article-navigation article-navigation--enhanced" aria-label="{{ 'article.navigation' | t }}">
           {%- if blog.previous_article -%}
             <a href="{{ blog.previous_article.url }}" class="article-navigation__link article-navigation__link--prev">
-              {% render 'icon', icon: 'arrow-left' %}
-              <span class="article-navigation__text">
-                <span class="article-navigation__label">{{ 'article.previous' | t }}</span>
-                <span class="article-navigation__title">{{ blog.previous_article.title | truncate: 50 }}</span>
+              {%- if blog.previous_article.image -%}
+                <div class="article-navigation__image">
+                  {{
+                    blog.previous_article.image
+                    | image_url: width: 200
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '80, 120, 160, 200',
+                      sizes: '80px',
+                      class: 'article-navigation__thumbnail'
+                  }}
+                </div>
+              {%- endif -%}
+              <span class="article-navigation__content">
+                <span class="article-navigation__direction">
+                  {% render 'icon', icon: 'arrow-left', size: 'sm' %}
+                  <span class="article-navigation__label">{{ 'article.previous' | t }}</span>
+                </span>
+                <span class="article-navigation__title">{{ blog.previous_article.title | truncate: 60 }}</span>
               </span>
             </a>
+          {%- else -%}
+            <div class="article-navigation__placeholder"></div>
           {%- endif -%}
+
           {%- if blog.next_article -%}
             <a href="{{ blog.next_article.url }}" class="article-navigation__link article-navigation__link--next">
-              <span class="article-navigation__text">
-                <span class="article-navigation__label">{{ 'article.next' | t }}</span>
-                <span class="article-navigation__title">{{ blog.next_article.title | truncate: 50 }}</span>
+              <span class="article-navigation__content">
+                <span class="article-navigation__direction">
+                  <span class="article-navigation__label">{{ 'article.next' | t }}</span>
+                  {% render 'icon', icon: 'arrow-right', size: 'sm' %}
+                </span>
+                <span class="article-navigation__title">{{ blog.next_article.title | truncate: 60 }}</span>
               </span>
-              {% render 'icon', icon: 'arrow-right' %}
+              {%- if blog.next_article.image -%}
+                <div class="article-navigation__image">
+                  {{
+                    blog.next_article.image
+                    | image_url: width: 200
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '80, 120, 160, 200',
+                      sizes: '80px',
+                      class: 'article-navigation__thumbnail'
+                  }}
+                </div>
+              {%- endif -%}
             </a>
+          {%- else -%}
+            <div class="article-navigation__placeholder"></div>
           {%- endif -%}
         </nav>
       {%- endif -%}
+    {%- endif -%}
+
+    {%- comment -%} Related Articles {%- endcomment -%}
+    {%- if section.settings.show_related_articles -%}
+      {% render 'related-articles', article: article, blog: blog, limit: 3 %}
     {%- endif -%}
 
     {%- comment -%} Comments {%- endcomment -%}
@@ -213,7 +292,7 @@
             {%- endif -%}
 
             <div class="form-group">
-              <label for="CommentAuthor" class="form-label">{{ 'blog.comments.name' | t }}</label>
+              <label for="CommentAuthor" class="form-label">{{ 'common.name' | t }}</label>
               <input
                 type="text"
                 id="CommentAuthor"
@@ -225,7 +304,7 @@
             </div>
 
             <div class="form-group">
-              <label for="CommentEmail" class="form-label">{{ 'blog.comments.email' | t }}</label>
+              <label for="CommentEmail" class="form-label">{{ 'common.email' | t }}</label>
               <input
                 type="email"
                 id="CommentEmail"
@@ -237,7 +316,7 @@
             </div>
 
             <div class="form-group">
-              <label for="CommentBody" class="form-label">{{ 'blog.comments.message' | t }}</label>
+              <label for="CommentBody" class="form-label">{{ 'common.message' | t }}</label>
               <textarea
                 id="CommentBody"
                 name="comment[body]"
@@ -264,6 +343,55 @@
   "class": "section-main-article",
   "settings": [
     {
+      "type": "header",
+      "content": "t:sections.main_article.settings.header_reading_experience.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress_bar",
+      "label": "t:sections.main_article.settings.show_progress_bar.label",
+      "info": "t:sections.main_article.settings.show_progress_bar.info",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_read_time",
+      "label": "t:sections.main_article.settings.show_read_time.label",
+      "info": "t:sections.main_article.settings.show_read_time.info",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_drop_caps",
+      "label": "t:sections.main_article.settings.enable_drop_caps.label",
+      "info": "t:sections.main_article.settings.enable_drop_caps.info",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "drop_cap_style",
+      "label": "t:sections.main_article.settings.drop_cap_style.label",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:sections.main_article.settings.drop_cap_style.options.default"
+        },
+        {
+          "value": "serif",
+          "label": "t:sections.main_article.settings.drop_cap_style.options.serif"
+        },
+        {
+          "value": "square",
+          "label": "t:sections.main_article.settings.drop_cap_style.options.square"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main_article.settings.header_article_display.content"
+    },
+    {
       "type": "checkbox",
       "id": "show_breadcrumb",
       "label": "t:sections.main_article.settings.show_breadcrumb.label",
@@ -273,6 +401,13 @@
       "type": "checkbox",
       "id": "show_featured_image",
       "label": "t:sections.main_article.settings.show_featured_image.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "t:sections.main_article.settings.show_excerpt.label",
+      "info": "t:sections.main_article.settings.show_excerpt.info",
       "default": true
     },
     {
@@ -301,8 +436,22 @@
     },
     {
       "type": "checkbox",
+      "id": "show_author_bio",
+      "label": "t:sections.main_article.settings.show_author_bio.label",
+      "info": "t:sections.main_article.settings.show_author_bio.info",
+      "default": true
+    },
+    {
+      "type": "checkbox",
       "id": "show_navigation",
       "label": "t:sections.main_article.settings.show_navigation.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_related_articles",
+      "label": "t:sections.main_article.settings.show_related_articles.label",
+      "info": "t:sections.main_article.settings.show_related_articles.info",
       "default": true
     },
     {

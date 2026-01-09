@@ -1,0 +1,276 @@
+{% comment %}
+  Related Articles Component
+  Influence Theme
+
+  Displays related articles based on shared tags from the same blog.
+
+  Usage:
+  {% render 'related-articles', article: article, blog: blog %}
+
+  Parameters:
+  - article: (required) The current article
+  - blog: (required) The current blog
+  - limit: (optional) Number of articles to show, default 3
+  - heading: (optional) Section heading
+{% endcomment %}
+
+{%- liquid
+  assign limit = limit | default: 3
+  assign heading = heading | default: 'article.related_articles' | t | default: 'You may also like'
+  assign related_articles = ''
+
+  # Find articles with shared tags
+  for blog_article in blog.articles
+    # Skip current article
+    if blog_article.id == article.id
+      continue
+    endif
+
+    # Check for shared tags
+    assign has_shared_tag = false
+    for tag in article.tags
+      if blog_article.tags contains tag
+        assign has_shared_tag = true
+        break
+      endif
+    endfor
+
+    if has_shared_tag
+      if related_articles == ''
+        assign related_articles = blog_article.id | append: ''
+      else
+        assign related_articles = related_articles | append: ',' | append: blog_article.id
+      endif
+    endif
+  endfor
+
+  # Convert to array and limit
+  assign related_ids = related_articles | split: ','
+  assign related_count = related_ids.size | at_most: limit
+
+  # If not enough related by tags, fill with recent articles
+  if related_count < limit
+    for blog_article in blog.articles
+      if blog_article.id == article.id
+        continue
+      endif
+
+      unless related_ids contains blog_article.id
+        if related_ids == ''
+          assign related_ids = blog_article.id | append: ''
+        else
+          assign related_ids = related_ids | append: ',' | append: blog_article.id
+        endif
+        assign related_count = related_count | plus: 1
+        if related_count >= limit
+          break
+        endif
+      endunless
+    endfor
+  endif
+
+  # Re-split in case we added more
+  assign related_ids = related_articles | split: ','
+-%}
+
+{%- if related_count > 0 -%}
+  <section class="related-articles" aria-labelledby="related-articles-heading">
+    <h2 id="related-articles-heading" class="related-articles__heading">{{ heading }}</h2>
+
+    <div class="related-articles__grid">
+      {%- assign shown = 0 -%}
+      {%- for blog_article in blog.articles -%}
+        {%- if blog_article.id == article.id -%}
+          {%- continue -%}
+        {%- endif -%}
+
+        {%- comment -%} Check if this article is in our related list or has shared tags {%- endcomment -%}
+        {%- assign show_article = false -%}
+        {%- for tag in article.tags -%}
+          {%- if blog_article.tags contains tag -%}
+            {%- assign show_article = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- comment -%} If no shared tags found and we haven't reached limit, show anyway {%- endcomment -%}
+        {%- if show_article == false and shown < limit -%}
+          {%- assign show_article = true -%}
+        {%- endif -%}
+
+        {%- if show_article and shown < limit -%}
+          <article class="related-articles__card">
+            <a href="{{ blog_article.url }}" class="related-articles__link">
+              {%- if blog_article.image -%}
+                <div class="related-articles__image">
+                  {{
+                    blog_article.image
+                    | image_url: width: 600
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '200, 300, 400, 600',
+                      sizes: '(min-width: 990px) 300px, (min-width: 750px) 250px, 150px',
+                      class: 'related-articles__thumbnail'
+                  }}
+                </div>
+              {%- else -%}
+                <div class="related-articles__image related-articles__image--placeholder">
+                  {% render 'icon', icon: 'image', size: 'lg' %}
+                </div>
+              {%- endif -%}
+
+              <div class="related-articles__content">
+                {%- if blog_article.tags.size > 0 -%}
+                  <span class="related-articles__category">{{ blog_article.tags.first }}</span>
+                {%- endif -%}
+                <h3 class="related-articles__title">{{ blog_article.title | truncate: 60 }}</h3>
+                <time class="related-articles__date" datetime="{{ blog_article.published_at | date: '%Y-%m-%d' }}">
+                  {{ blog_article.published_at | date: format: 'abbreviated_date' }}
+                </time>
+              </div>
+            </a>
+          </article>
+          {%- assign shown = shown | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </section>
+{%- endif -%}
+
+<style>
+  .related-articles {
+    margin: var(--space-16, 4rem) 0;
+    padding-top: var(--space-8, 2rem);
+    border-top: var(--border-width, 1px) solid var(--border-color, #e5e5e5);
+  }
+
+  .related-articles__heading {
+    font-family: var(--font-heading-family);
+    font-size: var(--font-size-2xl, 1.5rem);
+    font-weight: var(--font-heading-weight, 700);
+    text-align: center;
+    margin-bottom: var(--space-8, 2rem);
+  }
+
+  .related-articles__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6, 1.5rem);
+  }
+
+  .related-articles__card {
+    border-radius: var(--radius-lg, 0);
+    overflow: hidden;
+    background-color: var(--color-background, #fff);
+  }
+
+  .related-articles__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .related-articles__image {
+    aspect-ratio: 3/2;
+    overflow: hidden;
+    background-color: var(--color-background-secondary, #f5f5f5);
+  }
+
+  .related-articles__image--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-muted, #666);
+  }
+
+  .related-articles__thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-base, 0.2s) var(--ease-out, ease-out);
+  }
+
+  .related-articles__link:hover .related-articles__thumbnail {
+    transform: scale(1.05);
+  }
+
+  .related-articles__content {
+    padding: var(--space-4, 1rem) 0;
+  }
+
+  .related-articles__category {
+    display: inline-block;
+    font-size: var(--font-size-xs, 0.75rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wider, 0.05em);
+    color: var(--color-muted, #666);
+    margin-bottom: var(--space-2, 0.5rem);
+  }
+
+  .related-articles__title {
+    font-family: var(--font-heading-family);
+    font-size: var(--font-size-lg, 1.125rem);
+    font-weight: 600;
+    line-height: var(--line-height-tight, 1.2);
+    margin: 0 0 var(--space-2, 0.5rem);
+    transition: opacity var(--duration-fast, 0.15s) var(--ease-out, ease-out);
+  }
+
+  .related-articles__link:hover .related-articles__title {
+    opacity: 0.7;
+  }
+
+  .related-articles__date {
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-muted, #666);
+  }
+
+  /* Tablet */
+  @media (max-width: 989px) {
+    .related-articles__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .related-articles__card:last-child:nth-child(odd) {
+      display: none;
+    }
+  }
+
+  /* Mobile - Horizontal scroll carousel */
+  @media (max-width: 749px) {
+    .related-articles__grid {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: var(--space-4, 1rem);
+      gap: var(--space-4, 1rem);
+      padding-bottom: var(--space-4, 1rem);
+      margin: 0 calc(-1 * var(--space-4, 1rem));
+      padding-left: var(--space-4, 1rem);
+      padding-right: var(--space-4, 1rem);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .related-articles__card {
+      flex: 0 0 75%;
+      scroll-snap-align: start;
+    }
+
+    .related-articles__card:last-child {
+      display: block;
+    }
+
+    .related-articles__title {
+      font-size: var(--font-size-base, 1rem);
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .related-articles__thumbnail,
+    .related-articles__title {
+      transition: none;
+    }
+  }
+</style>

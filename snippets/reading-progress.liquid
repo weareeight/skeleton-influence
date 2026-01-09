@@ -1,0 +1,64 @@
+{% comment %}
+  Reading Progress Bar
+  Influence Theme
+
+  Displays a thin progress bar at the top of the viewport
+  showing how much of the article has been read.
+
+  Usage:
+  {% render 'reading-progress' %}
+
+  Requirements:
+  - Article content must have [data-article-content] attribute
+  - Include blog.js for functionality
+{% endcomment %}
+
+<div
+  class="reading-progress"
+  role="progressbar"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  aria-valuenow="0"
+  aria-label="{{ 'blogs.article.reading_progress' | t | default: 'Reading progress' }}"
+>
+  <div class="reading-progress__bar"></div>
+</div>
+
+<style>
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-header, 100);
+    height: 3px;
+    background-color: var(--border-color, #e5e5e5);
+    opacity: 0;
+    transition: opacity var(--duration-base, 0.2s) var(--ease-out, ease-out);
+    pointer-events: none;
+  }
+
+  .reading-progress.is-visible {
+    opacity: 1;
+  }
+
+  .reading-progress__bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--color-foreground, #000);
+    transition: width 50ms linear;
+    will-change: width;
+  }
+
+  /* Hide when header is sticky and visible */
+  .header-sticky .reading-progress {
+    top: var(--header-height, 60px);
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .reading-progress__bar {
+      transition: none;
+    }
+  }
+</style>

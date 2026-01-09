@@ -1,0 +1,17 @@
+{% comment %}
+  Page Header - Editorial Bar Style
+  Influence Theme
+
+  Usage:
+  {% render 'page-header', title: collection.title %}
+  {% render 'page-header', title: 'cart.title' | t %}
+
+  Parameters:
+  - title: (required) The page title to display
+{% endcomment %}
+
+<header class="page-header">
+  <div class="page-header__container container">
+    <h1 class="page-header__title">{{ title }}</h1>
+  </div>
+</header>

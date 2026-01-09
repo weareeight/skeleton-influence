@@ -22,7 +22,7 @@
     <button
       type="button"
       class="quick-shop__close"
-      aria-label="{{ 'accessibility.close' | t }}"
+      aria-label="{{ 'common.close' | t }}"
       data-quick-shop-close
     >
       {% render 'icon', icon: 'close' %}
@@ -427,14 +427,21 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-4);
-    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--color-foreground);
+    color: var(--color-background);
     flex-shrink: 0;
   }
 
+  .quick-shop__header .icon {
+    color: var(--color-background);
+  }
+
   .quick-shop__title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-widest);
     margin: 0;
   }
 
@@ -445,11 +452,11 @@
     width: 2.75rem;
     height: 2.75rem;
     border-radius: var(--radius-full);
-    transition: background-color var(--duration-fast) var(--ease-out);
+    transition: opacity var(--duration-fast) var(--ease-out);
   }
 
   .quick-shop__close:hover {
-    background-color: var(--color-background-subtle);
+    opacity: 0.7;
   }
 
   .quick-shop__body {

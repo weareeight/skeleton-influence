@@ -4,15 +4,16 @@
 {% endcomment %}
 
 <section class="main-cart section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+  {% render 'page-header', title: 'cart.title' | t %}
+
   <div class="container">
-    <h1 class="main-cart__heading h2">{{ 'cart.title' | t }}</h1>
 
     {%- if cart.item_count > 0 -%}
       <form action="{{ routes.cart_url }}" method="post" id="cart-form" class="cart-form">
         <div class="cart-form__content">
           {%- comment -%} Cart Items {%- endcomment -%}
           <div class="cart-items">
-            <div class="cart-items__header hide-mobile">
+            <div class="cart-items__header hide-mobile" data-animate="fade" style="--delay: 100ms">
               <span class="cart-items__header-product">{{ 'cart.product' | t }}</span>
               <span class="cart-items__header-price">{{ 'cart.price' | t }}</span>
               <span class="cart-items__header-quantity">{{ 'cart.quantity' | t }}</span>
@@ -20,7 +21,8 @@
             </div>
 
             {%- for item in cart.items -%}
-              <div class="cart-item" data-cart-item data-line-item-key="{{ item.key }}">
+              {%- assign item_delay = forloop.index | times: 50 | plus: 150 -%}
+              <div class="cart-item" data-cart-item data-line-item-key="{{ item.key }}" data-animate="fade" style="--delay: {{ item_delay }}ms">
                 {%- comment -%} Product Image {%- endcomment -%}
                 <div class="cart-item__media">
                   {%- if item.image -%}
@@ -163,7 +165,7 @@
           </div>
 
           {%- comment -%} Cart Summary {%- endcomment -%}
-          <div class="cart-summary">
+          <div class="cart-summary" data-animate="fade" style="--delay: 100ms">
             {%- comment -%} Cart Note {%- endcomment -%}
             {%- if section.settings.show_cart_note -%}
               <div class="cart-summary__note">
@@ -241,7 +243,7 @@
       </form>
     {%- else -%}
       {%- comment -%} Empty Cart {%- endcomment -%}
-      <div class="cart-empty">
+      <div class="cart-empty" data-animate="fade">
         <div class="cart-empty__icon">
           {% render 'icon', icon: 'cart', size: 'lg' %}
         </div>

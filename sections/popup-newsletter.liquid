@@ -49,7 +49,7 @@
       type="button"
       class="popup__close"
       data-popup-close
-      aria-label="{{ 'accessibility.close' | t }}"
+      aria-label="{{ 'common.close' | t }}"
     >
       {% render 'icon', icon: 'close' %}
     </button>
@@ -202,9 +202,13 @@
       const closeBtn = popup.querySelector('[data-popup-close]');
       let triggerElement = null;
 
-      // Don't show in theme editor preview mode
+      // Close button - attach early so it works in design mode
+      if (closeBtn) {
+        closeBtn.addEventListener('click', closePopup);
+      }
+
+      // In theme editor, show popup immediately for preview
       if (Shopify.designMode) {
-        // In editor, show popup immediately for preview
         showPopup();
         return;
       }
@@ -282,11 +286,6 @@
             firstFocusable.focus();
           }
         }
-      }
-
-      // Close button
-      if (closeBtn) {
-        closeBtn.addEventListener('click', closePopup);
       }
 
       // Cookie helpers

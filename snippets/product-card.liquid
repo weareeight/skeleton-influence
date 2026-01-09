@@ -142,10 +142,25 @@
         {%- if option_name_downcase == 'color' or option_name_downcase == 'colour' -%}
           <div class="product-card__swatches">
             {%- for value in option.values limit: 5 -%}
-              {%- assign swatch = value | handle | append: '.png' | file_url -%}
+              {%- liquid
+                comment
+                  Use Shopify swatch API when available, fall back to color name
+                endcomment
+                assign swatch_style = ''
+                if value.swatch.color != blank
+                  assign swatch_style = '--swatch-color: ' | append: value.swatch.color | append: ';'
+                else
+                  assign color_value = value | handle | replace: '-', ''
+                  assign swatch_style = '--swatch-color: ' | append: color_value | append: ';'
+                endif
+                if value.swatch.image
+                  assign swatch_image_url = value.swatch.image | image_url: width: 50
+                  assign swatch_style = swatch_style | append: ' --swatch-image: url(' | append: swatch_image_url | append: ');'
+                endif
+              -%}
               <span
                 class="product-card__swatch"
-                style="--swatch-color: {{ value | handle | replace: '-', '' }}; --swatch-image: url('{{ swatch }}')"
+                style="{{ swatch_style }}"
                 title="{{ value }}"
               ></span>
             {%- endfor -%}

@@ -1,4 +1,35 @@
 {
+  "common": {
+    "email": "Email",
+    "password": "Password",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "name": "Name",
+    "phone": "Phone",
+    "message": "Message",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "loading": "Loading...",
+    "save": "Save",
+    "update": "Update",
+    "add": "Add",
+    "remove": "Remove",
+    "back": "Back",
+    "continue": "Continue",
+    "view_all": "View all",
+    "learn_more": "Learn more",
+    "share": "Share",
+    "search": "Search",
+    "apply": "Apply",
+    "clear": "Clear",
+    "or": "or",
+    "and": "and",
+    "from": "From",
+    "to": "To"
+  },
   "general": {
     "404": {
       "title": "Page not found",
@@ -908,7 +939,13 @@
     "share": "Share this article",
     "previous": "Previous article",
     "next": "Next article",
-    "navigation": "Article navigation"
+    "navigation": "Article navigation",
+    "min_read": "min read",
+    "reading_progress": "Reading progress",
+    "about_author": "About the author",
+    "written_by": "Written by",
+    "more_from_author": "More articles by this author",
+    "related_articles": "You may also like"
   },
   "contact": {
     "form": {

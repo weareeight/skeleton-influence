@@ -4,13 +4,14 @@
 {% endcomment %}
 
 <section class="main-account section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+  {% render 'page-header', title: 'customer.account.title' | t %}
+
   <div class="container">
-    <header class="account-header">
-      <h1 class="account-header__title h2">{{ 'customer.account.title' | t }}</h1>
-      <a href="{{ routes.account_logout_url }}" class="account-header__logout link">
+    <div class="account-actions">
+      <a href="{{ routes.account_logout_url }}" class="account-actions__logout link">
         {{ 'customer.account.logout' | t }}
       </a>
-    </header>
+    </div>
 
     <div class="account-content">
       {%- comment -%} Account Details {%- endcomment -%}

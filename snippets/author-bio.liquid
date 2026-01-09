@@ -1,0 +1,256 @@
+{% comment %}
+  Author Bio Component
+  Influence Theme
+
+  Displays an author bio section with photo, name, description, and social links.
+
+  Usage:
+  {% render 'author-bio', article: article %}
+
+  Parameters:
+  - article: (required) The article object
+  - show_image: (optional) Whether to show author image, default true
+  - layout: (optional) 'horizontal' or 'stacked', default 'horizontal'
+{% endcomment %}
+
+{%- liquid
+  assign show_image = show_image | default: true
+  assign layout = layout | default: 'horizontal'
+-%}
+
+<aside class="author-bio author-bio--{{ layout }}" aria-label="{{ 'article.about_author' | t | default: 'About the author' }}">
+  {%- if show_image -%}
+    <div class="author-bio__image">
+      {%- comment -%}
+        Check for author image metafield first, fallback to placeholder
+        Store owners can add author images via metafields: article.author.image
+      {%- endcomment -%}
+      {%- if article.metafields.custom.author_image -%}
+        {{
+          article.metafields.custom.author_image.value
+          | image_url: width: 200
+          | image_tag:
+            loading: 'lazy',
+            widths: '80, 120, 160, 200',
+            sizes: '80px',
+            class: 'author-bio__avatar'
+        }}
+      {%- else -%}
+        <div class="author-bio__avatar author-bio__avatar--placeholder">
+          {% render 'icon', icon: 'user', size: 'lg' %}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="author-bio__content">
+    <p class="author-bio__label">{{ 'article.written_by' | t | default: 'Written by' }}</p>
+    <h3 class="author-bio__name">{{ article.author }}</h3>
+
+    {%- comment -%}
+      Author bio from metafield or fallback text
+      Store owners can add author bios via metafields: article.author_bio
+    {%- endcomment -%}
+    {%- if article.metafields.custom.author_bio -%}
+      <p class="author-bio__description">{{ article.metafields.custom.author_bio.value }}</p>
+    {%- endif -%}
+
+    {%- comment -%} Social Links from metafields {%- endcomment -%}
+    {%- liquid
+      assign author_instagram = article.metafields.custom.author_instagram.value
+      assign author_twitter = article.metafields.custom.author_twitter.value
+      assign author_linkedin = article.metafields.custom.author_linkedin.value
+    -%}
+
+    {%- if author_instagram or author_twitter or author_linkedin -%}
+      <div class="author-bio__social">
+        {%- if author_instagram -%}
+          <a
+            href="{{ author_instagram }}"
+            class="author-bio__social-link"
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            aria-label="Instagram"
+          >
+            {% render 'icon', icon: 'instagram', size: 'sm' %}
+          </a>
+        {%- endif -%}
+        {%- if author_twitter -%}
+          <a
+            href="{{ author_twitter }}"
+            class="author-bio__social-link"
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            aria-label="Twitter"
+          >
+            {% render 'icon', icon: 'twitter', size: 'sm' %}
+          </a>
+        {%- endif -%}
+        {%- if author_linkedin -%}
+          <a
+            href="{{ author_linkedin }}"
+            class="author-bio__social-link"
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            aria-label="LinkedIn"
+          >
+            {% render 'icon', icon: 'linkedin', size: 'sm' %}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} More from this author link {%- endcomment -%}
+    <a href="{{ blog.url }}?author={{ article.author | url_encode }}" class="author-bio__more-link">
+      {{ 'article.more_from_author' | t | default: 'More articles by this author' }}
+      {% render 'icon', icon: 'arrow-right', size: 'sm' %}
+    </a>
+  </div>
+</aside>
+
+<style>
+  .author-bio {
+    padding: var(--space-8, 2rem);
+    background-color: var(--color-background-secondary, #f5f5f5);
+    border-radius: var(--radius-lg, 0);
+    margin: var(--space-12, 3rem) 0;
+  }
+
+  .author-bio--horizontal {
+    display: flex;
+    gap: var(--space-6, 1.5rem);
+    align-items: flex-start;
+  }
+
+  .author-bio--stacked {
+    text-align: center;
+  }
+
+  .author-bio--stacked .author-bio__image {
+    margin-bottom: var(--space-4, 1rem);
+  }
+
+  .author-bio__image {
+    flex-shrink: 0;
+  }
+
+  .author-bio__avatar {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .author-bio__avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-foreground, #000);
+    color: var(--color-background, #fff);
+  }
+
+  .author-bio__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .author-bio__label {
+    font-size: var(--font-size-xs, 0.75rem);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wider, 0.05em);
+    color: var(--color-muted, #666);
+    margin-bottom: var(--space-1, 0.25rem);
+  }
+
+  .author-bio__name {
+    font-family: var(--font-heading-family);
+    font-size: var(--font-size-xl, 1.25rem);
+    font-weight: var(--font-heading-weight, 700);
+    margin: 0 0 var(--space-3, 0.75rem);
+  }
+
+  .author-bio__description {
+    font-size: var(--font-size-sm, 0.875rem);
+    line-height: var(--line-height-relaxed, 1.75);
+    color: var(--color-muted, #666);
+    margin-bottom: var(--space-4, 1rem);
+  }
+
+  .author-bio__social {
+    display: flex;
+    gap: var(--space-3, 0.75rem);
+    margin-bottom: var(--space-4, 1rem);
+  }
+
+  .author-bio--stacked .author-bio__social {
+    justify-content: center;
+  }
+
+  .author-bio__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    color: var(--color-foreground, #000);
+    border: var(--border-width, 1px) solid var(--border-color, #e5e5e5);
+    border-radius: 50%;
+    transition: all var(--duration-fast, 0.15s) var(--ease-out, ease-out);
+  }
+
+  .author-bio__social-link:hover {
+    background-color: var(--color-foreground, #000);
+    border-color: var(--color-foreground, #000);
+    color: var(--color-background, #fff);
+  }
+
+  .author-bio__more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2, 0.5rem);
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: 600;
+    color: inherit;
+    text-decoration: none;
+    transition: opacity var(--duration-fast, 0.15s) var(--ease-out, ease-out);
+  }
+
+  .author-bio__more-link:hover {
+    opacity: 0.7;
+  }
+
+  .author-bio__more-link svg {
+    transition: transform var(--duration-fast, 0.15s) var(--ease-out, ease-out);
+  }
+
+  .author-bio__more-link:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 749px) {
+    .author-bio--horizontal {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .author-bio--horizontal .author-bio__social {
+      justify-content: center;
+    }
+
+    .author-bio__avatar {
+      width: 4rem;
+      height: 4rem;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .author-bio__social-link,
+    .author-bio__more-link,
+    .author-bio__more-link svg {
+      transition: none;
+    }
+  }
+</style>

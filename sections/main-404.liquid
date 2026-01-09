@@ -4,10 +4,11 @@
 {% endcomment %}
 
 <section class="main-404 section {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+  {% render 'page-header', title: 'general.404.title' | t %}
+
   <div class="container">
     <div class="main-404__content text-center">
       <span class="main-404__code">404</span>
-      <h1 class="main-404__heading h1">{{ 'general.404.title' | t }}</h1>
       <p class="main-404__text">{{ 'general.404.subtext' | t }}</p>
 
       {%- if section.settings.show_search -%}
