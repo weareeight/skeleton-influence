@@ -4,7 +4,7 @@
 
 This project is a premium Shopify theme built on the **Skeleton Theme** foundation, targeting the Shopify Theme Store. The theme draws inspiration from **Prestige** but pushes further into high-fashion, editorial aesthetics.
 
-**Theme Codename:** *Influence*
+**Theme Codename:** *Elle*
 **Target Market:** Luxury fashion, designer brands, high-end accessories, curated boutiques
 **Design Philosophy:** Bold minimalism meets editorial sophistication
 
@@ -22,7 +22,7 @@ This project is a premium Shopify theme built on the **Skeleton Theme** foundati
 - **Full-bleed imagery** with cinematic aspect ratios
 
 ### Differentiation from Prestige
-| Prestige | Influence |
+| Prestige | Elle |
 |----------|-----------|
 | Classic luxury | Contemporary fashion-forward |
 | Balanced symmetry | Intentional asymmetry |
@@ -288,10 +288,10 @@ Use these Shopify-approved terms:
 
 ## Preset Strategy
 
-**Required:** One preset must share theme name ("Influence")
+**Required:** One preset must share theme name ("Elle")
 
 **Suggested Presets (3 total):**
-1. **Influence** - Core black/white editorial aesthetic
+1. **Elle** - Core black/white editorial aesthetic
 2. **Runway** - Bolder, more colorful fashion-week vibe
 3. **Atelier** - Softer, artisanal luxury feel
 

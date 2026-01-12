@@ -1,7 +1,7 @@
-# Influence Theme - Implementation Plan
+# Elle Theme - Implementation Plan
 
 ## Overview
-Transform the Skeleton theme into **Influence** - a fashion-forward, editorial-style Shopify theme for Theme Store submission. Single preset with monochromatic editorial aesthetic.
+Transform the Skeleton theme into **Elle** - a fashion-forward, editorial-style Shopify theme for Theme Store submission. Single preset with monochromatic editorial aesthetic.
 
 **Design Direction:** Bold minimalism meets editorial sophistication (Vogue/Harper's Bazaar inspired)
 - Dramatic typography scale with serif headings
@@ -43,7 +43,7 @@ CSS Variables to add:
 
 ### Settings Structure
 ```
-1. theme_info (Influence v1.0.0)
+1. theme_info (Elle v1.0.0)
 2. Logo & Favicon
 3. Colors (4 scheme colors + sale/error)
 4. Typography (heading font, body font, base size)
@@ -235,11 +235,11 @@ templates/customers/activate_account.json + sections/main-activate-account.liqui
 ## Phase 10: Preset & Polish
 
 ### Files to Modify
-- [config/settings_data.json](config/settings_data.json) - Single "Influence" preset
+- [config/settings_data.json](config/settings_data.json) - Single "Elle" preset
 - [locales/en.default.json](locales/en.default.json) - Complete translations
 - All JSON templates - Demo section configurations
 
-### Influence Preset
+### Elle Preset
 ```json
 {
   "type_heading_font": "cormorant_garamond_n4",

@@ -1,4 +1,4 @@
-# Influence Theme - Section Audit & Recommendations
+# Elle Theme - Section Audit & Recommendations
 
 **Audit Date:** January 2026
 **Theme Version:** Current Development
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The Influence theme has a strong foundation with **18 comprehensive, production-ready sections** covering core Shopify Theme Store requirements. The theme demonstrates editorial sophistication with features like a 3D product carousel and refined animations. However, several sections from the roadmap are missing, and there are opportunities to further differentiate this theme in the luxury fashion market.
+The Elle theme has a strong foundation with **18 comprehensive, production-ready sections** covering core Shopify Theme Store requirements. The theme demonstrates editorial sophistication with features like a 3D product carousel and refined animations. However, several sections from the roadmap are missing, and there are opportunities to further differentiate this theme in the luxury fashion market.
 
 ### Quick Stats
 
@@ -344,7 +344,7 @@ The Influence theme has a strong foundation with **18 comprehensive, production-
 ### 1. Editorial Spread Section
 - **Priority:** HIGH
 - **Purpose:** Magazine-style multi-image layout with text
-- **Fashion Value:** Creates the editorial/magazine feel that differentiates Influence
+- **Fashion Value:** Creates the editorial/magazine feel that differentiates Elle
 - **Suggested Features:**
   - Asymmetric 2-3 image layout
   - Large display typography
@@ -505,7 +505,7 @@ The Influence theme has a strong foundation with **18 comprehensive, production-
 4. **Split Hero** - Layout variety
 
 ### Phase 2: Differentiation (Fashion-Forward)
-5. **Editorial Spread Section** - Unique to Influence
+5. **Editorial Spread Section** - Unique to Elle
 6. **Scrolling Marquee** - High-fashion aesthetic
 7. **Logo List** - Brand credibility
 8. **Product Grid (Curated)** - Merchandising flexibility
@@ -527,7 +527,7 @@ The Influence theme has a strong foundation with **18 comprehensive, production-
 
 ### What Top Fashion Themes Have
 
-| Feature | Prestige | Broadcast | Impulse | Influence |
+| Feature | Prestige | Broadcast | Impulse | Elle |
 |---------|----------|-----------|---------|-----------|
 | Lookbook/Hotspots | Yes | No | Yes | **MISSING** |
 | Video Section | Yes | Yes | Yes | **MISSING** |
@@ -539,7 +539,7 @@ The Influence theme has a strong foundation with **18 comprehensive, production-
 | Mega Menu | Yes | Yes | Yes | **YES** |
 | Sticky Header | Yes | Yes | Yes | **YES** |
 
-### Influence Unique Advantages
+### Elle Unique Advantages
 1. 3D Product Carousel - No competitor has this
 2. Editorial typography (drop caps)
 3. Vignette overlay option
@@ -603,7 +603,7 @@ The Influence theme has a strong foundation with **18 comprehensive, production-
 
 ## Conclusion
 
-The Influence theme has a solid foundation with excellent core sections. The 3D carousel and editorial typography features provide unique differentiation. However, to be competitive in the fashion theme market, the following are essential:
+The Elle theme has a solid foundation with excellent core sections. The 3D carousel and editorial typography features provide unique differentiation. However, to be competitive in the fashion theme market, the following are essential:
 
 **Must Have (Before Launch):**
 1. Lookbook/Hotspot section
@@ -622,7 +622,7 @@ The Influence theme has a solid foundation with excellent core sections. The 3D 
 10. Size Guide
 11. Additional global settings
 
-With these additions, Influence will be well-positioned as a premium fashion theme that goes beyond Prestige in editorial sophistication while meeting all Theme Store requirements.
+With these additions, Elle will be well-positioned as a premium fashion theme that goes beyond Prestige in editorial sophistication while meeting all Theme Store requirements.
 
 ---
 
