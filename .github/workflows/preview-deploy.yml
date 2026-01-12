@@ -118,33 +118,36 @@ jobs:
               return;
             }
 
+            const body = [
+              '## Preview Ready',
+              '',
+              `**Preview URL:** ${previewUrl}`,
+              '',
+              'This preview will persist until the issue is closed or PR is merged.',
+              '',
+              '---',
+              '',
+              '**To approve:** React with :+1: to this comment, then comment `@claude create pr`',
+              '',
+              '**To request changes:** Comment with feedback and `@claude iterate`',
+              '',
+              '<details>',
+              '<summary>Technical details</summary>',
+              '',
+              `- Theme ID: ${themeId}`,
+              `- Branch: ${branch}`,
+              `- Store: ${store}`,
+              '',
+              '</details>'
+            ].join('\n');
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issueNumber,
-              body: `## Preview Ready
-
-**Preview URL:** ${previewUrl}
-
-This preview will persist until the issue is closed or PR is merged.
-
----
-
-**To approve:** React with :+1: to this comment, then comment \`@claude create pr\`
-
-**To request changes:** Comment with feedback and \`@claude iterate\`
-
-<details>
-<summary>Technical details</summary>
-
-- Theme ID: \`${themeId}\`
-- Branch: \`${branch}\`
-- Store: \`${store}\`
-
-</details>`
+              body: body
             });
 
-            // Add preview-ready label to the issue
             try {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
