@@ -31,6 +31,7 @@
   {%- comment -%} Product Media {%- endcomment -%}
   <div class="product-card__media media aspect-{{ settings.product_card_aspect_ratio | replace: '/', '-' }}">
     {%- if product.featured_media -%}
+      {%- assign focal_point = product.featured_media.presentation.focal_point | default: '50% 50%' -%}
       {{
         product.featured_media
         | image_url: width: 600
@@ -38,10 +39,12 @@
           loading: 'lazy',
           sizes: '(min-width: 1200px) 25vw, (min-width: 750px) 33vw, 50vw',
           widths: '165, 360, 535, 750, 1000',
-          class: 'product-card__image product-card__primary-image'
+          class: 'product-card__image product-card__primary-image',
+          style: 'object-position: ' | append: focal_point | append: ';'
       }}
 
       {%- if show_secondary_image and product.media.size > 1 -%}
+        {%- assign secondary_focal_point = product.media[1].presentation.focal_point | default: '50% 50%' -%}
         {{
           product.media[1]
           | image_url: width: 600
@@ -49,7 +52,8 @@
             loading: 'lazy',
             sizes: '(min-width: 1200px) 25vw, (min-width: 750px) 33vw, 50vw',
             widths: '165, 360, 535, 750, 1000',
-            class: 'product-card__image product-card__secondary-image'
+            class: 'product-card__image product-card__secondary-image',
+            style: 'object-position: ' | append: secondary_focal_point | append: ';'
         }}
       {%- endif -%}
     {%- else -%}

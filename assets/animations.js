@@ -27,20 +27,8 @@ class AnimationController {
    * Call this after DOM is ready
    */
   init() {
-    console.log('[Animations] Initializing animation controller');
-
-    // Debug: Log ALL elements with data-animate (including those with is-visible)
-    const allAnimateElements = document.querySelectorAll('[data-animate]');
-    console.log('[Animations] Total elements with data-animate:', allAnimateElements.length);
-    allAnimateElements.forEach((el, i) => {
-      const type = el.dataset.animate || 'default';
-      const hasVisible = el.classList.contains('is-visible');
-      console.log(`[Animations] Element ${i}: type="${type}", hasIsVisible=${hasVisible}, tag=${el.tagName}, class="${el.className}"`);
-    });
-
     // Check if animations are disabled
     if (this.shouldDisableAnimations()) {
-      console.log('[Animations] Animations disabled, showing all elements');
       this.showAllElements();
       return;
     }
@@ -61,8 +49,6 @@ class AnimationController {
     // Setup scroll-based detection for reveal elements (clip-path workaround)
     this.setupScrollListener();
 
-    console.log('[Animations] Animation controller initialized');
-
     // Re-observe on Shopify section events (theme editor)
     this.setupSectionEvents();
   }
@@ -82,11 +68,8 @@ class AnimationController {
    */
   setupScrollListener() {
     if (this.revealElements.length === 0) {
-      console.log('[Animations] No reveal elements to track via scroll');
       return;
     }
-
-    console.log('[Animations] Setting up scroll listener for', this.revealElements.length, 'reveal elements');
 
     this.scrollHandler = () => {
       if (!this.ticking) {
@@ -113,7 +96,6 @@ class AnimationController {
       if (this.scrollHandler) {
         window.removeEventListener('scroll', this.scrollHandler);
         this.scrollHandler = null;
-        console.log('[Animations] All reveal elements animated, removed scroll listener');
       }
       return;
     }
@@ -127,7 +109,6 @@ class AnimationController {
 
       // Trigger when top of element enters trigger zone
       if (rect.top < triggerPoint && rect.bottom > 0) {
-        console.log('[Animations] Scroll trigger for reveal element:', el.dataset.animate, el);
         this.triggerAnimation(el);
         return false; // Remove from array
       }
@@ -167,20 +148,15 @@ class AnimationController {
    */
   observeElements() {
     const elements = document.querySelectorAll('[data-animate]:not(.is-visible)');
-    console.log('[Animations] Found', elements.length, 'elements to observe');
 
-    elements.forEach((el, index) => {
-      const animType = el.dataset.animate || 'default';
+    elements.forEach((el) => {
       const isReveal = this.isRevealElement(el);
-      console.log('[Animations] Observing element', index, '- type:', animType, '- isReveal:', isReveal, el);
 
       // Check if element is already in viewport (fixes above-the-fold elements)
       if (this.isInViewport(el)) {
-        console.log('[Animations] Element already in viewport, triggering immediately:', animType);
         this.triggerAnimation(el);
       } else if (isReveal) {
         // Reveal elements use scroll-based detection (clip-path prevents IntersectionObserver)
-        console.log('[Animations] Adding to reveal elements for scroll detection:', animType);
         this.revealElements.push(el);
       } else {
         // Standard elements use IntersectionObserver
@@ -209,18 +185,13 @@ class AnimationController {
    */
   triggerAnimation(el) {
     const delay = this.getDelay(el);
-    const animType = el.dataset.animate || 'default';
-
-    console.log('[Animations] Triggering animation:', animType, 'delay:', delay);
 
     if (delay > 0) {
       setTimeout(() => {
         el.classList.add('is-visible');
-        console.log('[Animations] Added is-visible class after delay:', delay);
       }, delay);
     } else {
       el.classList.add('is-visible');
-      console.log('[Animations] Added is-visible class immediately');
     }
   }
 
@@ -229,7 +200,6 @@ class AnimationController {
    */
   handleIntersect(entries) {
     entries.forEach(entry => {
-      console.log('[Animations] Intersection:', entry.isIntersecting, 'ratio:', entry.intersectionRatio, entry.target);
       if (entry.isIntersecting) {
         this.triggerAnimation(entry.target);
         // Stop observing this element
