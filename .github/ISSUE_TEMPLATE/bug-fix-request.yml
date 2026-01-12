@@ -1,0 +1,73 @@
+name: Bug Fix Request
+description: Report a bug or issue for Claude to fix with preview
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Once submitted, mention `@claude` in a comment to get a fix with a live preview.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What's the issue?
+      description: Describe what's wrong and where you found it
+      placeholder: "The header overlaps the hero section on mobile devices..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: page
+    attributes:
+      label: Which page/template?
+      options:
+        - Home page
+        - Product page
+        - Collection page
+        - Cart page
+        - Blog/Article
+        - Search
+        - Other (specify below)
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: URL where the issue occurs
+      description: Link to the specific page in the test store
+      placeholder: "https://test-store.myshopify.com/products/..."
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device/viewport
+      options:
+        - Mobile
+        - Tablet
+        - Desktop
+        - All devices
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen instead?
+      placeholder: "The header should stay above the hero section..."
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag and drop screenshots showing the issue
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Next steps:**
+        1. Submit this issue
+        2. Comment `@claude please fix this` to trigger the fix
+        3. Wait for a preview URL to appear
+        4. Test the fix, then approve with :+1: and `@claude create pr`

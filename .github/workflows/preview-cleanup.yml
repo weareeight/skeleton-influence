@@ -1,0 +1,75 @@
+name: Cleanup Preview Theme
+
+on:
+  pull_request:
+    types: [closed]
+  issues:
+    types: [closed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    # Only run if there's a preview to clean up
+    if: |
+      contains(github.event.issue.labels.*.name, 'preview-ready') ||
+      contains(github.event.pull_request.labels.*.name, 'preview-ready')
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli @shopify/theme
+
+      - name: Get issue/PR number
+        id: context
+        run: |
+          if [ "${{ github.event_name }}" == "issues" ]; then
+            echo "number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Find and delete preview theme
+        run: |
+          ISSUE_NUM="${{ steps.context.outputs.number }}"
+
+          echo "Looking for preview theme for Issue #${ISSUE_NUM}..."
+
+          # List all themes in the store
+          THEMES=$(shopify theme list \
+            --store "${{ secrets.SHOPIFY_STORE }}" \
+            --json 2>/dev/null) || {
+            echo "Could not list themes"
+            exit 0
+          }
+
+          # Find theme ID for this issue's preview
+          THEME_ID=$(echo "$THEMES" | jq -r ".[] | select(.name | contains(\"Issue #${ISSUE_NUM}\")) | .id" | head -1)
+
+          if [ -z "$THEME_ID" ] || [ "$THEME_ID" == "null" ]; then
+            echo "No preview theme found for Issue #${ISSUE_NUM}"
+            exit 0
+          fi
+
+          echo "Found preview theme with ID: $THEME_ID"
+
+          # Delete the preview theme
+          shopify theme delete \
+            --store "${{ secrets.SHOPIFY_STORE }}" \
+            --theme "$THEME_ID" \
+            --force || {
+            echo "Could not delete theme $THEME_ID"
+            exit 0
+          }
+
+          echo "Successfully deleted preview theme $THEME_ID"
+        env:
+          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+
+      - name: Output summary
+        run: |
+          echo "## Preview Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Cleaned up preview theme for Issue/PR #${{ steps.context.outputs.number }}" >> $GITHUB_STEP_SUMMARY

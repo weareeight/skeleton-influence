@@ -1,0 +1,139 @@
+name: Deploy Preview Theme
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli @shopify/theme
+
+      - name: Extract issue number from branch
+        id: issue
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          # Extract issue number from branch name (e.g., claude/issue-42-fix-header)
+          ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
+          echo "number=$ISSUE_NUM" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Push theme to test store
+        id: deploy
+        run: |
+          THEME_NAME="Preview: Issue #${{ steps.issue.outputs.number }} - $(date +%Y%m%d-%H%M)"
+
+          # Push theme as unpublished and capture output
+          OUTPUT=$(shopify theme push \
+            --unpublished \
+            --store "${{ secrets.SHOPIFY_STORE }}" \
+            --path . \
+            --json 2>&1) || true
+
+          # Extract theme ID from output
+          THEME_ID=$(echo "$OUTPUT" | jq -r '.theme.id // empty' 2>/dev/null || echo "")
+
+          if [ -z "$THEME_ID" ]; then
+            echo "Failed to get theme ID from output:"
+            echo "$OUTPUT"
+            exit 1
+          fi
+
+          echo "theme_id=$THEME_ID" >> $GITHUB_OUTPUT
+          echo "Deployed theme with ID: $THEME_ID"
+        env:
+          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+
+      - name: Generate share URL
+        id: share
+        run: |
+          # Generate a shareable preview URL
+          SHARE_OUTPUT=$(shopify theme share \
+            --store "${{ secrets.SHOPIFY_STORE }}" \
+            --theme "${{ steps.deploy.outputs.theme_id }}" 2>&1) || true
+
+          # Extract the preview URL from output
+          PREVIEW_URL=$(echo "$SHARE_OUTPUT" | grep -oE 'https://[^ ]+preview_theme_id[^ ]*' | head -1 || echo "")
+
+          if [ -z "$PREVIEW_URL" ]; then
+            # Fallback: construct URL manually
+            PREVIEW_URL="https://${{ secrets.SHOPIFY_STORE }}/?preview_theme_id=${{ steps.deploy.outputs.theme_id }}"
+          fi
+
+          echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "Preview URL: $PREVIEW_URL"
+        env:
+          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+
+      - name: Comment on issue with preview URL
+        if: steps.issue.outputs.number != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = parseInt('${{ steps.issue.outputs.number }}', 10);
+            const previewUrl = '${{ steps.share.outputs.url }}';
+            const themeId = '${{ steps.deploy.outputs.theme_id }}';
+            const branch = '${{ steps.issue.outputs.branch }}';
+            const store = '${{ secrets.SHOPIFY_STORE }}';
+
+            if (!issueNumber) {
+              console.log('No issue number found, skipping comment');
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `## Preview Ready
+
+**Preview URL:** ${previewUrl}
+
+This preview will persist until the issue is closed or PR is merged.
+
+---
+
+**To approve:** React with :+1: to this comment, then comment \`@claude create pr\`
+
+**To request changes:** Comment with feedback and \`@claude iterate\`
+
+<details>
+<summary>Technical details</summary>
+
+- Theme ID: \`${themeId}\`
+- Branch: \`${branch}\`
+- Store: \`${store}\`
+
+</details>`
+            });
+
+            // Add preview-ready label to the issue
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: ['preview-ready']
+              });
+            } catch (e) {
+              console.log('Could not add label (may not exist):', e.message);
+            }
+
+      - name: Output summary
+        run: |
+          echo "## Preview Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Theme ID:** ${{ steps.deploy.outputs.theme_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Preview URL:** ${{ steps.share.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Issue:** #${{ steps.issue.outputs.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ steps.issue.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
