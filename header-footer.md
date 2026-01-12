@@ -1,4 +1,4 @@
-# Header & Footer Enhancement Plan - Influence Theme
+# Header & Footer Enhancement Plan - Elle Theme
 
 ## Executive Summary
 

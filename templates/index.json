@@ -6,60 +6,60 @@
         "subheading": {
           "type": "subheading",
           "settings": {
-            "text": "New Collection"
+            "text": "AW25 Collection"
           }
         },
         "heading": {
           "type": "heading",
           "settings": {
-            "text": "Define Your Style"
-          }
-        },
-        "text": {
-          "type": "text",
-          "settings": {
-            "text": "<p>Discover our curated selection of contemporary fashion designed for the modern individual.</p>"
+            "text": "See the Night",
+            "size": "large"
           }
         },
         "button": {
           "type": "button",
           "settings": {
-            "label": "Shop Now",
+            "label": "Shop Eyewear",
             "link": "",
-            "style": "primary"
+            "style": "outline"
           }
         }
       },
-      "block_order": ["subheading", "heading", "text", "button"],
+      "block_order": ["subheading", "heading", "button"],
       "settings": {
         "height": "full",
-        "content_position": "middle_center",
+        "content_position": "bottom_left",
         "show_scroll_indicator": true,
         "overlay_style": "gradient",
-        "overlay_opacity": 40
+        "overlay_opacity": 50,
+        "color_scheme": "scheme_2"
       }
     },
     "product_carousel_3d": {
       "type": "product-carousel-3d",
       "settings": {
+        "subheading": "Featured",
+        "custom_title": "Berlin Noir",
         "images_to_show": 6,
         "title_size": "large",
         "show_price": true,
         "show_variants": false,
-        "cta_text": "Shop Now",
-        "cta_style": "primary",
+        "cta_text": "View Details",
+        "cta_style": "outline",
         "height": "large",
-        "carousel_radius": 500,
+        "carousel_radius": 550,
+        "padding": "none",
         "color_scheme": "scheme_2"
       }
     },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
-        "heading": "Featured Collection",
+        "heading": "New Arrivals",
         "products_to_show": 8,
         "columns_desktop": "4",
-        "show_view_all": true
+        "show_view_all": true,
+        "color_scheme": "scheme_1"
       }
     },
     "image_with_text": {
@@ -68,26 +68,26 @@
         "subheading": {
           "type": "subheading",
           "settings": {
-            "text": "Our Story"
+            "text": "The Brand"
           }
         },
         "heading": {
           "type": "heading",
           "settings": {
-            "text": "Crafted with Purpose",
+            "text": "Born in Berlin",
             "heading_size": "h2"
           }
         },
         "text": {
           "type": "text",
           "settings": {
-            "text": "<p>We believe in creating timeless pieces that transcend seasons. Each item in our collection is thoughtfully designed and responsibly made.</p>"
+            "text": "<p>Crafted for those who move through the night. Each frame designed in our Kreuzberg studio, built to withstand the city that never sleeps.</p>"
           }
         },
         "button": {
           "type": "button",
           "settings": {
-            "button_label": "Learn More",
+            "button_label": "Our Story",
             "button_link": "",
             "button_style": "outline"
           }
@@ -96,96 +96,79 @@
       "block_order": ["subheading", "heading", "text", "button"],
       "settings": {
         "image_position": "left",
-        "content_alignment": "left"
+        "content_alignment": "left",
+        "color_scheme": "scheme_3"
+      }
+    },
+    "lookbook": {
+      "type": "lookbook",
+      "blocks": {
+        "hotspot_1": {
+          "type": "hotspot",
+          "settings": {
+            "horizontal_position": 35,
+            "vertical_position": 45
+          }
+        },
+        "hotspot_2": {
+          "type": "hotspot",
+          "settings": {
+            "horizontal_position": 70,
+            "vertical_position": 55
+          }
+        }
+      },
+      "block_order": ["hotspot_1", "hotspot_2"],
+      "settings": {
+        "subheading": "Editorial",
+        "heading": "Shop the Look",
+        "heading_alignment": "center",
+        "image_ratio": "landscape",
+        "hotspot_style": "minimal",
+        "hotspot_color": "light",
+        "padding": "large",
+        "color_scheme": "scheme_1"
+      }
+    },
+    "scrolling_marquee": {
+      "type": "scrolling-marquee",
+      "settings": {
+        "text": "Free Returns • Handcrafted in Berlin • UV400 Protection • Free Returns • Handcrafted in Berlin • UV400 Protection",
+        "color_scheme": "scheme_2"
       }
     },
     "rich_text": {
       "type": "rich-text",
       "blocks": {
-        "subheading": {
-          "type": "subheading",
-          "settings": {
-            "text": "Editorial"
-          }
-        },
         "heading": {
           "type": "heading",
           "settings": {
-            "text": "The Art of Dressing Well",
-            "heading_size": "h2"
-          }
-        },
-        "text": {
-          "type": "text",
-          "settings": {
-            "text": "<p>Fashion is not about following trends blindly. It's about understanding your own style and expressing it with confidence. Our collection is designed to help you do just that.</p>"
+            "text": "\"Eyewear for the nocturnal.\"",
+            "heading_size": "h1"
           }
         }
       },
-      "block_order": ["subheading", "heading", "text"],
+      "block_order": ["heading"],
       "settings": {
         "text_alignment": "center",
-        "narrow_container": true
-      }
-    },
-    "testimonials": {
-      "type": "testimonials",
-      "blocks": {
-        "testimonial_1": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "The quality is exceptional. These pieces have become staples in my wardrobe.",
-            "author_name": "Sarah M.",
-            "author_title": "Verified Buyer"
-          }
-        },
-        "testimonial_2": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "Finally, a brand that understands timeless design. I recommend them to everyone.",
-            "author_name": "James L.",
-            "author_title": "Verified Buyer"
-          }
-        },
-        "testimonial_3": {
-          "type": "testimonial",
-          "settings": {
-            "rating": 5,
-            "quote": "Impeccable craftsmanship and attention to detail. Worth every penny.",
-            "author_name": "Emma R.",
-            "author_title": "Verified Buyer"
-          }
-        }
-      },
-      "block_order": ["testimonial_1", "testimonial_2", "testimonial_3"],
-      "settings": {
-        "heading": "What Our Customers Say",
-        "layout": "carousel",
-        "columns": 3
+        "narrow_container": true,
+        "color_scheme": "scheme_1"
       }
     },
     "newsletter": {
       "type": "newsletter",
       "blocks": {
-        "subheading": {
-          "type": "subheading",
-          "settings": {
-            "text": "Stay Connected"
-          }
-        },
         "heading": {
           "type": "heading",
           "settings": {
-            "text": "Join Our Community",
+            "text": "Join the Night",
             "heading_size": "h2"
           }
         },
         "text": {
           "type": "text",
           "settings": {
-            "text": "<p>Be the first to know about new arrivals, exclusive offers, and style inspiration.</p>"
+            "text": "<p>Early access to drops. No spam.</p>"
           }
         },
         "form": {
@@ -196,7 +179,7 @@
           }
         }
       },
-      "block_order": ["subheading", "heading", "text", "form"],
+      "block_order": ["heading", "text", "form"],
       "settings": {
         "color_scheme": "scheme_2",
         "narrow_container": true
@@ -208,8 +191,9 @@
     "product_carousel_3d",
     "featured_collection",
     "image_with_text",
+    "lookbook",
+    "scrolling_marquee",
     "rich_text",
-    "testimonials",
     "newsletter"
   ]
 }

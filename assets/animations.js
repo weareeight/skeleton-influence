@@ -1,5 +1,5 @@
 /**
- * Animation Controller - Influence Theme
+ * Animation Controller - Elle Theme
  * IntersectionObserver-based scroll-triggered animations
  * Respects user preferences and theme settings
  */

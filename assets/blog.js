@@ -1,5 +1,5 @@
 /**
- * Blog Module - Influence Theme
+ * Blog Module - Elle Theme
  * Handles reading progress, estimated read time, and other blog enhancements
  */
 
