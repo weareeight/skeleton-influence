@@ -64,6 +64,7 @@ jobs:
           OUTPUT=$(shopify theme push \
             --unpublished \
             --store "${{ secrets.SHOPIFY_STORE }}" \
+            --theme "$THEME_NAME" \
             --path . \
             --json 2>&1) || true
 
