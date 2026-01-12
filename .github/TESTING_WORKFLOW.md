@@ -106,13 +106,14 @@ Claude will push an updated fix and a new preview URL will appear.
 The following secrets must be configured in the repository:
 
 - `SHOPIFY_STORE` - The test store URL (e.g., `test-store.myshopify.com`)
-- `SHOPIFY_CLI_THEME_TOKEN` - A Theme Access API token with `write_themes` scope
+- `SHOPIFY_CLIENT_ID` - The app's Client ID from Dev Dashboard
+- `SHOPIFY_CLIENT_SECRET` - The app's Client Secret from Dev Dashboard
 
-### Getting the API Token
+### Getting the Credentials
 
-1. Go to your test store's Admin
-2. Navigate to Settings > Apps > Develop apps
-3. Create a new app
-4. Configure Admin API scopes: enable `write_themes`
-5. Install the app
-6. Copy the Admin API access token
+1. Go to [Dev Dashboard](https://partners.shopify.com) and create an app
+2. Configure Admin API scopes: enable `write_themes`
+3. Install the app on your test store
+4. Copy the **Client ID** and **Client Secret** from the app's credentials page
+
+The workflow uses OAuth client credentials grant to get a fresh access token on each run (tokens expire after 24 hours, so this is handled automatically).

@@ -19,6 +19,33 @@ jobs:
       - name: Install Shopify CLI
         run: npm install -g @shopify/cli @shopify/theme
 
+      - name: Get access token via client credentials
+        id: auth
+        run: |
+          # Request access token using client credentials grant
+          RESPONSE=$(curl -s -X POST \
+            "https://${{ secrets.SHOPIFY_STORE }}/admin/oauth/access_token" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "client_id": "${{ secrets.SHOPIFY_CLIENT_ID }}",
+              "client_secret": "${{ secrets.SHOPIFY_CLIENT_SECRET }}",
+              "grant_type": "client_credentials"
+            }')
+
+          # Extract access token from response
+          ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token // empty')
+
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "Failed to get access token:"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          # Mask the token in logs
+          echo "::add-mask::$ACCESS_TOKEN"
+          echo "token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
+          echo "Successfully obtained access token"
+
       - name: Extract issue number from branch
         id: issue
         run: |
@@ -52,7 +79,7 @@ jobs:
           echo "theme_id=$THEME_ID" >> $GITHUB_OUTPUT
           echo "Deployed theme with ID: $THEME_ID"
         env:
-          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+          SHOPIFY_CLI_THEME_TOKEN: ${{ steps.auth.outputs.token }}
 
       - name: Generate share URL
         id: share
@@ -73,7 +100,7 @@ jobs:
           echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
           echo "Preview URL: $PREVIEW_URL"
         env:
-          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+          SHOPIFY_CLI_THEME_TOKEN: ${{ steps.auth.outputs.token }}
 
       - name: Comment on issue with preview URL
         if: steps.issue.outputs.number != ''
