@@ -37,6 +37,9 @@
   else
     assign wrapper = 'div'
   endif
+
+  # Get focal point for object-position CSS
+  assign focal_point = image.presentation.focal_point | default: '50% 50%'
 %}
 
 <{{ wrapper }}
@@ -45,7 +48,7 @@
     href="{{ url }}"
   {% endif %}
 >
-  {{ image | image_url: width: width, height: height, crop: crop | image_tag }}
+  {{ image | image_url: width: width, height: height, crop: crop | image_tag: style: 'object-position: ' | append: focal_point | append: ';' }}
 </{{ wrapper }}>
 
 {% stylesheet %}

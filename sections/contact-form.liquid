@@ -34,7 +34,7 @@
           </div>
         {%- else -%}
           {%- if form.errors -%}
-            <div class="form-message form-message--error">
+            <div class="form-message form-message--error" role="alert" aria-live="polite">
               {{ form.errors | default_errors }}
             </div>
           {%- endif -%}

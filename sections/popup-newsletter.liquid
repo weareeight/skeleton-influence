@@ -138,7 +138,7 @@
                 </div>
               {%- else -%}
                 {%- if form.errors -%}
-                  <div class="form-message form-message--error">
+                  <div class="form-message form-message--error" role="alert" aria-live="polite" id="Popup-error-{{ section_id }}">
                     {{ form.errors.messages['email'] }}
                   </div>
                 {%- endif -%}
