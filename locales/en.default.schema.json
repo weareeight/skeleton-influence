@@ -293,6 +293,10 @@
         "logo_width": {
           "label": "Desktop logo width"
         },
+        "text_logo_font_size": {
+          "label": "Text logo font size",
+          "info": "Font size when no logo image is set"
+        },
         "logo_position": {
           "label": "Logo position",
           "options": {
@@ -360,13 +364,36 @@
         "mega_menu": {
           "header": "Mega menu",
           "promo_image": {
-            "label": "Promotional image"
+            "label": "Fallback promotional image"
           },
           "promo_text": {
-            "label": "Promotional text"
+            "label": "Fallback promotional text"
           },
           "promo_link": {
-            "label": "Promotional link"
+            "label": "Fallback promotional link"
+          }
+        }
+      },
+      "blocks": {
+        "mega_menu_promo": {
+          "name": "Mega menu promo",
+          "settings": {
+            "menu_title": {
+              "label": "Menu item title",
+              "info": "Enter the exact title of the menu item (e.g., \"Products\")"
+            },
+            "image": {
+              "label": "Image"
+            },
+            "heading": {
+              "label": "Heading"
+            },
+            "text": {
+              "label": "Text"
+            },
+            "link": {
+              "label": "Link"
+            }
           }
         }
       }
@@ -968,6 +995,15 @@
         },
         "enable_video_looping": {
           "label": "Enable video looping"
+        },
+        "visible_thumbnails": {
+          "label": "Visible thumbnails"
+        },
+        "show_image_counter": {
+          "label": "Show image counter"
+        },
+        "show_nav_arrows": {
+          "label": "Show navigation arrows"
         }
       },
       "blocks": {

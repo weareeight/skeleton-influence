@@ -1,0 +1,83 @@
+{% comment %}
+  Mega Menu Promo Snippet
+  Finds and renders the promo card for a specific menu item
+
+  Parameters:
+  - menu_title: The title of the top-level menu item to match
+  - blocks: The section blocks to search for matching promo
+  - fallback_image: Global fallback promo image
+  - fallback_text: Global fallback promo text
+  - fallback_link: Global fallback promo link
+{% endcomment %}
+
+{%- liquid
+  assign promo_image = fallback_image
+  assign promo_heading = ''
+  assign promo_text = fallback_text
+  assign promo_link = fallback_link
+  assign matched_block = nil
+  assign menu_title_lower = menu_title | downcase | strip
+  assign has_any_promo_blocks = false
+
+  # Search blocks for matching promo
+  for block in blocks
+    if block.type == 'mega_menu_promo'
+      assign has_any_promo_blocks = true
+      assign block_title = block.settings.menu_title | downcase | strip
+      if block_title == menu_title_lower
+        assign matched_block = block
+        if block.settings.image != blank
+          assign promo_image = block.settings.image
+        endif
+        if block.settings.heading != blank
+          assign promo_heading = block.settings.heading
+        endif
+        if block.settings.text != blank
+          assign promo_text = block.settings.text
+        endif
+        if block.settings.link != blank
+          assign promo_link = block.settings.link
+        endif
+        break
+      endif
+    endif
+  endfor
+-%}
+
+{%- if promo_image != blank or matched_block != nil -%}
+  <div class="mega-menu__promo" {{ matched_block.shopify_attributes }} data-menu-promo="{{ menu_title_lower }}">
+    <a href="{{ promo_link | default: '#' }}" class="mega-menu__promo-link">
+      {%- if promo_image != blank -%}
+        <div class="mega-menu__promo-image">
+          {{
+            promo_image
+            | image_url: width: 400
+            | image_tag:
+              loading: 'lazy',
+              class: 'mega-menu__promo-img',
+              sizes: '256px'
+          }}
+        </div>
+      {%- elsif request.design_mode -%}
+        <div class="mega-menu__promo-image mega-menu__promo-placeholder">
+          <span>Add image</span>
+        </div>
+      {%- endif -%}
+      {%- if promo_heading != blank -%}
+        <span class="mega-menu__promo-heading">{{ promo_heading }}</span>
+      {%- endif -%}
+      {%- if promo_text != blank -%}
+        <span class="mega-menu__promo-text">{{ promo_text }}</span>
+      {%- endif -%}
+    </a>
+  </div>
+{%- elsif request.design_mode and has_any_promo_blocks -%}
+  {%- comment -%} Show placeholder in design mode when promo blocks exist but none match this menu {%- endcomment -%}
+  <div class="mega-menu__promo mega-menu__promo--placeholder" data-menu-promo="{{ menu_title_lower }}">
+    <a href="#" class="mega-menu__promo-link">
+      <div class="mega-menu__promo-image mega-menu__promo-placeholder">
+        <span>{{ menu_title }}</span>
+      </div>
+    </a>
+  </div>
+{%- endif -%}

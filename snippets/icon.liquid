@@ -13,6 +13,7 @@
   - aria_label: (optional) Accessible label for the icon
 {% endcomment %}
 
+{%- unless icon == blank or icon == 'none' -%}
 {%- liquid
   assign icon_class = 'icon'
 
@@ -41,3 +42,4 @@
 >
   <use href="#icon-{{ icon }}"></use>
 </svg>
+{%- endunless -%}

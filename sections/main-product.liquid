@@ -24,30 +24,59 @@
     <div class="main-product__media">
       {%- if product.media.size > 0 -%}
         <div class="product-gallery" data-product-gallery>
-          {%- comment -%} Thumbnails {%- endcomment -%}
+          {%- comment -%} Thumbnails with overflow {%- endcomment -%}
           {%- if product.media.size > 1 and section.settings.gallery_layout == 'thumbnails' -%}
-            <div class="product-gallery__thumbnails" data-thumbnails>
-              {%- for media in product.media -%}
+            {%- assign visible_thumbs = section.settings.visible_thumbnails | default: 4 -%}
+            {%- assign extra_count = product.media.size | minus: visible_thumbs -%}
+            <div class="product-gallery__thumbnails-wrapper" data-thumbnails-wrapper>
+              {%- comment -%} Up arrow (hidden initially) {%- endcomment -%}
+              <button
+                type="button"
+                class="product-gallery__thumb-nav product-gallery__thumb-nav--up"
+                data-thumb-nav="up"
+                aria-label="{{ 'accessibility.previous' | t }}"
+                hidden
+              >
+                {% render 'icon', icon: 'chevron-up', size: 'sm' %}
+              </button>
+
+              <div class="product-gallery__thumbnails" data-thumbnails>
+                {%- for media in product.media -%}
+                  <button
+                    type="button"
+                    class="product-gallery__thumbnail{% if forloop.first %} is-active{% endif %}{% if forloop.index > visible_thumbs %} is-overflow{% endif %}"
+                    data-thumbnail-index="{{ forloop.index0 }}"
+                    aria-label="{{ 'product.media_thumbnail' | t: index: forloop.index }}"
+                  >
+                    {%- if media.media_type == 'image' -%}
+                      {{ media | image_url: width: 100 | image_tag: loading: 'lazy' }}
+                    {%- elsif media.media_type == 'video' or media.media_type == 'external_video' -%}
+                      <div class="product-gallery__thumbnail-video">
+                        {{ media.preview_image | image_url: width: 100 | image_tag: loading: 'lazy' }}
+                        {% render 'icon', icon: 'play', size: 'sm' %}
+                      </div>
+                    {%- elsif media.media_type == 'model' -%}
+                      <div class="product-gallery__thumbnail-model">
+                        {{ media.preview_image | image_url: width: 100 | image_tag: loading: 'lazy' }}
+                      </div>
+                    {%- endif -%}
+                  </button>
+                {%- endfor -%}
+              </div>
+
+              {%- comment -%} Down arrow / MORE indicator {%- endcomment -%}
+              {%- if extra_count > 0 -%}
                 <button
                   type="button"
-                  class="product-gallery__thumbnail{% if forloop.first %} is-active{% endif %}"
-                  data-thumbnail-index="{{ forloop.index0 }}"
-                  aria-label="{{ 'product.media_thumbnail' | t: index: forloop.index }}"
+                  class="product-gallery__thumb-nav product-gallery__thumb-nav--down"
+                  data-thumb-nav="down"
+                  data-extra-count="{{ extra_count }}"
+                  aria-label="{{ 'accessibility.next' | t }}"
                 >
-                  {%- if media.media_type == 'image' -%}
-                    {{ media | image_url: width: 100 | image_tag: loading: 'lazy' }}
-                  {%- elsif media.media_type == 'video' or media.media_type == 'external_video' -%}
-                    <div class="product-gallery__thumbnail-video">
-                      {{ media.preview_image | image_url: width: 100 | image_tag: loading: 'lazy' }}
-                      {% render 'icon', icon: 'play', size: 'sm' %}
-                    </div>
-                  {%- elsif media.media_type == 'model' -%}
-                    <div class="product-gallery__thumbnail-model">
-                      {{ media.preview_image | image_url: width: 100 | image_tag: loading: 'lazy' }}
-                    </div>
-                  {%- endif -%}
+                  <span class="product-gallery__more-text" data-more-text>{{ 'product.more_images' | t: count: extra_count | default: 'MORE' }} ({{ extra_count }})</span>
+                  {% render 'icon', icon: 'chevron-down', size: 'sm' %}
                 </button>
-              {%- endfor -%}
+              {%- endif -%}
             </div>
           {%- endif -%}
 
@@ -104,6 +133,35 @@
                 {%- endcase -%}
               </div>
             {%- endfor -%}
+
+            {%- comment -%} Navigation arrows and counter {%- endcomment -%}
+            {%- if product.media.size > 1 -%}
+              {%- if section.settings.show_nav_arrows -%}
+                <button
+                  type="button"
+                  class="product-gallery__nav product-gallery__nav--prev"
+                  data-gallery-nav="prev"
+                  aria-label="{{ 'accessibility.previous' | t }}"
+                >
+                  {% render 'icon', icon: 'chevron-left' %}
+                </button>
+                <button
+                  type="button"
+                  class="product-gallery__nav product-gallery__nav--next"
+                  data-gallery-nav="next"
+                  aria-label="{{ 'accessibility.next' | t }}"
+                >
+                  {% render 'icon', icon: 'chevron-right' %}
+                </button>
+              {%- endif -%}
+              {%- if section.settings.show_image_counter -%}
+                <div class="product-gallery__counter" aria-live="polite" aria-atomic="true">
+                  <span data-gallery-current>1</span>
+                  <span class="product-gallery__counter-sep">/</span>
+                  <span data-gallery-total>{{ product.media.size }}</span>
+                </div>
+              {%- endif -%}
+            {%- endif -%}
 
             {%- comment -%} Zoom button {%- endcomment -%}
             {%- if section.settings.enable_zoom -%}
@@ -745,23 +803,6 @@
       }
     });
 
-    // Gallery thumbnails
-    const thumbnails = document.querySelectorAll('[data-thumbnail-index]');
-    const slides = document.querySelectorAll('[data-slide-index]');
-    thumbnails.forEach(thumb => {
-      thumb.addEventListener('click', () => {
-        const index = parseInt(thumb.dataset.thumbnailIndex);
-        thumbnails.forEach(t => t.classList.remove('is-active'));
-        slides.forEach(s => { s.classList.remove('is-active'); s.hidden = true; });
-        thumb.classList.add('is-active');
-        const activeSlide = document.querySelector(`[data-slide-index="${index}"]`);
-        if (activeSlide) {
-          activeSlide.classList.add('is-active');
-          activeSlide.hidden = false;
-        }
-      });
-    });
-
     // AJAX Add to Cart - opens cart drawer instead of redirecting
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -849,6 +890,130 @@
       }
     });
   })();
+
+  // Gallery Navigation - separate from form to ensure it always runs
+  (function() {
+    const gallery = document.querySelector('[data-product-gallery]');
+    if (!gallery) return;
+
+    const mainMedia = gallery.querySelector('[data-main-media]');
+    const thumbnails = gallery.querySelectorAll('[data-thumbnail-index]');
+    const slides = gallery.querySelectorAll('[data-slide-index]');
+    const prevBtn = gallery.querySelector('[data-gallery-nav="prev"]');
+    const nextBtn = gallery.querySelector('[data-gallery-nav="next"]');
+    const currentCounter = gallery.querySelector('[data-gallery-current]');
+    const totalCount = slides.length;
+
+    let currentIndex = 0;
+
+    function goToSlide(index) {
+      // Loop around
+      if (index < 0) index = totalCount - 1;
+      if (index >= totalCount) index = 0;
+
+      // Update slides
+      slides.forEach((slide, i) => {
+        const isActive = i === index;
+        slide.classList.toggle('is-active', isActive);
+        slide.hidden = !isActive;
+      });
+
+      // Update thumbnails
+      thumbnails.forEach((thumb, i) => {
+        thumb.classList.toggle('is-active', i === index);
+      });
+
+      // Update counter
+      if (currentCounter) {
+        currentCounter.textContent = index + 1;
+      }
+
+      currentIndex = index;
+    }
+
+    // Thumbnail clicks
+    thumbnails.forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        const index = parseInt(thumb.dataset.thumbnailIndex);
+        goToSlide(index);
+      });
+    });
+
+    // Prev/Next button clicks
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+    }
+
+    // Keyboard navigation
+    if (mainMedia) {
+      mainMedia.setAttribute('tabindex', '0');
+      mainMedia.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          goToSlide(currentIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          goToSlide(currentIndex + 1);
+        }
+      });
+    }
+
+    // Touch swipe support
+    let touchStartX = 0;
+    const SWIPE_THRESHOLD = 50;
+
+    if (mainMedia) {
+      mainMedia.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      mainMedia.addEventListener('touchend', (e) => {
+        const touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) > SWIPE_THRESHOLD) {
+          if (diff > 0) {
+            goToSlide(currentIndex + 1); // Swipe left = next
+          } else {
+            goToSlide(currentIndex - 1); // Swipe right = prev
+          }
+        }
+      }, { passive: true });
+    }
+
+    // Thumbnail overflow expand/collapse
+    const thumbnailsWrapper = gallery.querySelector('[data-thumbnails-wrapper]');
+    if (thumbnailsWrapper) {
+      const thumbnailsContainer = thumbnailsWrapper.querySelector('[data-thumbnails]');
+      const upNav = thumbnailsWrapper.querySelector('[data-thumb-nav="up"]');
+      const downNav = thumbnailsWrapper.querySelector('[data-thumb-nav="down"]');
+      let isExpanded = false;
+
+      if (downNav) {
+        downNav.addEventListener('click', () => {
+          isExpanded = !isExpanded;
+          thumbnailsContainer.classList.toggle('is-expanded', isExpanded);
+          downNav.classList.toggle('is-expanded', isExpanded);
+
+          if (upNav) {
+            upNav.hidden = !isExpanded;
+          }
+        });
+      }
+
+      if (upNav) {
+        upNav.addEventListener('click', () => {
+          isExpanded = false;
+          thumbnailsContainer.classList.remove('is-expanded');
+          downNav.classList.remove('is-expanded');
+          upNav.hidden = true;
+        });
+      }
+    }
+  })();
 </script>
 
 {% stylesheet %}
@@ -859,7 +1024,7 @@
 
   @media (min-width: 990px) {
     .main-product__grid {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 3fr 2fr;
       gap: var(--space-16);
     }
 
@@ -871,7 +1036,44 @@
   .main-product__info {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-5);
+  }
+
+  /* Product info block sectioning - borders between elements */
+  .product-info__vendor,
+  .product-info__title,
+  .product-info__price,
+  .product-info__description,
+  .variant-picker,
+  .product-info__quantity,
+  .product-info__buy-buttons,
+  .product-info__inventory,
+  .product-info__sku,
+  .product-info__rating,
+  .product-info__share,
+  .product-info__text,
+  .product-info__complementary,
+  .product-info__custom-liquid {
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Trust badges already have borders - just ensure consistent padding */
+  .product-info__trust-badges {
+    padding-bottom: var(--space-4);
+  }
+
+  /* Remove border from last visible element */
+  .main-product__info > form > *:last-child:not(.product-info__collapsible) {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* Divider block is already a separator */
+  .product-info__divider {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin: 0;
   }
 
   .main-product__info--sticky {
@@ -937,6 +1139,18 @@
     font-size: var(--font-size-sm);
     line-height: var(--line-height-relaxed);
     opacity: 0.8;
+    animation: collapsible-open var(--duration-normal, 0.3s) var(--ease-out) forwards;
+  }
+
+  @keyframes collapsible-open {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 0.8;
+      transform: translateY(0);
+    }
   }
 
   .product-info__inventory {
@@ -1198,6 +1412,27 @@
       "id": "enable_video_looping",
       "label": "t:sections.main_product.settings.enable_video_looping.label",
       "default": false
+    },
+    {
+      "type": "range",
+      "id": "visible_thumbnails",
+      "min": 3,
+      "max": 6,
+      "step": 1,
+      "label": "t:sections.main_product.settings.visible_thumbnails.label",
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image_counter",
+      "label": "t:sections.main_product.settings.show_image_counter.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_nav_arrows",
+      "label": "t:sections.main_product.settings.show_nav_arrows.label",
+      "default": true
     },
     {
       "type": "color_scheme",

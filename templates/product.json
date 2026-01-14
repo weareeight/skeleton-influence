@@ -41,7 +41,7 @@
           "type": "collapsible_tab",
           "settings": {
             "heading": "Shipping & Returns",
-            "icon": "shipping",
+            "icon": "truck",
             "content": "<p>Free shipping on orders over $100. Returns accepted within 30 days.</p>"
           }
         },
@@ -49,7 +49,7 @@
           "type": "collapsible_tab",
           "settings": {
             "heading": "Care Instructions",
-            "icon": "care",
+            "icon": "info",
             "content": "<p>See product label for detailed care instructions.</p>"
           }
         },
@@ -76,18 +76,155 @@
         "enable_video_autoplay": false
       }
     },
+    "scrolling_marquee": {
+      "type": "scrolling-marquee",
+      "blocks": {
+        "text_1": {
+          "type": "text",
+          "settings": {
+            "text": "Handcrafted in Berlin"
+          }
+        },
+        "text_2": {
+          "type": "text",
+          "settings": {
+            "text": "UV400 Protection"
+          }
+        },
+        "text_3": {
+          "type": "text",
+          "settings": {
+            "text": "Free Returns"
+          }
+        },
+        "text_4": {
+          "type": "text",
+          "settings": {
+            "text": "Lifetime Warranty"
+          }
+        }
+      },
+      "block_order": ["text_1", "text_2", "text_3", "text_4"],
+      "settings": {
+        "speed": 25,
+        "color_scheme": "scheme_2"
+      }
+    },
+    "image_with_text": {
+      "type": "image-with-text",
+      "blocks": {
+        "subheading": {
+          "type": "subheading",
+          "settings": {
+            "text": "Craftsmanship"
+          }
+        },
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "text": "Made to Last",
+            "heading_size": "h2"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Every frame is handcrafted in our Berlin studio using premium acetate and surgical-grade stainless steel. Built for those who demand more.</p>"
+          }
+        },
+        "button": {
+          "type": "button",
+          "settings": {
+            "button_label": "Our Process",
+            "button_link": "",
+            "button_style": "outline"
+          }
+        }
+      },
+      "block_order": ["subheading", "heading", "text", "button"],
+      "settings": {
+        "image_position": "right",
+        "content_alignment": "left",
+        "color_scheme": "scheme_1"
+      }
+    },
     "product_recommendations": {
       "type": "product-recommendations",
       "settings": {
         "heading": "You may also like",
         "products_to_show": 4,
         "columns_desktop": 4,
-        "columns_mobile": "2"
+        "columns_mobile": "2",
+        "color_scheme": "scheme_1"
+      }
+    },
+    "rich_text": {
+      "type": "rich-text",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "text": "\"Designed for the night. Built for every day.\"",
+            "heading_size": "h1"
+          }
+        }
+      },
+      "block_order": ["heading"],
+      "settings": {
+        "text_alignment": "center",
+        "narrow_container": true,
+        "padding": "large",
+        "color_scheme": "scheme_2"
+      }
+    },
+    "featured_collection": {
+      "type": "featured-collection",
+      "settings": {
+        "heading": "Complete the Look",
+        "products_to_show": 4,
+        "columns_desktop": "4",
+        "show_view_all": true,
+        "color_scheme": "scheme_1"
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "text": "Join the Night",
+            "heading_size": "h2"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Early access to new releases. No spam, ever.</p>"
+          }
+        },
+        "form": {
+          "type": "form",
+          "settings": {
+            "button_label": "Subscribe",
+            "button_style": "primary"
+          }
+        }
+      },
+      "block_order": ["heading", "text", "form"],
+      "settings": {
+        "color_scheme": "scheme_2",
+        "narrow_container": true
       }
     }
   },
   "order": [
     "main",
-    "product_recommendations"
+    "scrolling_marquee",
+    "image_with_text",
+    "product_recommendations",
+    "rich_text",
+    "featured_collection",
+    "newsletter"
   ]
 }
