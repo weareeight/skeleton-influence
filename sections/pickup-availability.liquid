@@ -1,0 +1,128 @@
+{% comment %}
+  Pickup Availability Section
+  Rendered via Section Rendering API from product page JavaScript
+
+  This section displays store pickup availability for the current variant.
+  It's fetched dynamically when variants change.
+{% endcomment %}
+
+{%- assign pick_up_availabilities = product_variant.store_availabilities | where: 'pick_up_enabled', true -%}
+
+{%- if pick_up_availabilities.size > 0 -%}
+  {%- assign closest_location = pick_up_availabilities.first -%}
+
+  <pickup-availability class="pickup-availability">
+    <div class="pickup-availability__summary">
+      {%- if closest_location.available -%}
+        <span class="pickup-availability__icon pickup-availability__icon--available">
+          {% render 'icon', icon: 'check', size: 'sm' %}
+        </span>
+        <span class="pickup-availability__text">
+          {{ 'product.pickup_availability.available' | t: location: closest_location.location.name }}
+        </span>
+      {%- else -%}
+        <span class="pickup-availability__icon pickup-availability__icon--unavailable">
+          {% render 'icon', icon: 'x', size: 'sm' %}
+        </span>
+        <span class="pickup-availability__text">
+          {{ 'product.pickup_availability.unavailable' | t: location: closest_location.location.name }}
+        </span>
+      {%- endif -%}
+    </div>
+
+    {%- if closest_location.available -%}
+      <p class="pickup-availability__time text-sm text-muted">
+        {{ closest_location.pick_up_time }}
+      </p>
+    {%- endif -%}
+
+    {%- if pick_up_availabilities.size > 1 -%}
+      <button
+        type="button"
+        class="pickup-availability__button link text-sm"
+        data-pickup-modal-open
+        aria-haspopup="dialog"
+      >
+        {{ 'product.pickup_availability.check_other_stores' | t }}
+      </button>
+
+      <dialog class="pickup-availability__modal" data-pickup-modal>
+        <div class="pickup-availability__modal-header">
+          <h2 class="pickup-availability__modal-title h4">
+            {{ 'product.pickup_availability.view_store_info' | t }}
+          </h2>
+          <button type="button" class="pickup-availability__modal-close btn btn--icon" data-pickup-modal-close>
+            {% render 'icon', icon: 'close' %}
+          </button>
+        </div>
+
+        <div class="pickup-availability__modal-content">
+          <ul class="pickup-availability__stores" role="list">
+            {%- for availability in pick_up_availabilities -%}
+              <li class="pickup-availability__store">
+                <div class="pickup-availability__store-header">
+                  <span class="pickup-availability__store-name">{{ availability.location.name }}</span>
+                  {%- if availability.available -%}
+                    <span class="pickup-availability__store-status pickup-availability__store-status--available">
+                      {% render 'icon', icon: 'check', size: 'sm' %}
+                      <span>{{ availability.pick_up_time }}</span>
+                    </span>
+                  {%- else -%}
+                    <span class="pickup-availability__store-status pickup-availability__store-status--unavailable">
+                      {% render 'icon', icon: 'x', size: 'sm' %}
+                      <span>{{ 'product.pickup_availability.unavailable' | t: location: '' }}</span>
+                    </span>
+                  {%- endif -%}
+                </div>
+
+                {%- assign address = availability.location.address -%}
+                <address class="pickup-availability__store-address text-sm text-muted">
+                  {{ address.address1 }}<br>
+                  {%- if address.address2 != blank -%}
+                    {{ address.address2 }}<br>
+                  {%- endif -%}
+                  {{ address.city }}, {{ address.province_code }} {{ address.zip }}<br>
+                  {{ address.country }}
+                  {%- if address.phone != blank -%}
+                    <br><a href="tel:{{ address.phone }}">{{ address.phone }}</a>
+                  {%- endif -%}
+                </address>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      </dialog>
+    {%- endif -%}
+  </pickup-availability>
+
+  <script>
+    // Pickup availability modal functionality
+    (function() {
+      const container = document.currentScript.previousElementSibling;
+      if (!container) return;
+
+      const openBtn = container.querySelector('[data-pickup-modal-open]');
+      const modal = container.querySelector('[data-pickup-modal]');
+      const closeBtn = container.querySelector('[data-pickup-modal-close]');
+
+      if (openBtn && modal) {
+        openBtn.addEventListener('click', () => modal.showModal());
+
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => modal.close());
+        }
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) modal.close();
+        });
+      }
+    })();
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Pickup availability",
+  "limit": 1
+}
+{% endschema %}

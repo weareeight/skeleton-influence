@@ -30,6 +30,11 @@
     {% comment %} Meta tags for SEO and social sharing {% endcomment %}
     {% render 'meta-tags' %}
 
+    {% comment %} Favicon {% endcomment %}
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
     {% comment %} Shopify required header content {% endcomment %}
     {{ content_for_header }}
   </head>
@@ -43,7 +48,9 @@
     {% render 'icons-sprite' %}
 
     {% sections 'header-group' %}
-    {% section 'cart-drawer' %}
+    {%- if settings.cart_type == 'drawer' -%}
+      {% section 'cart-drawer' %}
+    {%- endif -%}
     {% section 'quick-shop' %}
 
     <main id="main-content" role="main">

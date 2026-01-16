@@ -14,7 +14,8 @@
 <section
   class="main-search section {% render 'color-scheme', scheme: section.settings.color_scheme %} section-padding--top-{{ section.settings.padding_top }} section-padding--bottom-{{ section.settings.padding_bottom }}"
 >
-  {% render 'page-header', title: 'search.title' | t %}
+  {%- assign page_title = 'search.title' | t -%}
+  {% render 'page-header', title: page_title %}
 
   <div class="container">
     {%- comment -%} Search Form {%- endcomment -%}
@@ -34,7 +35,7 @@
             autocapitalize="off"
             spellcheck="false"
           >
-          <input type="hidden" name="type" value="product,article,page,collection">
+          <input type="hidden" name="type" value="product,article,page">
           <button type="submit" class="search-form__submit btn btn--filled">
             {% render 'icon', icon: 'search' %}
             <span class="visually-hidden">{{ 'search.search' | t }}</span>
@@ -56,6 +57,12 @@
     {%- if search.performed -%}
       {%- if search.results_count > 0 -%}
         {%- comment -%} Search Toolbar {%- endcomment -%}
+        {%- comment -%}
+          Note: We show the total count on "All" using search.results_count.
+          Individual type tabs don't show counts because search.results is paginated
+          and we can't get accurate per-type totals without additional API calls.
+          Tabs are always shown so users can filter by type.
+        {%- endcomment -%}
         <div class="search-toolbar">
           {%- comment -%} Type Filter Tabs {%- endcomment -%}
           <div class="search-toolbar__tabs">
@@ -64,24 +71,36 @@
               class="search-toolbar__tab{% unless search.types %} is-active{% endunless %}"
             >
               {{ 'search.all' | t }}
+              {%- unless search.types -%}
+                <span class="search-toolbar__count">({{ search.results_count }})</span>
+              {%- endunless -%}
             </a>
             <a
               href="{{ routes.search_url }}?q={{ search.terms | url_encode }}&type=product"
               class="search-toolbar__tab{% if search.types contains 'product' and search.types.size == 1 %} is-active{% endif %}"
             >
               {{ 'search.products' | t }}
+              {%- if search.types contains 'product' and search.types.size == 1 -%}
+                <span class="search-toolbar__count">({{ search.results_count }})</span>
+              {%- endif -%}
             </a>
             <a
               href="{{ routes.search_url }}?q={{ search.terms | url_encode }}&type=article"
               class="search-toolbar__tab{% if search.types contains 'article' and search.types.size == 1 %} is-active{% endif %}"
             >
               {{ 'search.articles' | t }}
+              {%- if search.types contains 'article' and search.types.size == 1 -%}
+                <span class="search-toolbar__count">({{ search.results_count }})</span>
+              {%- endif -%}
             </a>
             <a
               href="{{ routes.search_url }}?q={{ search.terms | url_encode }}&type=page"
               class="search-toolbar__tab{% if search.types contains 'page' and search.types.size == 1 %} is-active{% endif %}"
             >
               {{ 'search.pages' | t }}
+              {%- if search.types contains 'page' and search.types.size == 1 -%}
+                <span class="search-toolbar__count">({{ search.results_count }})</span>
+              {%- endif -%}
             </a>
           </div>
 
@@ -104,9 +123,10 @@
           {%- endif -%}
         </div>
 
-        {%- comment -%} Faceted Filters (for products) {%- endcomment -%}
-        {%- if show_filters and search.filters.size > 0 -%}
-          <div class="search-filters-container">
+        {%- comment -%} Search Layout Container {%- endcomment -%}
+        <div class="search-layout{% if show_filters and search.filters.size > 0 %} search-layout--with-filters{% endif %}">
+          {%- comment -%} Faceted Filters (for products) {%- endcomment -%}
+          {%- if show_filters and search.filters.size > 0 -%}
             <aside class="search-filters" data-search-filters>
               <form id="SearchFiltersForm" data-search-filters-form>
                 {%- for filter in search.filters -%}
@@ -183,11 +203,11 @@
                 </noscript>
               </form>
             </aside>
-          </div>
-        {%- endif -%}
+          {%- endif -%}
 
-        {%- comment -%} Search Results {%- endcomment -%}
-        {%- paginate search.results by products_per_page -%}
+          {%- comment -%} Search Results {%- endcomment -%}
+          <div class="search-results">
+          {%- paginate search.results by products_per_page -%}
           <div
             class="search-results__grid grid"
             style="--grid-columns-desktop: {{ columns_desktop }}; --grid-columns-mobile: {{ columns_mobile }};"
@@ -257,6 +277,8 @@
             </nav>
           {%- endif -%}
         {%- endpaginate -%}
+          </div>{%- comment -%} /.search-results {%- endcomment -%}
+        </div>{%- comment -%} /.search-layout {%- endcomment -%}
       {%- else -%}
         {%- comment -%} No Results {%- endcomment -%}
         <div class="search-empty">
@@ -308,24 +330,26 @@ document.addEventListener('DOMContentLoaded', () => {
   padding: var(--section-padding-top) 0 var(--section-padding-bottom);
 }
 
-/* Search Header */
-.search-header {
-  text-align: center;
-  margin-bottom: var(--space-8);
-}
-
-.search-header__title {
-  margin: 0 0 var(--space-4);
-}
-
-.search-header__form {
+/* Search Form Wrapper */
+.search-form-wrapper {
   max-width: 600px;
-  margin: 0 auto;
+  margin: 0 auto var(--space-8);
+  border: none;
 }
 
-.search-header__results-count {
-  margin-top: var(--space-4);
+.search-form-container {
+  border: none;
+}
+
+.main-search .search-form {
+  border: none;
+}
+
+.search-results-count {
+  text-align: center;
+  font-size: var(--font-size-sm);
   color: var(--color-muted);
+  margin: var(--space-4) 0 var(--space-6);
 }
 
 /* Search Toolbar */
@@ -363,6 +387,11 @@ document.addEventListener('DOMContentLoaded', () => {
   border-color: var(--color-foreground);
 }
 
+.search-toolbar__count {
+  opacity: 0.7;
+  font-weight: 400;
+}
+
 .search-toolbar__sort {
   display: flex;
   align-items: center;
@@ -370,16 +399,22 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 /* Search Layout with Filters */
-.search-filters-container {
+.search-layout {
   margin-bottom: var(--space-6);
 }
 
 @media (min-width: 990px) {
-  .search-filters-container {
+  .search-layout--with-filters {
     display: grid;
-    grid-template-columns: 280px 1fr;
+    grid-template-columns: 280px minmax(0, 1fr);
     gap: var(--space-8);
+    align-items: start;
   }
+}
+
+.search-results {
+  min-width: 0;
+  display: block;
 }
 
 /* Search Filters */
@@ -503,20 +538,28 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 /* Search Results Grid */
-.search-results__grid {
+.search-results__grid.grid {
   display: grid;
   gap: var(--grid-gap, var(--space-6));
   grid-template-columns: repeat(var(--grid-columns-mobile, 1), 1fr);
+  width: 100%;
+  max-width: none;
 }
 
 @media (min-width: 750px) {
-  .search-results__grid {
+  .search-results__grid.grid {
     grid-template-columns: repeat(var(--grid-columns-desktop, 4), 1fr);
   }
 }
 
 .search-results__item {
   display: flex;
+  width: 100%;
+}
+
+.search-results__item > * {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Page Card (for page results) */

@@ -11,7 +11,7 @@
 
 <section class="rich-text section section--{{ padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
   <div class="container">
-    <div class="rich-text__inner text-{{ content_alignment }}{% if section.settings.narrow_width %} rich-text__inner--narrow{% endif %}">
+    <div class="rich-text__inner rich-text__inner--{{ text_style }} text-{{ content_alignment }}{% if section.settings.narrow_width %} rich-text__inner--narrow{% endif %}">
       {%- for block in section.blocks -%}
         {%- case block.type -%}
           {%- when 'subheading' -%}
@@ -31,7 +31,7 @@
           {%- when 'text' -%}
             {%- if block.settings.text != blank -%}
               <div
-                class="rich-text__text rte{% if text_style == 'large' %} text-lg{% endif %}"
+                class="rich-text__text rte"
                 {{ block.shopify_attributes }}
               >
                 {{ block.settings.text }}
@@ -107,6 +107,37 @@
     max-width: 40rem;
   }
 
+  /* Size variants - affect subheading, heading, and text */
+  .rich-text__inner--small .rich-text__subheading {
+    font-size: var(--font-size-xs);
+  }
+  .rich-text__inner--small .rich-text__heading {
+    font-size: var(--font-size-xl);
+  }
+  .rich-text__inner--small .rich-text__text {
+    font-size: var(--font-size-sm);
+  }
+
+  .rich-text__inner--medium .rich-text__subheading {
+    font-size: var(--font-size-sm);
+  }
+  .rich-text__inner--medium .rich-text__heading {
+    font-size: var(--font-size-3xl);
+  }
+  .rich-text__inner--medium .rich-text__text {
+    font-size: var(--font-size-base);
+  }
+
+  .rich-text__inner--large .rich-text__subheading {
+    font-size: var(--font-size-base);
+  }
+  .rich-text__inner--large .rich-text__heading {
+    font-size: var(--font-size-4xl);
+  }
+  .rich-text__inner--large .rich-text__text {
+    font-size: var(--font-size-lg);
+  }
+
   .rich-text__button {
     margin-top: var(--space-4);
   }
@@ -148,12 +179,13 @@
     {
       "type": "select",
       "id": "text_style",
-      "label": "t:sections.rich_text.settings.text_style.label",
+      "label": "Text size",
       "options": [
-        { "value": "body", "label": "t:sections.rich_text.settings.text_style.options.body" },
-        { "value": "large", "label": "t:sections.rich_text.settings.text_style.options.large" }
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
       ],
-      "default": "body"
+      "default": "medium"
     },
     {
       "type": "checkbox",

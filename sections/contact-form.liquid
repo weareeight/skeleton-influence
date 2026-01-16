@@ -3,21 +3,27 @@
   Displays a contact form with customizable fields
 {% endcomment %}
 
-<section class="contact-form-section section section--{{ section.settings.padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+<section class="contact-form-section section section--{{ section.settings.padding }}{% if section.settings.show_page_header %} has-page-header{% endif %} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
+  {%- if section.settings.show_page_header and section.settings.heading != blank -%}
+    {% render 'page-header', title: section.settings.heading %}
+  {%- endif -%}
+
   <div class="container{% if section.settings.narrow_container %} container--narrow{% endif %}">
     <div class="contact-form-section__inner">
-      {%- if section.settings.subheading != blank or section.settings.heading != blank or section.settings.text != blank -%}
+      {%- if section.settings.subheading != blank or section.settings.text != blank or section.settings.heading != blank and section.settings.show_page_header == false -%}
         <div class="contact-form-section__header text-{{ section.settings.text_alignment }}">
           {%- if section.settings.subheading != blank -%}
             <p class="contact-form-section__subheading subheading">
               {{ section.settings.subheading }}
             </p>
           {%- endif -%}
-          {%- if section.settings.heading != blank -%}
-            <h2 class="contact-form-section__heading {{ section.settings.heading_size }}">
-              {{ section.settings.heading }}
-            </h2>
-          {%- endif -%}
+          {%- unless section.settings.show_page_header -%}
+            {%- if section.settings.heading != blank -%}
+              <h2 class="contact-form-section__heading {{ section.settings.heading_size }}">
+                {{ section.settings.heading }}
+              </h2>
+            {%- endif -%}
+          {%- endunless -%}
           {%- if section.settings.text != blank -%}
             <div class="contact-form-section__text rte">
               {{ section.settings.text }}
@@ -192,6 +198,11 @@
   .contact-form-section.section--large {
     padding-block: var(--section-spacing-lg);
   }
+
+  /* Remove top padding when using page header */
+  .contact-form-section.has-page-header {
+    padding-top: 0;
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -210,6 +221,13 @@
       "id": "heading",
       "label": "t:labels.heading",
       "default": "Contact us"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_page_header",
+      "label": "Use page header style",
+      "info": "Display heading in the same style as other pages",
+      "default": true
     },
     {
       "type": "select",

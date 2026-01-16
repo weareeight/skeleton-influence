@@ -146,8 +146,8 @@
     </div>
   </div>
 
-  {%- comment -%} Scroll indicator {%- endcomment -%}
-  {%- if section.settings.show_scroll_indicator and section.settings.height == 'full' -%}
+  {%- comment -%} Scroll indicator - hidden when content is bottom center to avoid overlap {%- endcomment -%}
+  {%- if section.settings.show_scroll_indicator and section.settings.height == 'full' and section.settings.content_position != 'bottom_center' -%}
     <div class="hero__scroll-indicator">
       <span class="hero__scroll-text">Scroll</span>
       <span class="hero__scroll-line"></span>

@@ -188,16 +188,29 @@
           </a>
         {%- endif -%}
 
-        <a href="{{ routes.cart_url }}" class="header__icon-btn header__cart-btn" aria-label="{{ 'cart.title' | t }}" data-cart-toggle>
-          {% render 'icon', icon: 'cart' %}
-          <span class="visually-hidden">{{ 'cart.title' | t }}</span>
-          {%- case cart_badge_style -%}
-            {%- when 'number' -%}
-              <span class="header__cart-count{% if cart.item_count == 0 %} hidden{% endif %}" data-cart-count>{{ cart.item_count }}</span>
-            {%- when 'dot' -%}
-              <span class="header__cart-dot{% if cart.item_count == 0 %} hidden{% endif %}" data-cart-dot aria-hidden="true"></span>
-          {%- endcase -%}
-        </a>
+        {%- if settings.cart_type == 'drawer' -%}
+          <button type="button" class="header__icon-btn header__cart-btn" aria-label="{{ 'cart.title' | t }}" data-cart-toggle>
+            {% render 'icon', icon: 'cart' %}
+            <span class="visually-hidden">{{ 'cart.title' | t }}</span>
+            {%- case cart_badge_style -%}
+              {%- when 'number' -%}
+                <span class="header__cart-count{% if cart.item_count == 0 %} hidden{% endif %}" data-cart-count>{{ cart.item_count }}</span>
+              {%- when 'dot' -%}
+                <span class="header__cart-dot{% if cart.item_count == 0 %} hidden{% endif %}" data-cart-dot aria-hidden="true"></span>
+            {%- endcase -%}
+          </button>
+        {%- else -%}
+          <a href="{{ routes.cart_url }}" class="header__icon-btn header__cart-btn" aria-label="{{ 'cart.title' | t }}">
+            {% render 'icon', icon: 'cart' %}
+            <span class="visually-hidden">{{ 'cart.title' | t }}</span>
+            {%- case cart_badge_style -%}
+              {%- when 'number' -%}
+                <span class="header__cart-count{% if cart.item_count == 0 %} hidden{% endif %}" data-cart-count>{{ cart.item_count }}</span>
+              {%- when 'dot' -%}
+                <span class="header__cart-dot{% if cart.item_count == 0 %} hidden{% endif %}" data-cart-dot aria-hidden="true"></span>
+            {%- endcase -%}
+          </a>
+        {%- endif -%}
       </div>
     </div>
   </div>

@@ -648,6 +648,7 @@
     "no_results": "No results found for \"{{ terms }}\"",
     "no_results_html": "No results found for \"{{ terms }}\"",
     "results_count": "{{ count }} results for \"{{ terms }}\"",
+    "results_for_html": "{{ count }} results for <strong>\"{{ terms }}\"</strong>",
     "loading": "Loading...",
     "view_all": "View all results",
     "all": "All",
@@ -744,6 +745,8 @@
       "play_video": "Play video",
       "load_model": "Load 3D model"
     },
+    "media_thumbnail": "Product thumbnail {{ index }}",
+    "low_stock_count": "Only {{ count }} left in stock",
     "price": {
       "from": "From {{ price }}",
       "sale_price": "Sale price",
@@ -803,7 +806,8 @@
     "taxes_included_and_shipping_policy_html": "Taxes included. <a href=\"{{ link }}\">Shipping</a> calculated at checkout.",
     "taxes_and_shipping_policy_at_checkout_html": "Taxes and <a href=\"{{ link }}\">shipping</a> calculated at checkout.",
     "taxes_and_shipping_at_checkout": "Taxes and shipping calculated at checkout.",
-    "items_list": "Cart items"
+    "items_list": "Cart items",
+    "you_may_also_like": "You may also like"
   },
   "customer": {
     "account": {
@@ -915,6 +919,7 @@
     "tags_label": "Tags",
     "articles_list": "Blog posts",
     "article_comments": "Comments",
+    "article_metadata_html": "{{ date }} • {{ author }}",
     "comment_form_title": "Leave a comment",
     "comment_form_name": "Name",
     "comment_form_email": "Email",
@@ -933,7 +938,13 @@
     "onboarding": {
       "title": "Blog post title",
       "excerpt": "Give your customers a summary of your blog post.",
-      "author": "Author name"
+      "author": "Author name",
+      "tag": "Tag"
+    }
+  },
+  "blogs": {
+    "article": {
+      "reading_progress": "Reading progress"
     }
   },
   "article": {

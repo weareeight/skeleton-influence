@@ -20,10 +20,17 @@
 >
   {%- if recommendations.performed and recommendations.products_count > 0 -%}
     <div class="container">
-      {%- if heading != blank -%}
-        <h2 class="product-recommendations__heading section-heading text-{{ section.settings.heading_alignment }}">
-          {{ heading }}
-        </h2>
+      {%- if section.settings.subheading != blank or heading != blank -%}
+        <div class="product-recommendations__header text-{{ section.settings.heading_alignment }}">
+          {%- if section.settings.subheading != blank -%}
+            <p class="product-recommendations__subheading subheading">{{ section.settings.subheading }}</p>
+          {%- endif -%}
+          {%- if heading != blank -%}
+            <h2 class="product-recommendations__heading {{ section.settings.heading_size }}">
+              {{ heading }}
+            </h2>
+          {%- endif -%}
+        </div>
       {%- endif -%}
 
       <div
@@ -71,8 +78,16 @@
     padding-block: var(--section-spacing-md);
   }
 
-  .product-recommendations__heading {
+  .product-recommendations__header {
     margin-bottom: var(--space-8);
+  }
+
+  .product-recommendations__subheading {
+    margin-bottom: var(--space-2);
+  }
+
+  .product-recommendations__heading {
+    margin: 0;
   }
 
   .product-recommendations__grid {
@@ -100,9 +115,25 @@
   "settings": [
     {
       "type": "text",
+      "id": "subheading",
+      "label": "t:labels.subheading"
+    },
+    {
+      "type": "text",
       "id": "heading",
       "label": "t:labels.heading",
       "default": "You may also like"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "t:labels.heading_size",
+      "options": [
+        { "value": "h3", "label": "t:options.heading_size.small" },
+        { "value": "h2", "label": "t:options.heading_size.medium" },
+        { "value": "h1", "label": "t:options.heading_size.large" }
+      ],
+      "default": "h2"
     },
     {
       "type": "select",

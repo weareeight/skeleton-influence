@@ -51,13 +51,13 @@
 {% endif %}
 
 {% stylesheet %}
-  .search-results {
+  .section-search .search-results {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
-  .search-results .prev,
-  .search-results .page,
-  .search-results .next {
+  .section-search .search-results .prev,
+  .section-search .search-results .page,
+  .section-search .search-results .next {
     grid-column: 1 / -1;
   }
 {% endstylesheet %}

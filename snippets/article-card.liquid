@@ -20,23 +20,23 @@
 {% endcomment %}
 
 {%- liquid
-  assign show_date = show_date | default: true
-  assign show_author = show_author | default: true
-  assign show_tags = show_tags | default: false
-  assign show_excerpt = show_excerpt | default: true
-  assign show_image = show_image | default: true
-  assign show_read_time = show_read_time | default: true
+  assign show_date = show_date | default: true, allow_false: true
+  assign show_author = show_author | default: true, allow_false: true
+  assign show_tags = show_tags | default: false, allow_false: true
+  assign show_excerpt = show_excerpt | default: true, allow_false: true
+  assign show_image = show_image | default: true, allow_false: true
+  assign show_read_time = show_read_time | default: true, allow_false: true
   assign image_ratio = image_ratio | default: 'landscape'
   assign heading_size = heading_size | default: 'h4'
   assign featured = featured | default: false
 
   case image_ratio
-    when 'landscape'
-      assign aspect_ratio = '16-9'
     when 'portrait'
-      assign aspect_ratio = '3-4'
+      assign aspect_ratio = 'portrait'
     when 'square'
-      assign aspect_ratio = '1-1'
+      assign aspect_ratio = 'square'
+    else
+      assign aspect_ratio = 'landscape'
   endcase
 
   # Calculate read time
@@ -75,21 +75,23 @@
 
   <div class="article-card__content">
     {%- comment -%} Category + Read Time Row {%- endcomment -%}
-    <div class="article-card__meta-top">
-      {%- if article.tags.size > 0 -%}
-        <a href="{{ blog.url }}/tagged/{{ article.tags.first | handle }}" class="article-card__category">
-          {{ article.tags.first }}
-        </a>
-      {%- endif -%}
-      {%- if article.tags.size > 0 and show_read_time -%}
-        <span class="article-card__divider" aria-hidden="true"></span>
-      {%- endif -%}
-      {%- if show_read_time -%}
-        <span class="article-card__read-time">
-          {{ read_time }} {{ 'article.min_read' | t }}
-        </span>
-      {%- endif -%}
-    </div>
+    {%- if show_tags and article.tags.size > 0 or show_read_time -%}
+      <div class="article-card__meta-top">
+        {%- if show_tags and article.tags.size > 0 -%}
+          <a href="{{ blog.url }}/tagged/{{ article.tags.first | handle }}" class="article-card__category">
+            {{ article.tags.first }}
+          </a>
+        {%- endif -%}
+        {%- if show_tags and article.tags.size > 0 and show_read_time -%}
+          <span class="article-card__divider" aria-hidden="true"></span>
+        {%- endif -%}
+        {%- if show_read_time -%}
+          <span class="article-card__read-time">
+            {{ read_time }} {{ 'article.min_read' | t }}
+          </span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
 
     <h3 class="article-card__title {{ heading_size }}">
       <a href="{{ article.url }}">{{ article.title }}</a>

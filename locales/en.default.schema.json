@@ -899,24 +899,6 @@
         }
       }
     },
-    "video": {
-      "name": "Video",
-      "settings": {
-        "heading": {
-          "label": "Heading"
-        },
-        "video_url": {
-          "label": "Video URL",
-          "info": "Supports YouTube and Vimeo"
-        },
-        "cover_image": {
-          "label": "Cover image"
-        },
-        "enable_autoplay": {
-          "label": "Autoplay"
-        }
-      }
-    },
     "testimonials": {
       "name": "Testimonials",
       "settings": {
@@ -2034,7 +2016,6 @@
     "page_margin": "Page margin",
     "page_width": "Page width",
     "show_payment_icons": "Show payment icons",
-    "subheading": "Subheading",
     "text": "Text",
     "text_alignment": "Text alignment",
     "text_style": "Text style",

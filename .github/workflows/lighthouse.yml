@@ -1,0 +1,65 @@
+name: Lighthouse CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    name: Lighthouse Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli @shopify/theme
+
+      - name: Deploy theme to preview
+        env:
+          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+          SHOPIFY_FLAG_STORE: ${{ secrets.SHOPIFY_STORE }}
+        run: |
+          shopify theme push --unpublished --json > theme-info.json
+          echo "PREVIEW_URL=$(cat theme-info.json | jq -r '.theme.preview_url')" >> $GITHUB_ENV
+          echo "THEME_ID=$(cat theme-info.json | jq -r '.theme.id')" >> $GITHUB_ENV
+
+      - name: Wait for theme processing
+        run: sleep 30
+
+      - name: Lighthouse CI (Desktop)
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            ${{ env.PREVIEW_URL }}
+            ${{ env.PREVIEW_URL }}/collections/all
+          configPath: .github/lighthouse/lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Lighthouse CI (Mobile)
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            ${{ env.PREVIEW_URL }}
+            ${{ env.PREVIEW_URL }}/collections/all
+          configPath: .github/lighthouse/lighthouserc-mobile.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Cleanup preview theme
+        if: always()
+        env:
+          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+          SHOPIFY_FLAG_STORE: ${{ secrets.SHOPIFY_STORE }}
+        run: |
+          if [ -n "${{ env.THEME_ID }}" ]; then
+            shopify theme delete --theme ${{ env.THEME_ID }} --force || true
+          fi

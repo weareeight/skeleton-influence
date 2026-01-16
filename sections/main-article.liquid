@@ -113,33 +113,39 @@
       <div class="article-share">
         <span class="article-share__label">{{ 'article.share' | t }}</span>
         <div class="article-share__links">
-          <a
-            href="https://www.facebook.com/sharer/sharer.php?u={{ article.url | prepend: request.origin | url_encode }}"
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            class="article-share__link"
-            aria-label="{{ 'accessibility.share_facebook' | t }}"
-          >
-            {% render 'icon', icon: 'facebook' %}
-          </a>
-          <a
-            href="https://twitter.com/intent/tweet?url={{ article.url | prepend: request.origin | url_encode }}&text={{ article.title | url_encode }}"
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            class="article-share__link"
-            aria-label="{{ 'accessibility.share_twitter' | t }}"
-          >
-            {% render 'icon', icon: 'twitter' %}
-          </a>
-          <a
-            href="https://pinterest.com/pin/create/button/?url={{ article.url | prepend: request.origin | url_encode }}&media={{ article.image | image_url: width: 1200 | prepend: 'https:' | url_encode }}&description={{ article.title | url_encode }}"
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            class="article-share__link"
-            aria-label="{{ 'accessibility.share_pinterest' | t }}"
-          >
-            {% render 'icon', icon: 'pinterest' %}
-          </a>
+          {%- if settings.share_facebook -%}
+            <a
+              href="https://www.facebook.com/sharer/sharer.php?u={{ article.url | prepend: request.origin | url_encode }}"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              class="article-share__link"
+              aria-label="{{ 'accessibility.share_facebook' | t }}"
+            >
+              {% render 'icon', icon: 'facebook' %}
+            </a>
+          {%- endif -%}
+          {%- if settings.share_twitter -%}
+            <a
+              href="https://twitter.com/intent/tweet?url={{ article.url | prepend: request.origin | url_encode }}&text={{ article.title | url_encode }}"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              class="article-share__link"
+              aria-label="{{ 'accessibility.share_twitter' | t }}"
+            >
+              {% render 'icon', icon: 'twitter' %}
+            </a>
+          {%- endif -%}
+          {%- if settings.share_pinterest and article.image -%}
+            <a
+              href="https://pinterest.com/pin/create/button/?url={{ article.url | prepend: request.origin | url_encode }}&media={{ article.image | image_url: width: 1200 | prepend: 'https:' | url_encode }}&description={{ article.title | url_encode }}"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              class="article-share__link"
+              aria-label="{{ 'accessibility.share_pinterest' | t }}"
+            >
+              {% render 'icon', icon: 'pinterest' %}
+            </a>
+          {%- endif -%}
           <a
             href="mailto:?subject={{ article.title | url_encode }}&body={{ article.url | prepend: request.origin | url_encode }}"
             class="article-share__link"

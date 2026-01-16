@@ -103,6 +103,10 @@
                 <a href="{{ item.url }}">{{ item.product.title }}</a>
               </h3>
 
+              {%- if settings.cart_show_vendor and item.product.vendor != blank -%}
+                <p class="cart-drawer-item__vendor">{{ item.product.vendor }}</p>
+              {%- endif -%}
+
               {%- if item.product.has_only_default_variant == false -%}
                 <p class="cart-drawer-item__variant">{{ item.variant.title }}</p>
               {%- endif -%}
@@ -232,7 +236,7 @@
 
   {%- if cart.item_count > 0 -%}
     {%- comment -%} Cart Note Section {%- endcomment -%}
-    {%- if section.settings.enable_cart_note -%}
+    {%- if settings.cart_enable_notes -%}
       <div class="cart-drawer__note" data-cart-note>
         <button type="button" class="cart-drawer__note-toggle" data-cart-note-toggle aria-expanded="false">
           <span>{{ 'cart.note_toggle' | t }}</span>
@@ -738,16 +742,6 @@
       "id": "shipping_message_success",
       "label": "t:sections.cart_drawer.settings.shipping_message_success.label",
       "default": "You've unlocked free shipping!"
-    },
-    {
-      "type": "header",
-      "content": "t:sections.cart_drawer.settings.header_cart_note.content"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_cart_note",
-      "label": "t:sections.cart_drawer.settings.enable_cart_note.label",
-      "default": true
     },
     {
       "type": "header",

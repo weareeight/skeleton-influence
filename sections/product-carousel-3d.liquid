@@ -12,6 +12,7 @@
   assign height_class = 'carousel-3d--' | append: section.settings.height
   assign display_title = section.settings.custom_title | default: product.title | default: 'Product Title'
   assign padding = section.settings.padding
+  assign enable_text_override = section.settings.enable_text_override
 -%}
 
 <section
@@ -22,12 +23,16 @@
     --carousel-radius: {{ section.settings.carousel_radius }}px;
     --card-width: 280px;
     --card-height: 380px;
+    {%- if enable_text_override -%}
+      --text-override-color: {{ section.settings.text_color }};
+      --text-override-bg: {{ section.settings.text_background_color }};
+    {%- endif -%}
   "
 >
   {%- comment -%} 3D Scene with centered title overlay {%- endcomment -%}
   <div class="carousel-3d__scene">
     {%- comment -%} Title overlay - centered in the middle of the carousel {%- endcomment -%}
-    <div class="carousel-3d__title-overlay">
+    <div class="carousel-3d__title-overlay{% if enable_text_override %} carousel-3d__title-overlay--custom-colors{% endif %}">
       {%- if section.settings.subheading != blank -%}
         <p class="carousel-3d__subheading subheading">{{ section.settings.subheading }}</p>
       {%- endif -%}
@@ -199,6 +204,18 @@
 
   .carousel-3d__title span {
     display: inline-block;
+  }
+
+  /* Text color overrides - background hugs the text */
+  .carousel-3d__title-overlay--custom-colors .carousel-3d__title span,
+  .carousel-3d__title-overlay--custom-colors .carousel-3d__subheading,
+  .carousel-3d__title-overlay--custom-colors .carousel-3d__price,
+  .carousel-3d__title-overlay--custom-colors .carousel-3d__variants {
+    color: var(--text-override-color);
+    background-color: var(--text-override-bg);
+    padding: 0.1em 0.4em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
   }
 
   .carousel-3d__title--small { font-size: clamp(1rem, 3vw, 1.5rem); }
@@ -521,6 +538,31 @@
         { "value": "underline", "label": "t:options.button_style.underline" }
       ],
       "default": "filled"
+    },
+    {
+      "type": "header",
+      "content": "Text colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_text_override",
+      "label": "Override text colors",
+      "info": "Use custom colors instead of color scheme",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff",
+      "visible_if": "{{ section.settings.enable_text_override }}"
+    },
+    {
+      "type": "color",
+      "id": "text_background_color",
+      "label": "Text background color",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.enable_text_override }}"
     },
     {
       "type": "header",

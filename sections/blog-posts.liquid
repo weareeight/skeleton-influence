@@ -3,6 +3,8 @@
   Displays featured blog articles from a selected blog
 {% endcomment %}
 
+{{ 'blog.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
   assign blog = blogs[section.settings.blog]
   assign posts_to_show = section.settings.posts_to_show
@@ -11,16 +13,15 @@
   assign padding = section.settings.padding
   assign image_ratio = section.settings.image_ratio
   assign layout = section.settings.layout
+  assign heading_alignment = section.settings.heading_alignment
 
   case image_ratio
-    when 'landscape'
-      assign aspect_class = 'aspect-16-9'
     when 'portrait'
       assign aspect_class = 'aspect-portrait'
     when 'square'
       assign aspect_class = 'aspect-square'
     else
-      assign aspect_class = 'aspect-16-9'
+      assign aspect_class = 'aspect-landscape'
   endcase
 -%}
 
@@ -31,7 +32,7 @@
 >
   <div class="container">
     {%- if section.settings.subheading != blank or section.settings.heading != blank or section.settings.show_view_all -%}
-      <div class="blog-posts__header">
+      <div class="blog-posts__header blog-posts__header--{{ heading_alignment }}">
         <div class="blog-posts__header-text">
           {%- if section.settings.subheading != blank -%}
             <p class="blog-posts__subheading subheading" data-animate="fade">{{ section.settings.subheading }}</p>
@@ -62,6 +63,8 @@
               show_date: section.settings.show_date,
               show_author: section.settings.show_author,
               show_excerpt: section.settings.show_excerpt,
+              show_tags: section.settings.show_tags,
+              show_read_time: section.settings.show_read_time,
               image_ratio: section.settings.image_ratio
             %}
           </article>
@@ -82,6 +85,19 @@
                 {{ 'lifestyle-1' | placeholder_svg_tag: 'article-card__placeholder' }}
               </div>
               <div class="article-card__content">
+                {%- if section.settings.show_tags or section.settings.show_read_time -%}
+                  <div class="article-card__meta-top">
+                    {%- if section.settings.show_tags -%}
+                      <span class="article-card__category">{{ 'blog.onboarding.tag' | t | default: 'Style' }}</span>
+                    {%- endif -%}
+                    {%- if section.settings.show_tags and section.settings.show_read_time -%}
+                      <span class="article-card__divider" aria-hidden="true"></span>
+                    {%- endif -%}
+                    {%- if section.settings.show_read_time -%}
+                      <span class="article-card__read-time">3 {{ 'article.min_read' | t }}</span>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
                 <h3 class="article-card__title h4">
                   <a href="#">{{ 'blog.onboarding.title' | t }}</a>
                 </h3>
@@ -147,6 +163,17 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
+  }
+
+  /* Center alignment */
+  .blog-posts__header--center {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .blog-posts__header--center .blog-posts__header-text {
+    align-items: center;
   }
 
   .blog-posts__view-all {
@@ -332,6 +359,16 @@
       "default": "From the journal"
     },
     {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "t:labels.heading_alignment",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" }
+      ],
+      "default": "left"
+    },
+    {
       "type": "blog",
       "id": "blog",
       "label": "t:sections.blog_posts.settings.blog.label"
@@ -426,6 +463,18 @@
       "type": "checkbox",
       "id": "show_excerpt",
       "label": "t:sections.blog_posts.settings.show_excerpt.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show tags",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_read_time",
+      "label": "Show read time",
       "default": true
     },
     {

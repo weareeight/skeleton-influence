@@ -22,17 +22,29 @@
     {%- comment -%} Image with reveal animation {%- endcomment -%}
     <div class="image-with-text__media image-with-text__media--{{ image_ratio }}" data-animate="{{ image_reveal }}">
       {%- if section.settings.image != blank -%}
-        {%- assign focal_point = section.settings.image.presentation.focal_point | default: '50% 50%' -%}
-        {{
-          section.settings.image
-          | image_url: width: 1200
-          | image_tag:
-            loading: 'lazy',
-            sizes: '(min-width: 990px) 50vw, 100vw',
-            widths: '375, 550, 750, 1000, 1200',
-            class: 'image-with-text__image',
-            style: 'object-position: ' | append: focal_point | append: ';'
-        }}
+        {%- if image_ratio == 'adapt' -%}
+          {{
+            section.settings.image
+            | image_url: width: 1200
+            | image_tag:
+              loading: 'lazy',
+              sizes: '(min-width: 990px) 50vw, 100vw',
+              widths: '375, 550, 750, 1000, 1200',
+              class: 'image-with-text__image'
+          }}
+        {%- else -%}
+          {%- assign focal_point = section.settings.image.presentation.focal_point | default: '50% 50%' -%}
+          {{
+            section.settings.image
+            | image_url: width: 1200
+            | image_tag:
+              loading: 'lazy',
+              sizes: '(min-width: 990px) 50vw, 100vw',
+              widths: '375, 550, 750, 1000, 1200',
+              class: 'image-with-text__image',
+              style: 'object-position: ' | append: focal_point | append: ';'
+          }}
+        {%- endif -%}
       {%- else -%}
         {{ 'image' | placeholder_svg_tag: 'image-with-text__placeholder' }}
       {%- endif -%}
@@ -331,7 +343,7 @@
         { "value": "medium", "label": "t:options.padding.medium" },
         { "value": "large", "label": "t:options.padding.large" }
       ],
-      "default": "medium"
+      "default": "none"
     },
     {
       "type": "color_scheme",

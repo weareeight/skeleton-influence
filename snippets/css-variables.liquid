@@ -31,17 +31,20 @@
     --font-body-weight: {{ settings.type_body_font.weight }};
 
     /* Font Size Scale (Fluid Typography) */
-    --font-size-xs: clamp(0.6875rem, 0.65rem + 0.1vw, 0.75rem);      /* 11-12px */
-    --font-size-sm: clamp(0.75rem, 0.7rem + 0.15vw, 0.875rem);       /* 12-14px */
-    --font-size-base: clamp(0.875rem, 0.8rem + 0.2vw, 1rem);         /* 14-16px */
-    --font-size-md: clamp(1rem, 0.9rem + 0.3vw, 1.125rem);           /* 16-18px */
-    --font-size-lg: clamp(1.125rem, 1rem + 0.4vw, 1.375rem);         /* 18-22px */
-    --font-size-xl: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);        /* 20-26px */
-    --font-size-2xl: clamp(1.5rem, 1.3rem + 0.7vw, 2rem);            /* 24-32px */
-    --font-size-3xl: clamp(1.875rem, 1.5rem + 1vw, 2.5rem);          /* 30-40px */
-    --font-size-4xl: clamp(2.25rem, 1.8rem + 1.5vw, 3.25rem);        /* 36-52px */
-    --font-size-5xl: clamp(2.75rem, 2rem + 2vw, 4rem);               /* 44-64px */
-    --font-size-display: clamp(3.5rem, 2.5rem + 3vw, 6rem);          /* 56-96px */
+    /* Base size from settings: {{ settings.type_base_size | default: 16 }}px */
+    {%- assign base_size = settings.type_base_size | default: 16 -%}
+    {%- assign scale_factor = base_size | divided_by: 16.0 -%}
+    --font-size-xs: calc({{ scale_factor }} * clamp(0.6875rem, 0.65rem + 0.1vw, 0.75rem));
+    --font-size-sm: calc({{ scale_factor }} * clamp(0.75rem, 0.7rem + 0.15vw, 0.875rem));
+    --font-size-base: calc({{ scale_factor }} * clamp(0.875rem, 0.8rem + 0.2vw, 1rem));
+    --font-size-md: calc({{ scale_factor }} * clamp(1rem, 0.9rem + 0.3vw, 1.125rem));
+    --font-size-lg: calc({{ scale_factor }} * clamp(1.125rem, 1rem + 0.4vw, 1.375rem));
+    --font-size-xl: calc({{ scale_factor }} * clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem));
+    --font-size-2xl: calc({{ scale_factor }} * clamp(1.5rem, 1.3rem + 0.7vw, 2rem));
+    --font-size-3xl: calc({{ scale_factor }} * clamp(1.875rem, 1.5rem + 1vw, 2.5rem));
+    --font-size-4xl: calc({{ scale_factor }} * clamp(2.25rem, 1.8rem + 1.5vw, 3.25rem));
+    --font-size-5xl: calc({{ scale_factor }} * clamp(2.75rem, 2rem + 2vw, 4rem));
+    --font-size-display: calc({{ scale_factor }} * clamp(3.5rem, 2.5rem + 3vw, 6rem));
 
     /* Line Heights */
     --line-height-tight: 1.1;
@@ -78,11 +81,25 @@
     --space-40: 10rem;    /* 160px */
     --space-48: 12rem;    /* 192px */
 
-    /* Section Spacing (responsive) */
-    --section-spacing-sm: clamp(2rem, 4vw, 3rem);
-    --section-spacing-md: clamp(3rem, 6vw, 5rem);
-    --section-spacing-lg: clamp(4rem, 8vw, 7rem);
-    --section-spacing-xl: clamp(5rem, 10vw, 10rem);
+    /* Section Spacing (responsive, controlled by settings.section_spacing) */
+    {%- case settings.section_spacing -%}
+      {%- when 'compact' -%}
+        --section-spacing-sm: clamp(1.5rem, 3vw, 2rem);
+        --section-spacing-md: clamp(2rem, 4vw, 3rem);
+        --section-spacing-lg: clamp(2.5rem, 5vw, 4rem);
+        --section-spacing-xl: clamp(3rem, 6vw, 5rem);
+      {%- when 'generous' -%}
+        --section-spacing-sm: clamp(3rem, 5vw, 4rem);
+        --section-spacing-md: clamp(4rem, 7vw, 6rem);
+        --section-spacing-lg: clamp(5rem, 9vw, 8rem);
+        --section-spacing-xl: clamp(6rem, 11vw, 10rem);
+      {%- else -%}
+        /* Standard (default) */
+        --section-spacing-sm: clamp(2rem, 4vw, 3rem);
+        --section-spacing-md: clamp(3rem, 6vw, 5rem);
+        --section-spacing-lg: clamp(4rem, 8vw, 7rem);
+        --section-spacing-xl: clamp(5rem, 10vw, 10rem);
+    {%- endcase -%}
 
     /* Grid Gap */
     --grid-gap-sm: clamp(0.75rem, 2vw, 1rem);

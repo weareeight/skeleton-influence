@@ -7,8 +7,14 @@
 {% endcomment %}
 
 {%- liquid
-  assign show_country = localization.available_countries.size > 1
-  assign show_language = localization.available_languages.size > 1
+  assign show_country = false
+  if localization.available_countries.size > 1
+    assign show_country = true
+  endif
+  assign show_language = false
+  if localization.available_languages.size > 1
+    assign show_language = true
+  endif
 -%}
 
 {%- if show_country or show_language -%}

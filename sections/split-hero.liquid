@@ -13,13 +13,16 @@
   assign content_alignment = section.settings.content_alignment
   assign mobile_image_position = section.settings.mobile_image_position
   assign padding = section.settings.padding
+  assign overlay_style = section.settings.overlay_style | default: 'none'
+  assign overlay_opacity = section.settings.overlay_opacity | default: 0
 -%}
 
 <section
   id="{{ section_id }}"
-  class="split-hero section section--{{ padding }} split-hero--{{ image_position }} split-hero--{{ height }} split-hero--mobile-image-{{ mobile_image_position }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
+  class="split-hero section section--{{ padding }} split-hero--{{ image_position }} split-hero--{{ height }} split-hero--mobile-image-{{ mobile_image_position }} split-hero--overlay-{{ overlay_style }} {% render 'color-scheme', scheme: section.settings.color_scheme %}"
   data-section-id="{{ section.id }}"
   data-section-type="split-hero"
+  style="--split-hero-overlay-opacity: {{ overlay_opacity | divided_by: 100.0 }};"
 >
   <div class="split-hero__grid split-hero__grid--{{ split_ratio }}">
     {%- comment -%} Image Side with reveal animation {%- endcomment -%}
@@ -46,6 +49,9 @@
           </div>
         {%- endif -%}
       </div>
+      {%- if overlay_style != 'none' and overlay_opacity > 0 -%}
+        <div class="split-hero__overlay"></div>
+      {%- endif -%}
     </div>
 
     {%- comment -%} Content Side with staggered animations {%- endcomment -%}
@@ -249,6 +255,35 @@
     opacity: 0.5;
   }
 
+  /* Overlay styles */
+  .split-hero__overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .split-hero--overlay-solid .split-hero__overlay {
+    background-color: rgb(0 0 0 / var(--split-hero-overlay-opacity, 0.3));
+  }
+
+  .split-hero--overlay-gradient .split-hero__overlay {
+    background: linear-gradient(
+      to top,
+      rgb(0 0 0 / calc(var(--split-hero-overlay-opacity, 0.3) * 1.5)) 0%,
+      rgb(0 0 0 / calc(var(--split-hero-overlay-opacity, 0.3) * 0.5)) 50%,
+      transparent 100%
+    );
+  }
+
+  .split-hero--overlay-vignette .split-hero__overlay {
+    background: radial-gradient(
+      ellipse at center,
+      rgb(0 0 0 / calc(var(--split-hero-overlay-opacity, 0.3) * 0.3)) 50%,
+      rgb(0 0 0 / var(--split-hero-overlay-opacity, 0.3)) 100%
+    );
+  }
+
   /* Content side */
   .split-hero__content {
     display: flex;
@@ -446,6 +481,32 @@
       "id": "enable_parallax",
       "label": "t:sections.split_hero.settings.enable_parallax.label",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "Image overlay"
+    },
+    {
+      "type": "select",
+      "id": "overlay_style",
+      "label": "Overlay style",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "solid", "label": "Solid" },
+        { "value": "gradient", "label": "Gradient" },
+        { "value": "vignette", "label": "Vignette" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay opacity",
+      "default": 30
     },
     {
       "type": "select",

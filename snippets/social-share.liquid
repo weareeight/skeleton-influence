@@ -10,6 +10,10 @@
   - share_title: Title to share
   - share_url: URL to share (relative path)
   - share_image: (optional) Image for Pinterest
+  - show_facebook: (optional) Show Facebook button
+  - show_twitter: (optional) Show Twitter/X button
+  - show_pinterest: (optional) Show Pinterest button
+  - show_email: (optional) Show Email button
 {% endcomment %}
 
 {%- liquid
@@ -17,39 +21,57 @@
   assign full_url = share_url | prepend: request.origin
   assign encoded_url = full_url | url_encode
   assign encoded_title = share_title | default: page_title | url_encode
+
+  # Use passed parameters if provided, otherwise fall back to global theme settings
+  if show_facebook == nil
+    assign show_facebook = settings.share_facebook
+  endif
+  if show_twitter == nil
+    assign show_twitter = settings.share_twitter
+  endif
+  if show_pinterest == nil
+    assign show_pinterest = settings.share_pinterest
+  endif
+  if show_email == nil
+    assign show_email = true
+  endif
 -%}
 
 <div class="social-share">
   <span class="social-share__label subheading">{{ 'general.social.share' | t }}</span>
   <ul class="social-share__links" role="list">
     {%- comment -%} Facebook {%- endcomment -%}
-    <li>
-      <a
-        href="https://www.facebook.com/sharer/sharer.php?u={{ encoded_url }}"
-        target="_blank"
-        rel="noopener noreferrer nofollow"
-        aria-label="{{ 'accessibility.share_facebook' | t }}"
-        class="social-share__link"
-      >
-        {% render 'icon', icon: 'facebook' %}
-      </a>
-    </li>
+    {%- if show_facebook -%}
+      <li>
+        <a
+          href="https://www.facebook.com/sharer/sharer.php?u={{ encoded_url }}"
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          aria-label="{{ 'accessibility.share_facebook' | t }}"
+          class="social-share__link"
+        >
+          {% render 'icon', icon: 'facebook' %}
+        </a>
+      </li>
+    {%- endif -%}
 
     {%- comment -%} Twitter/X {%- endcomment -%}
-    <li>
-      <a
-        href="https://twitter.com/intent/tweet?text={{ encoded_title }}&url={{ encoded_url }}"
-        target="_blank"
-        rel="noopener noreferrer nofollow"
-        aria-label="{{ 'accessibility.share_twitter' | t }}"
-        class="social-share__link"
-      >
-        {% render 'icon', icon: 'twitter' %}
-      </a>
-    </li>
+    {%- if show_twitter -%}
+      <li>
+        <a
+          href="https://twitter.com/intent/tweet?text={{ encoded_title }}&url={{ encoded_url }}"
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          aria-label="{{ 'accessibility.share_twitter' | t }}"
+          class="social-share__link"
+        >
+          {% render 'icon', icon: 'twitter' %}
+        </a>
+      </li>
+    {%- endif -%}
 
     {%- comment -%} Pinterest {%- endcomment -%}
-    {%- if share_image != blank -%}
+    {%- if show_pinterest and share_image != blank -%}
       <li>
         <a
           href="https://pinterest.com/pin/create/button/?url={{ encoded_url }}&media={{ share_image | image_url: width: 1200 | prepend: 'https:' | url_encode }}&description={{ encoded_title }}"
@@ -64,15 +86,17 @@
     {%- endif -%}
 
     {%- comment -%} Email {%- endcomment -%}
-    <li>
-      <a
-        href="mailto:?subject={{ encoded_title }}&body={{ full_url }}"
-        aria-label="{{ 'accessibility.share_email' | t }}"
-        class="social-share__link"
-      >
-        {% render 'icon', icon: 'mail' %}
-      </a>
-    </li>
+    {%- if show_email -%}
+      <li>
+        <a
+          href="mailto:?subject={{ encoded_title }}&body={{ full_url }}"
+          aria-label="{{ 'accessibility.share_email' | t }}"
+          class="social-share__link"
+        >
+          {% render 'icon', icon: 'mail' %}
+        </a>
+      </li>
+    {%- endif -%}
   </ul>
 </div>
 

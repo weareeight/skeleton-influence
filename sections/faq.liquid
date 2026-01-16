@@ -5,7 +5,6 @@
 
 {%- liquid
   assign columns_desktop = section.settings.columns_desktop
-  assign columns_mobile = section.settings.columns_mobile
 -%}
 
 <section class="faq section section--{{ section.settings.padding }} {% render 'color-scheme', scheme: section.settings.color_scheme %}">
@@ -31,7 +30,7 @@
     {%- if section.blocks.size > 0 -%}
       <div
         class="faq__grid"
-        style="--faq-columns-desktop: {{ columns_desktop }}; --faq-columns-mobile: {{ columns_mobile }};"
+        style="--faq-columns-desktop: {{ columns_desktop }};"
       >
         {%- for block in section.blocks -%}
           <div class="faq__item" {{ block.shopify_attributes }}>
@@ -78,7 +77,7 @@
   /* Grid layout */
   .faq__grid {
     display: grid;
-    grid-template-columns: repeat(var(--faq-columns-mobile, 1), 1fr);
+    grid-template-columns: 1fr;
     border-top: 1px solid var(--color-border);
     border-left: 1px solid var(--color-border);
   }
@@ -188,15 +187,6 @@
         { "value": "3", "label": "3" }
       ],
       "default": "2"
-    },
-    {
-      "type": "select",
-      "id": "columns_mobile",
-      "label": "t:labels.columns_mobile",
-      "options": [
-        { "value": "1", "label": "1" }
-      ],
-      "default": "1"
     },
     {
       "type": "header",
