@@ -11,9 +11,8 @@ import { runBriefPhase } from './phases/1-brief.js';
 import { runProductsPhase } from './phases/2-products.js';
 import { runImagesPhase } from './phases/3-images.js';
 import { runDifferentiationPhase } from './phases/4-differentiation.js';
+import { runDesignSystemPhase } from './phases/5-design-system.js';
 // Future phase imports (to be implemented)
-// import { runDesignSystemPhase } from './phases/5-design-system.js';
-// import { runCodeGenerationPhase } from './phases/6-code-generation.js';
 // import { runTestingPhase } from './phases/7-testing.js';
 // import { runSubmissionPhase } from './phases/8-submission.js';
 
@@ -128,12 +127,11 @@ async function runPhase(phase: Phase, session: SessionState): Promise<void> {
       await runDifferentiationPhase(session);
       break;
     case 'design-system':
-      display.info('Design System phase - implementation pending');
-      display.warning('Skipping to next phase...');
+      await runDesignSystemPhase(session);
       break;
     case 'code-generation':
-      display.info('Code Generation phase - implementation pending');
-      display.warning('Skipping to next phase...');
+      // Code generation is handled within differentiation phase
+      display.info('Code generation completed in differentiation phase');
       break;
     case 'testing':
       display.info('Testing phase - implementation pending');
