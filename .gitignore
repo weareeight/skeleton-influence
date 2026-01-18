@@ -18,3 +18,14 @@ release
 
 # Reference themes (not part of this project)
 inspa/
+
+# Builder application
+builder/.env
+builder/dist/
+builder/node_modules/
+
+# Generated output
+output/
+
+# Session data
+sessions/
