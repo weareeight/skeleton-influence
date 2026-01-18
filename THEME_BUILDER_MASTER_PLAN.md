@@ -1,955 +1,803 @@
 # Theme Builder Master Plan
+## Internal Tool for Rapid Theme Generation
+
+---
 
 ## Executive Summary
 
-Transform the "Elle" Shopify theme into a full-service **AI-powered theme builder platform** that enables rapid creation of customized, high-quality Shopify themes for specific market segments. The platform will leverage AI for design generation, code creation, market analysis, and automated testing.
+Transform the "Elle" Shopify theme into an **internal theme generation engine** that enables our team to rapidly create customized, high-quality Shopify themes for clients and new projects. The tool leverages AI for design generation, code creation, market analysis, and automated testing - all optimized for our internal workflow.
 
 ---
 
 ## Vision Statement
 
-**"From concept to deployed store in hours, not weeks."**
+**"Spin up a production-ready, market-optimized theme in under an hour."**
 
-A platform where merchants, agencies, and developers can:
-1. Describe their brand and target market
-2. Receive AI-generated theme variations with custom imagery
-3. Preview, refine, and deploy production-ready themes
-4. Continuously optimize based on performance data
-
----
-
-## Part 1: Product Strategy (CPO Perspective)
-
-### 1.1 Target Customer Segments
-
-| Segment | Pain Point | Our Solution |
-|---------|-----------|--------------|
-| **Solo Entrepreneurs** | Can't afford custom design, limited technical skills | AI generates complete themes from brand description |
-| **Agencies** | Theme customization is time-consuming, repetitive | Rapid theme generation for client pitches |
-| **Established Brands** | Need unique look, hate template-feel | Market-specific customization + custom imagery |
-| **Developers** | Starting from scratch is slow | Component library + AI-assisted coding |
-
-### 1.2 Core Value Propositions
-
-1. **Speed**: Generate complete theme variations in minutes
-2. **Quality**: Built on production-tested foundation (Elle theme)
-3. **Uniqueness**: AI-generated imagery means no stock photo overlap
-4. **Intelligence**: Market analysis informs design decisions
-5. **Reliability**: Automated testing ensures quality
-
-### 1.3 Product Tiers
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  STARTER (Free)                                                  │
-│  - 1 theme generation/month                                      │
-│  - Basic color/typography customization                          │
-│  - Community support                                             │
-├─────────────────────────────────────────────────────────────────┤
-│  PRO ($49/month)                                                 │
-│  - Unlimited theme generations                                   │
-│  - AI image generation (Nano Banana Pro)                         │
-│  - Market analysis reports                                       │
-│  - Priority support                                              │
-├─────────────────────────────────────────────────────────────────┤
-│  AGENCY ($199/month)                                             │
-│  - Everything in Pro                                             │
-│  - White-label themes                                            │
-│  - Client management dashboard                                   │
-│  - Custom section development (AI-assisted)                      │
-│  - API access                                                    │
-├─────────────────────────────────────────────────────────────────┤
-│  ENTERPRISE (Custom)                                             │
-│  - Dedicated infrastructure                                      │
-│  - Custom AI model training                                      │
-│  - SLA guarantees                                                │
-│  - On-premise deployment option                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 1.4 Competitive Differentiation
-
-| Competitor | Their Approach | Our Advantage |
-|------------|---------------|---------------|
-| Shopify Themes | Static templates | Dynamic AI generation |
-| Theme Forest | Generic designs | Market-specific customization |
-| Shogun/PageFly | Page builders | Full theme generation |
-| Custom Agencies | Expensive, slow | 10x faster, fraction of cost |
+An internal tool where our team can:
+1. Input a client brief or target market
+2. Get AI-generated theme variations with custom imagery
+3. Review, refine, and test automatically
+4. Deploy to client stores or theme submissions
 
 ---
 
-## Part 2: Technical Architecture (CTO Perspective)
+## Part 1: Strategic Overview
 
-### 2.1 System Architecture Overview
+### 1.1 Use Cases
+
+| Use Case | Description | Output |
+|----------|-------------|--------|
+| **Client Projects** | Generate base theme for client work | Customized theme ready for refinement |
+| **Theme Portfolio** | Create themes for Shopify marketplace | Production-ready themes for submission |
+| **Rapid Prototyping** | Quick concepts for pitches | Preview URLs for client review |
+| **Market Expansion** | Target new verticals | Industry-specific theme variants |
+
+### 1.2 Value Proposition
+
+| Current State | With Theme Builder |
+|--------------|-------------------|
+| 2-4 weeks per theme | 1-2 days per theme |
+| Manual design decisions | AI-informed, data-driven |
+| Stock imagery or client-provided | Generated on-demand |
+| Manual QA process | Automated testing pipeline |
+| Starting from scratch each time | Building on proven foundation |
+
+### 1.3 Success Metrics
+
+| Metric | Target |
+|--------|--------|
+| Theme generation time (draft) | < 1 hour |
+| Theme to production-ready | < 1 day |
+| Lighthouse score (generated) | > 80 |
+| Manual intervention needed | < 20% of sections |
+| Themes generated per month | 4-8 |
+
+---
+
+## Part 2: System Architecture
+
+### 2.1 Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              THEME BUILDER PLATFORM                          │
+│                         INTERNAL THEME BUILDER                               │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                   │
-│  │   Frontend   │    │   Backend    │    │   Workers    │                   │
-│  │   (Next.js)  │◄──►│   (Node.js)  │◄──►│  (Queue)     │                   │
-│  └──────────────┘    └──────────────┘    └──────────────┘                   │
-│         │                   │                   │                            │
-│         ▼                   ▼                   ▼                            │
-│  ┌──────────────────────────────────────────────────────────────┐           │
-│  │                      SERVICE LAYER                            │           │
-│  ├──────────────┬──────────────┬──────────────┬─────────────────┤           │
-│  │  AI Engine   │   Image Gen  │   Market     │   Testing       │           │
-│  │  (Claude)    │   (Nano      │   Analysis   │   Engine        │           │
-│  │              │   Banana)    │              │                 │           │
-│  └──────────────┴──────────────┴──────────────┴─────────────────┘           │
-│         │                   │                   │                            │
-│         ▼                   ▼                   ▼                            │
-│  ┌──────────────────────────────────────────────────────────────┐           │
-│  │                      DATA LAYER                               │           │
-│  ├──────────────┬──────────────┬──────────────┬─────────────────┤           │
-│  │  PostgreSQL  │   Redis      │   S3/R2      │   Theme         │           │
-│  │  (Users,     │   (Cache,    │   (Assets,   │   Registry      │           │
-│  │   Projects)  │    Sessions) │    Images)   │   (Git)         │           │
-│  └──────────────┴──────────────┴──────────────┴─────────────────┘           │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                         CLI / WEB INTERFACE                           │   │
+│  │  $ theme-builder generate --brief "luxury skincare brand"            │   │
+│  │  $ theme-builder analyze --competitor "https://example.com"          │   │
+│  │  $ theme-builder test --theme ./generated/skincare-v1                │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                      │                                       │
+│                                      ▼                                       │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                       ORCHESTRATION ENGINE                            │   │
+│  │                                                                        │   │
+│  │   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────────┐  │   │
+│  │   │   Market    │  │   Design    │  │   Code      │  │   Image    │  │   │
+│  │   │  Analysis   │  │  Generator  │  │  Generator  │  │ Generator  │  │   │
+│  │   │  (Claude)   │  │  (Claude)   │  │  (Claude)   │  │(NanoBanana)│  │   │
+│  │   └─────────────┘  └─────────────┘  └─────────────┘  └────────────┘  │   │
+│  │                                                                        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                      │                                       │
+│                                      ▼                                       │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                         THEME ASSEMBLY                                │   │
+│  │                                                                        │   │
+│  │   Base Theme ──► Section Selection ──► Customization ──► Output      │   │
+│  │   (Elle)         (53 sections)         (colors/fonts)    (new theme) │   │
+│  │                                                                        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                      │                                       │
+│                                      ▼                                       │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                      TESTING & DEPLOYMENT                             │   │
+│  │                                                                        │   │
+│  │   Theme Check ──► Lighthouse ──► Preview Deploy ──► Git Branch       │   │
+│  │                                                                        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 Core Services
-
-#### 2.2.1 Theme Generation Engine
+### 2.2 Directory Structure
 
 ```
-Input: Brand Brief
-  ├── Brand name, industry, values
-  ├── Target demographic
-  ├── Competitor URLs (optional)
-  └── Style preferences
-
-Process:
-  ┌─────────────────────────────────────────┐
-  │  1. Market Analysis                      │
-  │     - Analyze industry trends            │
-  │     - Extract competitor patterns        │
-  │     - Identify target audience prefs     │
-  └─────────────────────────────────────────┘
-                    │
-                    ▼
-  ┌─────────────────────────────────────────┐
-  │  2. Design System Generation             │
-  │     - Color palette (5 schemes)          │
-  │     - Typography pairing                 │
-  │     - Spacing/layout rules               │
-  │     - Component styles                   │
-  └─────────────────────────────────────────┘
-                    │
-                    ▼
-  ┌─────────────────────────────────────────┐
-  │  3. Section Selection & Configuration    │
-  │     - Choose relevant sections           │
-  │     - Configure for industry             │
-  │     - Set content placeholders           │
-  └─────────────────────────────────────────┘
-                    │
-                    ▼
-  ┌─────────────────────────────────────────┐
-  │  4. Image Generation (Nano Banana Pro)   │
-  │     - Hero images                        │
-  │     - Product lifestyle shots            │
-  │     - Background textures                │
-  │     - Icons and illustrations            │
-  └─────────────────────────────────────────┘
-                    │
-                    ▼
-  ┌─────────────────────────────────────────┐
-  │  5. Theme Assembly                       │
-  │     - Compile Liquid templates           │
-  │     - Generate settings_data.json        │
-  │     - Package assets                     │
-  │     - Create preview build               │
-  └─────────────────────────────────────────┘
-
-Output: Complete Theme Package
-  ├── All Liquid files (customized)
-  ├── Generated images
-  ├── Configured settings
-  └── Preview URL
+skeleton-influence/
+├── elle/                          # Base theme (current codebase)
+│   ├── sections/
+│   ├── snippets/
+│   ├── templates/
+│   └── ...
+│
+├── builder/                       # Theme builder tool
+│   ├── cli/                       # Command-line interface
+│   │   ├── commands/
+│   │   │   ├── generate.ts        # Generate new theme
+│   │   │   ├── analyze.ts         # Market/competitor analysis
+│   │   │   ├── section.ts         # Create new sections
+│   │   │   └── test.ts            # Run test suite
+│   │   └── index.ts
+│   │
+│   ├── core/                      # Core engine
+│   │   ├── orchestrator.ts        # Main workflow coordinator
+│   │   ├── theme-assembler.ts     # Assembles theme from parts
+│   │   └── config-generator.ts    # Generates settings_data.json
+│   │
+│   ├── ai/                        # AI integrations
+│   │   ├── claude/
+│   │   │   ├── client.ts          # Claude API wrapper
+│   │   │   ├── prompts/           # Versioned prompts
+│   │   │   │   ├── market-analysis.md
+│   │   │   │   ├── design-system.md
+│   │   │   │   ├── section-generator.md
+│   │   │   │   └── content-writer.md
+│   │   │   └── index.ts
+│   │   │
+│   │   └── nano-banana/
+│   │       ├── client.ts          # Nano Banana Pro API
+│   │       ├── prompts/           # Image generation prompts
+│   │       └── index.ts
+│   │
+│   ├── analysis/                  # Market analysis module
+│   │   ├── competitor.ts          # Competitor scraping/analysis
+│   │   ├── industry.ts            # Industry trends database
+│   │   └── recommendations.ts     # Design recommendations
+│   │
+│   ├── testing/                   # Automated testing
+│   │   ├── theme-check.ts
+│   │   ├── lighthouse.ts
+│   │   ├── visual-regression.ts
+│   │   └── report-generator.ts
+│   │
+│   └── templates/                 # Generation templates
+│       ├── briefs/                # Client brief templates
+│       ├── industries/            # Industry-specific configs
+│       └── presets/               # Quick-start presets
+│
+├── generated/                     # Output directory
+│   ├── skincare-brand-v1/
+│   ├── fitness-store-v2/
+│   └── ...
+│
+└── docs/                          # Documentation
+    ├── MASTER_PLAN.md
+    └── USAGE.md
 ```
 
-#### 2.2.2 AI Integration Architecture
+### 2.3 Technology Stack
+
+| Component | Technology | Rationale |
+|-----------|------------|-----------|
+| **CLI Framework** | Commander.js + Inquirer | Interactive prompts, familiar UX |
+| **Runtime** | Node.js 20+ / Bun | Fast, modern JS runtime |
+| **AI - Code/Analysis** | Claude API (Anthropic) | Best reasoning and code generation |
+| **AI - Images** | Nano Banana Pro | Custom imagery on demand |
+| **Testing** | Shopify Theme Check, Lighthouse CI | Already integrated |
+| **Preview Deployment** | Shopify CLI | Direct theme uploads |
+| **Version Control** | Git (auto-branching) | Track each generation |
+| **Configuration** | YAML/JSON | Human-readable configs |
+
+---
+
+## Part 3: Core Workflows
+
+### 3.1 Theme Generation Workflow
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    AI ORCHESTRATION LAYER                        │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌─────────────────┐     ┌─────────────────┐                    │
-│  │  Claude API     │     │  Nano Banana    │                    │
-│  │  (Anthropic)    │     │  Pro API        │                    │
-│  ├─────────────────┤     ├─────────────────┤                    │
-│  │ • Code Gen      │     │ • Hero Images   │                    │
-│  │ • Market        │     │ • Product Shots │                    │
-│  │   Analysis      │     │ • Backgrounds   │                    │
-│  │ • Design        │     │ • Textures      │                    │
-│  │   Decisions     │     │ • Lifestyle     │                    │
-│  │ • Content       │     │ • Brand Assets  │                    │
-│  │   Writing       │     │                 │                    │
-│  └─────────────────┘     └─────────────────┘                    │
-│           │                       │                              │
-│           └───────────┬───────────┘                              │
-│                       ▼                                          │
-│  ┌─────────────────────────────────────────┐                    │
-│  │         PROMPT MANAGEMENT SYSTEM         │                    │
-│  │  • Version-controlled prompts            │                    │
-│  │  • A/B testing of prompt variations      │                    │
-│  │  • Performance tracking                  │                    │
-│  │  • Context window optimization           │                    │
-│  └─────────────────────────────────────────┘                    │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+INPUT: Client Brief / Market Description
+─────────────────────────────────────────
+
+$ theme-builder generate
+
+? Enter project name: luxe-skincare
+? Describe the brand: Premium Korean skincare brand targeting millennial women,
+  focus on clean ingredients and minimalist aesthetic
+? Primary industry: Beauty & Skincare
+? Style preference: Minimal, Clean, Luxury
+? Competitor URLs (optional): https://tatcha.com, https://drunk-elephant.com
+? Generate images? Yes
+
+PROCESS:
+─────────────────────────────────────────
+
+Step 1: Market Analysis (Claude)
+├── Analyze provided competitors
+├── Research industry trends
+├── Identify target audience preferences
+└── Output: MarketAnalysisReport
+
+Step 2: Design System Generation (Claude)
+├── Generate color palette (5 schemes)
+├── Select typography pairing
+├── Define spacing/layout rules
+├── Recommend section selection
+└── Output: DesignSystemConfig
+
+Step 3: Section Configuration (Claude)
+├── Select relevant sections from library
+├── Configure section settings
+├── Arrange section order
+├── Generate placeholder content
+└── Output: TemplateConfigs
+
+Step 4: Image Generation (Nano Banana Pro)
+├── Generate hero images (3 variations)
+├── Generate lifestyle images
+├── Generate texture/backgrounds
+├── Optimize and resize
+└── Output: AssetBundle
+
+Step 5: Theme Assembly
+├── Copy base theme
+├── Apply design system
+├── Configure sections
+├── Insert generated images
+├── Update settings_data.json
+└── Output: CompleteTheme
+
+Step 6: Automated Testing
+├── Run Theme Check
+├── Run Lighthouse (desktop + mobile)
+├── Generate quality report
+└── Output: TestReport
+
+Step 7: Preview Deployment
+├── Create git branch
+├── Deploy preview theme
+├── Generate preview URL
+└── Output: PreviewLink
+
+OUTPUT:
+─────────────────────────────────────────
+
+✓ Theme generated: ./generated/luxe-skincare-v1/
+✓ Lighthouse Score: 84 (desktop) / 76 (mobile)
+✓ Theme Check: 0 errors, 3 warnings
+✓ Preview URL: https://your-store.myshopify.com/?preview_theme_id=123456
+✓ Git branch: generated/luxe-skincare-v1
+
+Generated assets:
+├── 5 color schemes configured
+├── 12 sections enabled
+├── 8 images generated
+└── All content placeholders filled
 ```
 
-#### 2.2.3 Nano Banana Pro Integration
+### 3.2 Section Generation Workflow
 
-**Use Cases for Image Generation:**
+```
+$ theme-builder section create
 
-| Image Type | Prompt Strategy | Output Specs |
-|------------|----------------|--------------|
-| Hero Banners | `{industry} lifestyle scene, {brand_mood}, professional photography, 16:9` | 1920x1080, WebP |
-| Product Lifestyle | `{product_type} in {setting}, {lighting_style}, editorial` | 1200x1200, WebP |
-| Background Textures | `subtle {material} texture, seamless, {color_palette}` | 512x512, tiled |
-| Team/About Photos | `diverse professional team, {industry} setting, candid` | 800x600, WebP |
-| Collection Banners | `{collection_theme} aesthetic, minimalist, {season}` | 1200x600, WebP |
+? Describe the section you need:
+  "A before/after image comparison slider for skincare transformations"
+
+PROCESS:
+─────────────────────────────────────────
+
+1. Claude analyzes request
+2. Searches existing sections for similar functionality
+3. Generates Liquid template
+4. Generates section schema
+5. Generates CSS (inline)
+6. Generates JavaScript (if needed)
+7. Validates with Theme Check
+8. Creates preview
+
+OUTPUT:
+─────────────────────────────────────────
+
+✓ Section created: sections/before-after-slider.liquid
+✓ Theme Check: Passed
+✓ Preview available in theme editor
+
+Section includes:
+├── Draggable comparison slider
+├── Mobile touch support
+├── Lazy-loaded images
+├── Configurable labels
+└── Animation options
+```
+
+### 3.3 Market Analysis Workflow
+
+```
+$ theme-builder analyze --competitors "https://tatcha.com,https://glossier.com"
+
+PROCESS:
+─────────────────────────────────────────
+
+1. Capture screenshots (desktop + mobile)
+2. Claude analyzes:
+   ├── Color palettes used
+   ├── Typography choices
+   ├── Layout patterns
+   ├── Navigation structure
+   ├── Product presentation
+   ├── Trust signals
+   └── Unique features
+3. Run Lighthouse on competitors
+4. Generate comparison report
+
+OUTPUT: analysis-report.md
+─────────────────────────────────────────
+
+## Competitor Analysis Report
+
+### Visual Design
+- Tatcha: Traditional Japanese aesthetic, gold accents, serif headings
+- Glossier: Millennial pink, playful, lots of whitespace
+
+### Common Patterns
+- Minimalist navigation
+- Video in hero sections
+- Strong social proof (reviews prominent)
+- Subscription options highlighted
+
+### Opportunities
+- Neither has 3D product views
+- Limited personalization features
+- No AR try-on capability
+
+### Recommended Approach
+Based on analysis, recommend:
+- Color: Clean whites with subtle warm accents
+- Typography: Modern serif headers, clean sans body
+- Sections: Hero video, ingredients showcase, transformation gallery
+```
+
+---
+
+## Part 4: AI Integration Details
+
+### 4.1 Claude Integration
+
+**Prompt Library Structure:**
+
+```
+builder/ai/claude/prompts/
+├── market-analysis.md       # Analyze competitors and market
+├── design-system.md         # Generate colors, typography, spacing
+├── section-selector.md      # Choose and configure sections
+├── section-generator.md     # Create new Liquid sections
+├── content-writer.md        # Generate placeholder content
+└── code-reviewer.md         # Review and improve generated code
+```
+
+**Example: Design System Prompt**
+
+```markdown
+# Design System Generator
+
+You are a senior UI designer creating a design system for a Shopify theme.
+
+## Input
+- Brand description: {{brand_description}}
+- Industry: {{industry}}
+- Target audience: {{target_audience}}
+- Style preferences: {{style_preferences}}
+- Competitor insights: {{competitor_analysis}}
+
+## Output Format
+Generate a complete design system in JSON:
+
+{
+  "color_schemes": [
+    {
+      "name": "Primary",
+      "background": "#FFFFFF",
+      "background_gradient": "",
+      "text": "#1a1a1a",
+      "button": "#1a1a1a",
+      "button_label": "#FFFFFF",
+      "secondary_button_label": "#1a1a1a",
+      "shadow": "#1a1a1a"
+    }
+    // ... 4 more schemes
+  ],
+  "typography": {
+    "heading_font": "Playfair Display",
+    "body_font": "Inter",
+    "base_size": 16
+  },
+  "spacing": {
+    "page_width": "1200px",
+    "section_spacing": "standard",
+    "card_corner_radius": 8
+  },
+  "rationale": "Explanation of design choices..."
+}
+
+## Guidelines
+- Ensure AA contrast compliance
+- Consider the target demographic
+- Reference competitor patterns where appropriate
+- Provide clear rationale for each decision
+```
+
+### 4.2 Nano Banana Pro Integration
+
+**Image Generation Categories:**
+
+| Category | Use Case | Prompt Template | Specs |
+|----------|----------|-----------------|-------|
+| Hero | Main banner | `{industry} lifestyle, {mood}, professional photography, wide shot` | 1920x1080 |
+| Product Lifestyle | Product context | `{product} in {setting}, {lighting}, editorial style` | 1200x1200 |
+| Collection | Category headers | `{theme} aesthetic flat lay, minimal, {colors}` | 1200x600 |
+| About/Team | Brand story | `modern {industry} workspace, diverse team, candid` | 800x600 |
+| Texture | Backgrounds | `subtle {material} texture, seamless, {color}` | 512x512 |
 
 **Image Pipeline:**
 
 ```
-Brand Brief → Prompt Engineering → Nano Banana Pro → Post-Processing → CDN
-                    │
-                    ├── Style consistency checks
-                    ├── Brand color overlay options
-                    ├── Automatic resizing/cropping
-                    └── Format optimization (WebP, AVIF)
+Brief → Prompt Generation (Claude) → Nano Banana Pro → Post-Processing → Assets
+                                            │
+                                            ├── Generate 3 variations
+                                            ├── Select best match
+                                            ├── Resize for responsive
+                                            ├── Convert to WebP
+                                            └── Generate srcset
 ```
 
-### 2.3 Database Schema
+**Prompt Enhancement Example:**
 
-```sql
--- Core Tables
-CREATE TABLE users (
-    id UUID PRIMARY KEY,
-    email VARCHAR(255) UNIQUE,
-    plan_tier VARCHAR(50),
-    created_at TIMESTAMP
-);
+```typescript
+// Input: "hero image for luxury skincare brand"
 
-CREATE TABLE projects (
-    id UUID PRIMARY KEY,
-    user_id UUID REFERENCES users(id),
-    name VARCHAR(255),
-    brand_brief JSONB,
-    status VARCHAR(50),
-    created_at TIMESTAMP
-);
+// Claude enhances to:
+const enhancedPrompt = `
+  Elegant flat lay of premium skincare products on white marble surface,
+  soft natural lighting from left, subtle shadows, minimalist composition,
+  rose gold accents, fresh botanical elements, editorial beauty photography,
+  high-end magazine aesthetic, clean and sophisticated
+`;
 
-CREATE TABLE theme_generations (
-    id UUID PRIMARY KEY,
-    project_id UUID REFERENCES projects(id),
-    version INTEGER,
-    settings_data JSONB,
-    sections_config JSONB,
-    preview_url VARCHAR(500),
-    lighthouse_scores JSONB,
-    created_at TIMESTAMP
-);
-
-CREATE TABLE generated_images (
-    id UUID PRIMARY KEY,
-    generation_id UUID REFERENCES theme_generations(id),
-    image_type VARCHAR(100),
-    prompt TEXT,
-    nano_banana_id VARCHAR(255),
-    cdn_url VARCHAR(500),
-    created_at TIMESTAMP
-);
-
-CREATE TABLE market_analyses (
-    id UUID PRIMARY KEY,
-    project_id UUID REFERENCES projects(id),
-    industry VARCHAR(100),
-    competitor_data JSONB,
-    trends JSONB,
-    recommendations JSONB,
-    created_at TIMESTAMP
-);
-
-CREATE TABLE section_library (
-    id UUID PRIMARY KEY,
-    name VARCHAR(100),
-    category VARCHAR(50),
-    liquid_template TEXT,
-    schema JSONB,
-    preview_image VARCHAR(500),
-    is_premium BOOLEAN,
-    created_at TIMESTAMP
-);
-```
-
-### 2.4 Section Generation System
-
-**AI-Powered Section Creation Flow:**
-
-```
-User Request: "I need a section that shows customer transformations with before/after images"
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  SECTION GENERATOR                                               │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  1. ANALYZE REQUEST                                              │
-│     - Parse intent: "before/after comparison"                    │
-│     - Identify patterns: image-comparison, testimonials          │
-│     - Check existing sections for similar functionality          │
-│                                                                  │
-│  2. DESIGN SECTION                                               │
-│     - Layout: Side-by-side or slider comparison                  │
-│     - Features: Draggable slider, hover reveal, click toggle     │
-│     - Responsive behavior                                        │
-│     - Accessibility requirements                                 │
-│                                                                  │
-│  3. GENERATE CODE                                                │
-│     Claude generates:                                            │
-│     ├── Liquid template (HTML structure)                         │
-│     ├── Schema (settings, blocks)                                │
-│     ├── CSS (inline or asset file)                               │
-│     └── JavaScript (if interactive)                              │
-│                                                                  │
-│  4. VALIDATE & TEST                                              │
-│     - Theme Check validation                                     │
-│     - Cross-browser testing                                      │
-│     - Performance impact assessment                              │
-│     - Accessibility audit                                        │
-│                                                                  │
-│  5. INTEGRATE                                                    │
-│     - Add to sections/ directory                                 │
-│     - Update templates as needed                                 │
-│     - Generate preview                                           │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-**Section Template Structure (for AI to follow):**
-
-```liquid
-{% comment %}
-  Section: [Section Name]
-  Description: [What this section does]
-  Generated: [timestamp]
-  Version: 1.0
-{% endcomment %}
-
-{%- style -%}
-  /* Section-specific styles */
-{%- endstyle -%}
-
-<section
-  id="section-{{ section.id }}"
-  class="section-[name] {% if section.settings.full_width %}section--full-width{% endif %}"
-  data-section-id="{{ section.id }}"
-  data-section-type="[section-type]"
->
-  <div class="container">
-    <!-- Section content -->
-  </div>
-</section>
-
-{% schema %}
-{
-  "name": "[Section Name]",
-  "tag": "section",
-  "class": "section-[name]",
-  "settings": [],
-  "blocks": [],
-  "presets": [
-    {
-      "name": "[Section Name]"
-    }
-  ]
-}
-{% endschema %}
+// Nano Banana generates image
+// Post-processing applies brand color overlay if needed
 ```
 
 ---
 
-## Part 3: Market Analysis Engine
+## Part 5: Testing & Quality Assurance
 
-### 3.1 Analysis Capabilities
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    MARKET ANALYSIS ENGINE                        │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  INPUT SOURCES                                                   │
-│  ├── User-provided competitor URLs                               │
-│  ├── Industry keyword analysis                                   │
-│  ├── Social media trend data                                     │
-│  └── Shopify store analytics (if connected)                      │
-│                                                                  │
-│  ANALYSIS MODULES                                                │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
-│  │  Competitor     │  │  Audience       │  │  Trend          │  │
-│  │  Analysis       │  │  Profiling      │  │  Detection      │  │
-│  ├─────────────────┤  ├─────────────────┤  ├─────────────────┤  │
-│  │ • Design        │  │ • Demographics  │  │ • Color trends  │  │
-│  │   patterns      │  │ • Psychographics│  │ • Layout trends │  │
-│  │ • Feature       │  │ • Purchase      │  │ • Feature       │  │
-│  │   comparison    │  │   behavior      │  │   adoption      │  │
-│  │ • Pricing       │  │ • Device        │  │ • Seasonal      │  │
-│  │   analysis      │  │   preferences   │  │   patterns      │  │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
-│                                                                  │
-│  OUTPUT: Market Analysis Report                                  │
-│  ├── Executive Summary                                           │
-│  ├── Competitor Landscape                                        │
-│  ├── Target Audience Profile                                     │
-│  ├── Design Recommendations                                      │
-│  ├── Feature Priorities                                          │
-│  └── Risk Assessment                                             │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 3.2 Industry-Specific Recommendations
-
-| Industry | Recommended Sections | Color Trends | Key Features |
-|----------|---------------------|--------------|--------------|
-| Fashion | Lookbook, 3D Carousel, Instagram Feed | Neutrals, seasonal accents | Size guides, wishlist |
-| Beauty | Before/After, Video tutorials, Reviews | Soft pinks, clean whites | Shade finder, subscriptions |
-| Electronics | Spec comparison, 360° view, FAQ | Dark mode, accent colors | Warranty info, support chat |
-| Food & Bev | Recipe cards, Subscription, Reviews | Warm, appetizing tones | Nutrition info, subscriptions |
-| Home & Living | Room planner, Collections, Lifestyle | Earth tones, calm palette | AR preview, dimensions |
-| Fitness | Transformation, Programs, Community | Bold, energetic colors | Progress tracking |
-
-### 3.3 Automated Competitor Analysis
-
-```python
-# Pseudo-code for competitor analysis pipeline
-
-async def analyze_competitor(url: str) -> CompetitorReport:
-    # 1. Capture visual data
-    screenshots = await capture_screenshots(url, viewports=['desktop', 'mobile'])
-
-    # 2. Extract design elements
-    design_analysis = await claude_analyze(
-        prompt="""Analyze this e-commerce store design:
-        - Color palette used
-        - Typography choices
-        - Layout patterns
-        - Navigation structure
-        - Hero section approach
-        - Product presentation
-        - Trust signals used
-        - Call-to-action style
-        """,
-        images=screenshots
-    )
-
-    # 3. Technical analysis
-    lighthouse_report = await run_lighthouse(url)
-    tech_stack = await detect_technologies(url)
-
-    # 4. Feature extraction
-    features = await extract_features(url)  # Cart type, search, filters, etc.
-
-    # 5. Generate insights
-    return CompetitorReport(
-        design=design_analysis,
-        performance=lighthouse_report,
-        technology=tech_stack,
-        features=features,
-        recommendations=generate_recommendations(design_analysis)
-    )
-```
-
----
-
-## Part 4: Testing & Quality Assurance
-
-### 4.1 Automated Testing Pipeline
+### 5.1 Automated Test Suite
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    TESTING PIPELINE                              │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  STAGE 1: Static Analysis (< 30 seconds)                        │
-│  ├── Shopify Theme Check                                         │
-│  ├── Liquid syntax validation                                    │
-│  ├── JSON schema validation                                      │
-│  └── CSS/JS linting                                              │
-│                                                                  │
-│  STAGE 2: Visual Testing (< 2 minutes)                          │
-│  ├── Screenshot comparison (baseline vs generated)               │
-│  ├── Responsive breakpoint validation                            │
-│  ├── Cross-browser rendering (Chrome, Safari, Firefox)           │
-│  └── Dark/light mode consistency                                 │
-│                                                                  │
-│  STAGE 3: Performance Testing (< 3 minutes)                     │
-│  ├── Lighthouse CI (desktop + mobile)                            │
-│  ├── Core Web Vitals measurement                                 │
-│  ├── Asset size analysis                                         │
-│  └── Critical rendering path audit                               │
-│                                                                  │
-│  STAGE 4: Accessibility Testing (< 2 minutes)                   │
-│  ├── axe-core automated audit                                    │
-│  ├── Color contrast validation                                   │
-│  ├── Keyboard navigation testing                                 │
-│  └── Screen reader compatibility                                 │
-│                                                                  │
-│  STAGE 5: Functional Testing (< 5 minutes)                      │
-│  ├── Add to cart flow                                            │
-│  ├── Search functionality                                        │
-│  ├── Navigation behavior                                         │
-│  ├── Form submissions                                            │
-│  └── Animation performance                                       │
-│                                                                  │
-│  STAGE 6: AI Review (< 1 minute)                                │
-│  ├── Design consistency check                                    │
-│  ├── Brand alignment verification                                │
-│  ├── UX best practices audit                                     │
-│  └── Content quality assessment                                  │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+$ theme-builder test --theme ./generated/luxe-skincare-v1/
 
-Total Pipeline Time: < 15 minutes
+Running test suite...
+
+[1/5] Theme Check
+     ✓ Liquid syntax valid
+     ✓ No deprecated features
+     ⚠ 2 warnings (minor)
+     Result: PASS
+
+[2/5] Lighthouse Desktop
+     Performance:   87
+     Accessibility: 94
+     Best Practices: 92
+     SEO:           89
+     Result: PASS (target: 80)
+
+[3/5] Lighthouse Mobile
+     Performance:   74
+     Accessibility: 94
+     Best Practices: 92
+     SEO:           89
+     Result: PASS (target: 70)
+
+[4/5] Asset Validation
+     ✓ All images optimized (<500KB)
+     ✓ No broken references
+     ✓ Fonts preloaded
+     Result: PASS
+
+[5/5] Accessibility Scan
+     ✓ Color contrast AA compliant
+     ✓ All images have alt text
+     ✓ Keyboard navigation works
+     ⚠ 1 minor issue (skip link focus)
+     Result: PASS
+
+═══════════════════════════════════════
+OVERALL: PASS (4 warnings)
+Ready for review
+═══════════════════════════════════════
+
+Report saved: ./generated/luxe-skincare-v1/test-report.html
 ```
 
-### 4.2 Quality Gates
+### 5.2 Quality Gates
 
 ```yaml
-# quality-gates.yml
+# builder/config/quality-gates.yml
+
 quality_gates:
-  lighthouse:
-    performance:
-      minimum: 60
-      target: 80
-      action_on_fail: warn
-    accessibility:
-      minimum: 90
-      target: 95
-      action_on_fail: block
-    best_practices:
-      minimum: 80
-      target: 90
-      action_on_fail: warn
-    seo:
-      minimum: 80
-      target: 90
-      action_on_fail: warn
-
   theme_check:
-    errors: 0
-    warnings_max: 10
-    action_on_fail: block
+    errors: 0              # Must have zero errors
+    warnings_max: 10       # Warnings allowed but logged
 
-  visual_regression:
-    diff_threshold: 5%  # Max pixel difference allowed
-    action_on_fail: review
+  lighthouse:
+    desktop:
+      performance: 75
+      accessibility: 90
+      best_practices: 80
+      seo: 80
+    mobile:
+      performance: 65
+      accessibility: 90
+      best_practices: 80
+      seo: 80
+
+  assets:
+    max_image_size: 500KB
+    required_formats: [webp]
 
   accessibility:
+    wcag_level: AA
     critical_issues: 0
-    serious_issues_max: 3
-    action_on_fail: block
-
-  performance:
-    largest_contentful_paint: 2500ms
-    first_input_delay: 100ms
-    cumulative_layout_shift: 0.1
-    action_on_fail: warn
-```
-
-### 4.3 Test Reporting Dashboard
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  THEME GENERATION: Project "Artisan Coffee Co" v3               │
-│  Status: ✓ PASSED (2 warnings)                                  │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ■■■■■■■■■■ Theme Check          PASSED  0 errors, 2 warnings   │
-│  ■■■■■■■■■■ Lighthouse Desktop   PASSED  Score: 87              │
-│  ■■■■■■■■■■ Lighthouse Mobile    PASSED  Score: 72              │
-│  ■■■■■■■■■■ Accessibility        PASSED  Score: 94              │
-│  ■■■■■■■■□□ Visual Regression    REVIEW  3.2% diff              │
-│  ■■■■■■■■■■ Functional Tests     PASSED  12/12 tests            │
-│                                                                  │
-│  Core Web Vitals:                                                │
-│  ├── LCP:  2.1s  ✓                                               │
-│  ├── FID:  45ms  ✓                                               │
-│  └── CLS:  0.05  ✓                                               │
-│                                                                  │
-│  [View Full Report]  [Download Theme]  [Deploy to Shopify]      │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Part 5: Development Phases
+## Part 6: Industry Presets
 
-### Phase 1: Foundation (Weeks 1-4)
-
-**Objective:** Establish core infrastructure and basic theme customization
-
-```
-Tasks:
-├── Infrastructure Setup
-│   ├── Cloud environment (Vercel/AWS)
-│   ├── Database setup (PostgreSQL + Redis)
-│   ├── CDN configuration (Cloudflare R2)
-│   └── CI/CD pipeline enhancement
-│
-├── Core Platform
-│   ├── User authentication system
-│   ├── Project management dashboard
-│   ├── Theme settings editor UI
-│   └── Preview deployment system
-│
-├── Basic Theme Customization
-│   ├── Color scheme editor
-│   ├── Typography selector
-│   ├── Logo/branding upload
-│   └── Section enable/disable
-│
-└── Deliverables
-    ├── Working web application
-    ├── User can create account
-    ├── User can customize colors/fonts
-    └── User can preview theme
-```
-
-### Phase 2: AI Integration (Weeks 5-8)
-
-**Objective:** Add AI-powered design generation
-
-```
-Tasks:
-├── Claude API Integration
-│   ├── Prompt engineering system
-│   ├── Design recommendation engine
-│   ├── Content generation (headlines, descriptions)
-│   └── Section configuration AI
-│
-├── Nano Banana Pro Integration
-│   ├── API connection setup
-│   ├── Image prompt templates
-│   ├── Asset pipeline (resize, optimize, CDN)
-│   └── Style consistency system
-│
-├── Brand Brief Wizard
-│   ├── Multi-step onboarding form
-│   ├── Industry/style selection
-│   ├── Competitor input
-│   └── AI-powered suggestions
-│
-└── Deliverables
-    ├── Full theme generation from brand brief
-    ├── AI-generated hero images
-    ├── Automatic color palette generation
-    └── Content placeholder generation
-```
-
-### Phase 3: Market Analysis (Weeks 9-12)
-
-**Objective:** Add market intelligence features
-
-```
-Tasks:
-├── Competitor Analysis
-│   ├── URL scraping system
-│   ├── Screenshot capture
-│   ├── Design pattern extraction
-│   └── Feature comparison matrix
-│
-├── Industry Intelligence
-│   ├── Trend database
-│   ├── Seasonal recommendations
-│   ├── Best practices library
-│   └── Success pattern matching
-│
-├── Reporting System
-│   ├── PDF report generation
-│   ├── Executive summaries
-│   ├── Visual comparisons
-│   └── Action recommendations
-│
-└── Deliverables
-    ├── Competitor analysis reports
-    ├── Industry-specific recommendations
-    ├── Design trend insights
-    └── Feature priority suggestions
-```
-
-### Phase 4: Section Builder (Weeks 13-16)
-
-**Objective:** AI-powered custom section creation
-
-```
-Tasks:
-├── Section Generator
-│   ├── Natural language input
-│   ├── Code generation (Claude)
-│   ├── Preview system
-│   └── Validation pipeline
-│
-├── Section Library
-│   ├── Community sections
-│   ├── Premium sections
-│   ├── Search and filter
-│   └── One-click install
-│
-├── Section Editor
-│   ├── Visual block editor
-│   ├── Code view toggle
-│   ├── Real-time preview
-│   └── Version history
-│
-└── Deliverables
-    ├── Create sections via natural language
-    ├── Browse/install community sections
-    ├── Edit section code with AI assistance
-    └── Section marketplace foundation
-```
-
-### Phase 5: Testing & QA Automation (Weeks 17-20)
-
-**Objective:** Comprehensive automated quality assurance
-
-```
-Tasks:
-├── Testing Infrastructure
-│   ├── Lighthouse CI integration
-│   ├── Visual regression system
-│   ├── Cross-browser testing
-│   └── Accessibility scanner
-│
-├── Quality Dashboard
-│   ├── Test result visualization
-│   ├── Historical tracking
-│   ├── Regression alerts
-│   └── Fix suggestions
-│
-├── Self-Healing
-│   ├── Auto-fix common issues
-│   ├── Performance optimization suggestions
-│   ├── Accessibility remediation
-│   └── Code quality improvements
-│
-└── Deliverables
-    ├── Automated testing on every generation
-    ├── Quality score dashboard
-    ├── AI-suggested fixes
-    └── One-click remediation
-```
-
-### Phase 6: Scale & Polish (Weeks 21-24)
-
-**Objective:** Production readiness and launch
-
-```
-Tasks:
-├── Performance Optimization
-│   ├── Generation speed (<2 min target)
-│   ├── Preview load time (<3s)
-│   ├── CDN optimization
-│   └── Caching strategy
-│
-├── User Experience
-│   ├── Onboarding flow refinement
-│   ├── Tutorial system
-│   ├── Help documentation
-│   └── Video guides
-│
-├── Business Features
-│   ├── Subscription billing
-│   ├── Usage analytics
-│   ├── Agency white-labeling
-│   └── API documentation
-│
-└── Deliverables
-    ├── Production-ready platform
-    ├── Complete documentation
-    ├── Billing system
-    └── Launch marketing site
-```
-
----
-
-## Part 6: Technical Specifications
-
-### 6.1 API Endpoints
+### 6.1 Pre-configured Industry Templates
 
 ```yaml
-# Theme Builder API v1
+# builder/templates/industries/beauty-skincare.yml
 
-# Projects
-POST   /api/v1/projects                    # Create new project
-GET    /api/v1/projects                    # List user's projects
-GET    /api/v1/projects/:id                # Get project details
-PUT    /api/v1/projects/:id                # Update project
-DELETE /api/v1/projects/:id                # Delete project
+industry: beauty-skincare
+display_name: "Beauty & Skincare"
 
+sections:
+  recommended:
+    - hero              # Full-bleed hero with video option
+    - featured-collection
+    - image-with-text   # Ingredients/philosophy story
+    - testimonials      # Before/after results
+    - video             # How-to content
+    - instagram-feed    # Social proof
+    - newsletter        # List building
+
+  optional:
+    - lookbook          # Product styling
+    - faq               # Ingredient questions
+    - blog-posts        # Skincare tips
+
+design:
+  style: "minimal, clean, luxurious"
+  color_mood: "soft, natural, calming"
+  typography: "elegant serif headings, clean sans body"
+
+imagery:
+  hero: "lifestyle flat lay, soft lighting, botanical elements"
+  product: "clean white background, soft shadows"
+  lifestyle: "self-care moments, natural light, diverse models"
+
+content:
+  trust_signals:
+    - "Clean ingredients"
+    - "Cruelty-free"
+    - "Dermatologist tested"
+  cta_style: "soft, inviting"
+```
+
+### 6.2 Available Industry Presets
+
+| Industry | Key Sections | Design Notes |
+|----------|-------------|--------------|
+| **Beauty/Skincare** | Testimonials, Video tutorials, Before/After | Soft, luxurious, clean |
+| **Fashion** | Lookbook, 3D Carousel, Instagram | Editorial, aspirational |
+| **Electronics** | Spec comparison, FAQ, Reviews | Dark mode, technical |
+| **Food & Beverage** | Recipe cards, Subscriptions | Warm, appetizing |
+| **Fitness** | Programs, Transformations, Community | Bold, energetic |
+| **Home & Living** | Collections, Lifestyle galleries | Calm, inspirational |
+| **Jewelry** | 3D views, Gifting guides | Elegant, detailed |
+| **Pet Supplies** | Subscriptions, Community | Playful, trustworthy |
+
+---
+
+## Part 7: Development Phases
+
+### Phase 1: Foundation (Week 1-2)
+
+**Goal:** Basic CLI that can generate a customized theme
+
+```
+Tasks:
+├── Set up builder/ directory structure
+├── Create CLI scaffolding (Commander.js)
+├── Implement theme copying/assembly
+├── Create settings_data.json generator
+├── Add basic color/typography customization
+└── Connect to existing preview deployment
+
+Deliverable:
+$ theme-builder generate --name "test" --colors "minimal" --typography "modern"
+→ Outputs working theme with customized settings
+```
+
+### Phase 2: Claude Integration (Week 3-4)
+
+**Goal:** AI-powered design decisions and content generation
+
+```
+Tasks:
+├── Set up Claude API client
+├── Create prompt templates for:
+│   ├── Design system generation
+│   ├── Section selection
+│   └── Content writing
+├── Implement design system generator
+├── Add section configuration logic
+└── Generate placeholder content
+
+Deliverable:
+$ theme-builder generate --brief "luxury skincare brand"
+→ AI selects colors, fonts, sections based on brief
+```
+
+### Phase 3: Nano Banana Pro Integration (Week 5-6)
+
+**Goal:** On-demand image generation
+
+```
+Tasks:
+├── Set up Nano Banana Pro API client
+├── Create image prompt templates
+├── Implement image generation pipeline
+├── Add post-processing (resize, optimize)
+├── Integrate into theme assembly
+└── Add variation generation
+
+Deliverable:
+$ theme-builder generate --brief "..." --images
+→ Generates hero, lifestyle, and texture images
+```
+
+### Phase 4: Market Analysis (Week 7-8)
+
+**Goal:** Competitor analysis and recommendations
+
+```
+Tasks:
+├── Implement URL screenshot capture
+├── Create competitor analysis prompts
+├── Build comparison report generator
+├── Add industry trends database
+└── Integrate insights into generation
+
+Deliverable:
+$ theme-builder analyze --competitors "url1,url2"
+→ Outputs detailed analysis report
+$ theme-builder generate --competitors "url1" --brief "..."
+→ Generation informed by competitor analysis
+```
+
+### Phase 5: Section Generator (Week 9-10)
+
+**Goal:** Create new sections via natural language
+
+```
+Tasks:
+├── Create section generation prompts
+├── Implement Liquid code generation
+├── Add schema generation
+├── Build validation pipeline
+├── Create section preview system
+└── Add to section library
+
+Deliverable:
+$ theme-builder section create "before/after slider"
+→ Generates working section with schema
+```
+
+### Phase 6: Testing & Polish (Week 11-12)
+
+**Goal:** Comprehensive automated testing
+
+```
+Tasks:
+├── Integrate Theme Check into CLI
+├── Add Lighthouse CI automation
+├── Create quality gate system
+├── Build test report generator
+├── Add visual regression testing
+└── Documentation and refinement
+
+Deliverable:
+$ theme-builder test --theme ./generated/xyz
+→ Full test suite with HTML report
+```
+
+---
+
+## Part 8: CLI Command Reference
+
+```bash
 # Theme Generation
-POST   /api/v1/projects/:id/generate       # Generate theme from brief
-GET    /api/v1/projects/:id/generations    # List all generations
-GET    /api/v1/generations/:id             # Get generation details
-POST   /api/v1/generations/:id/deploy      # Deploy to Shopify
+theme-builder generate [options]
+  --name <name>           Project name (required)
+  --brief <description>   Brand/project description
+  --industry <industry>   Industry preset to use
+  --competitors <urls>    Comma-separated competitor URLs
+  --images                Generate images with Nano Banana Pro
+  --no-test               Skip automated testing
+  --deploy                Deploy preview after generation
 
-# AI Features
-POST   /api/v1/ai/analyze-market           # Run market analysis
-POST   /api/v1/ai/generate-section         # Create custom section
-POST   /api/v1/ai/suggest-content          # Generate content
-POST   /api/v1/ai/optimize-design          # Get design suggestions
+# Market Analysis
+theme-builder analyze [options]
+  --competitors <urls>    URLs to analyze (required)
+  --output <file>         Output file path
+  --format <format>       Output format (md, html, json)
 
-# Images
-POST   /api/v1/images/generate             # Generate image (Nano Banana)
-GET    /api/v1/images/:id                  # Get image details
-POST   /api/v1/images/:id/variations       # Generate variations
+# Section Management
+theme-builder section create <description>
+  --name <name>           Section file name
+  --category <category>   Section category
+
+theme-builder section list
+  --category <category>   Filter by category
 
 # Testing
-POST   /api/v1/generations/:id/test        # Run test suite
-GET    /api/v1/generations/:id/test-report # Get test results
+theme-builder test [options]
+  --theme <path>          Theme directory to test
+  --fix                   Auto-fix issues where possible
+  --report <file>         Output report path
 
-# Sections
-GET    /api/v1/sections                    # List available sections
-GET    /api/v1/sections/:id                # Get section details
-POST   /api/v1/sections                    # Create custom section
-```
+# Utilities
+theme-builder preview <theme-path>
+  --store <store>         Target Shopify store
 
-### 6.2 Technology Stack
-
-| Layer | Technology | Rationale |
-|-------|------------|-----------|
-| **Frontend** | Next.js 14+ (App Router) | Server components, fast builds |
-| **Styling** | Tailwind CSS + shadcn/ui | Rapid development, consistent UI |
-| **State** | Zustand + React Query | Simple, performant state management |
-| **Backend** | Node.js + Hono | Fast, lightweight, Edge-compatible |
-| **Database** | PostgreSQL (Neon) | Serverless, scalable |
-| **Cache** | Redis (Upstash) | Serverless, global |
-| **Storage** | Cloudflare R2 | S3-compatible, no egress fees |
-| **CDN** | Cloudflare | Global, fast, integrated |
-| **AI - Text** | Claude API (Anthropic) | Best reasoning, code generation |
-| **AI - Image** | Nano Banana Pro | High-quality, consistent style |
-| **Auth** | Clerk | Easy, secure, Shopify OAuth |
-| **Payments** | Stripe | Industry standard |
-| **Monitoring** | Sentry + Axiom | Error tracking, logging |
-| **CI/CD** | GitHub Actions | Already in use, familiar |
-
-### 6.3 Security Considerations
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    SECURITY ARCHITECTURE                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  AUTHENTICATION                                                  │
-│  ├── OAuth 2.0 (Shopify, Google, GitHub)                        │
-│  ├── Session management (HttpOnly cookies)                       │
-│  ├── CSRF protection                                             │
-│  └── Rate limiting (per user, per IP)                           │
-│                                                                  │
-│  DATA PROTECTION                                                 │
-│  ├── Encryption at rest (AES-256)                               │
-│  ├── Encryption in transit (TLS 1.3)                            │
-│  ├── PII handling compliance (GDPR, CCPA)                       │
-│  └── Regular security audits                                     │
-│                                                                  │
-│  API SECURITY                                                    │
-│  ├── API key rotation                                            │
-│  ├── Webhook signature verification                              │
-│  ├── Input validation/sanitization                               │
-│  └── Output encoding                                             │
-│                                                                  │
-│  INFRASTRUCTURE                                                  │
-│  ├── WAF (Cloudflare)                                           │
-│  ├── DDoS protection                                             │
-│  ├── Secrets management (environment variables)                  │
-│  └── Principle of least privilege                                │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+theme-builder config
+  --set <key=value>       Set configuration value
+  --get <key>             Get configuration value
 ```
 
 ---
 
-## Part 7: Success Metrics
+## Part 9: Configuration
 
-### 7.1 Key Performance Indicators
+### 9.1 Environment Setup
 
-| Metric | Target (Launch) | Target (6 months) |
-|--------|-----------------|-------------------|
-| **User Acquisition** | 500 users | 5,000 users |
-| **Paid Conversion** | 5% | 10% |
-| **Theme Generations** | 1,000/month | 10,000/month |
-| **Generation Success Rate** | 90% | 98% |
-| **Avg Generation Time** | < 3 min | < 2 min |
-| **Customer Satisfaction** | 4.0/5 | 4.5/5 |
-| **Lighthouse Avg Score** | 75 | 85 |
-| **Churn Rate** | < 10%/month | < 5%/month |
-| **MRR** | $5,000 | $50,000 |
-
-### 7.2 Quality Metrics
-
-| Metric | Threshold | Measurement |
-|--------|-----------|-------------|
-| Generated theme quality | 80+ Lighthouse | Automated |
-| Image generation quality | 4/5 user rating | User feedback |
-| Section generation success | 95% valid code | Theme Check |
-| Market analysis accuracy | 80% actionable | User feedback |
-| Test pipeline reliability | 99% completion | Automated |
-
----
-
-## Part 8: Risk Assessment
-
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| AI API costs exceed projections | Medium | High | Usage caps, caching, prompt optimization |
-| Image generation quality inconsistent | Medium | Medium | Style guides, post-processing, multiple attempts |
-| Shopify API changes | Low | High | Abstract API layer, monitor changelog |
-| Competitor launches similar product | Medium | Medium | Focus on quality, unique features |
-| User adoption slower than expected | Medium | Medium | Freemium model, marketing push |
-| Generated code quality issues | Medium | High | Robust testing, human review option |
-
----
-
-## Part 9: Team Structure (Recommended)
-
+```bash
+# .env (local, not committed)
+ANTHROPIC_API_KEY=sk-ant-...
+NANO_BANANA_API_KEY=nb-...
+SHOPIFY_CLI_STORE=your-dev-store.myshopify.com
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    CORE TEAM (Phase 1-2)                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ENGINEERING (3)                                                 │
-│  ├── Full-stack Lead: Platform architecture, AI integration     │
-│  ├── Frontend Dev: Dashboard, preview system, UX                │
-│  └── Backend Dev: APIs, testing pipeline, infrastructure        │
-│                                                                  │
-│  PRODUCT (1)                                                     │
-│  └── Product Manager: Roadmap, user research, prioritization    │
-│                                                                  │
-│  DESIGN (1)                                                      │
-│  └── Product Designer: UI/UX, design system, user testing       │
-│                                                                  │
-├─────────────────────────────────────────────────────────────────┤
-│                    EXPANDED TEAM (Phase 3+)                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  + AI/ML Engineer: Prompt optimization, model fine-tuning       │
-│  + DevOps Engineer: Infrastructure, scaling, monitoring         │
-│  + QA Engineer: Test automation, quality processes              │
-│  + Growth Marketer: Acquisition, content, partnerships          │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+
+### 9.2 Builder Configuration
+
+```yaml
+# builder/config/builder.yml
+
+defaults:
+  output_directory: "./generated"
+  base_theme: "./elle"
+
+generation:
+  default_industry: "general"
+  generate_images: true
+  image_variations: 3
+  run_tests: true
+  auto_deploy_preview: true
+
+testing:
+  lighthouse_runs: 3  # Average of 3 runs
+  fail_on_warnings: false
+
+ai:
+  claude:
+    model: "claude-sonnet-4-20250514"
+    max_tokens: 4096
+  nano_banana:
+    default_quality: "high"
+    default_style: "photography"
 ```
 
 ---
@@ -958,136 +806,111 @@ POST   /api/v1/sections                    # Create custom section
 
 ### This Week
 
-1. **Validate Nano Banana Pro capabilities**
-   - Test image generation quality for e-commerce use cases
-   - Determine API limits and pricing
-   - Create initial prompt templates
+1. **Validate Nano Banana Pro**
+   - [ ] Test API access and capabilities
+   - [ ] Generate sample e-commerce images
+   - [ ] Determine rate limits and costs
+   - [ ] Create initial prompt templates
 
-2. **Set up development environment**
-   - Initialize Next.js project
-   - Configure database and auth
-   - Create basic project structure
+2. **Set up builder directory**
+   - [ ] Create folder structure
+   - [ ] Initialize package.json
+   - [ ] Set up TypeScript config
+   - [ ] Create basic CLI entry point
 
-3. **Define MVP scope**
-   - Core features for first release
-   - Success criteria
-   - Launch timeline
+3. **First working command**
+   - [ ] Implement `theme-builder generate --name`
+   - [ ] Copy base theme to generated/
+   - [ ] Update theme name in settings
 
-### This Month
+### Next Week
 
-1. **Build prototype**
-   - Brand brief wizard
-   - Basic theme customization
-   - Preview deployment
+1. **Claude integration**
+   - [ ] Set up API client
+   - [ ] Create design system prompt
+   - [ ] Generate first AI-powered theme
 
-2. **User research**
-   - Interview 10 potential users
-   - Validate pricing assumptions
-   - Gather feature priorities
-
-3. **Technical spikes**
-   - Test Claude for section generation
-   - Evaluate visual testing tools
-   - Prototype market analysis
+2. **Testing integration**
+   - [ ] Connect Theme Check to CLI
+   - [ ] Add Lighthouse automation
+   - [ ] Create basic test report
 
 ---
 
-## Appendix A: Brand Brief Template
+## Appendix A: Client Brief Template
 
-```json
-{
-  "brand": {
-    "name": "string",
-    "tagline": "string",
-    "description": "string",
-    "values": ["string"],
-    "voice": "professional | casual | playful | luxury | minimal"
-  },
-  "industry": {
-    "primary": "string",
-    "secondary": "string",
-    "keywords": ["string"]
-  },
-  "target_audience": {
-    "age_range": "18-24 | 25-34 | 35-44 | 45-54 | 55+",
-    "gender": "all | male | female | non-binary",
-    "income": "budget | mid-range | premium | luxury",
-    "interests": ["string"],
-    "pain_points": ["string"]
-  },
-  "competitors": [
-    {
-      "url": "string",
-      "what_we_like": "string",
-      "what_we_dislike": "string"
-    }
-  ],
-  "style_preferences": {
-    "mood": "modern | classic | bold | minimal | playful | elegant",
-    "colors": {
-      "preferred": ["string"],
-      "avoid": ["string"]
-    },
-    "inspiration_urls": ["string"]
-  },
-  "content": {
-    "hero_message": "string",
-    "unique_selling_points": ["string"],
-    "social_proof": "reviews | testimonials | press | certifications"
-  }
-}
+```yaml
+# briefs/client-template.yml
+
+project:
+  name: ""
+  client: ""
+  deadline: ""
+
+brand:
+  name: ""
+  tagline: ""
+  description: ""
+  values: []
+  voice: ""  # professional, casual, playful, luxury, minimal
+
+target_market:
+  industry: ""
+  audience:
+    age_range: ""
+    gender: ""
+    income_level: ""
+    interests: []
+  geography: ""
+
+competitors:
+  - url: ""
+    notes: ""
+
+style:
+  mood: ""  # modern, classic, bold, minimal, playful, elegant
+  colors:
+    preferred: []
+    avoid: []
+  inspiration: []
+
+requirements:
+  must_have_sections: []
+  must_have_features: []
+  content_ready: true/false
+  images_ready: true/false
+
+notes: ""
 ```
 
 ---
 
-## Appendix B: Section Schema Standard
+## Appendix B: Generated Theme Structure
 
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "required": ["name", "settings"],
-  "properties": {
-    "name": {
-      "type": "string",
-      "maxLength": 50
-    },
-    "tag": {
-      "type": "string",
-      "enum": ["section", "aside", "div", "footer", "header"]
-    },
-    "class": {
-      "type": "string"
-    },
-    "limit": {
-      "type": "integer",
-      "minimum": 1
-    },
-    "settings": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/setting"
-      }
-    },
-    "blocks": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/block"
-      }
-    },
-    "presets": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/preset"
-      }
-    }
-  }
-}
+```
+generated/luxe-skincare-v1/
+├── assets/
+│   ├── generated-hero-1.webp
+│   ├── generated-hero-2.webp
+│   ├── generated-lifestyle-1.webp
+│   └── ... (all generated images)
+├── config/
+│   ├── settings_schema.json    # Unchanged from base
+│   └── settings_data.json      # AI-configured
+├── layout/
+├── locales/
+├── sections/                    # Base + any new sections
+├── snippets/
+├── templates/
+│   └── index.json              # AI-configured section order
+├── generation-report.json      # Metadata about generation
+├── test-report.html            # Automated test results
+└── README.md                   # Generation notes
 ```
 
 ---
 
-*Document Version: 1.0*
+*Document Version: 2.0*
+*Type: Internal Tool*
 *Created: January 2026*
 *Last Updated: January 2026*
-*Authors: AI CTO & CPO (Claude)*
