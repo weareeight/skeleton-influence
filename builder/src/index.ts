@@ -13,8 +13,7 @@ import { runImagesPhase } from './phases/3-images.js';
 import { runDifferentiationPhase } from './phases/4-differentiation.js';
 import { runDesignSystemPhase } from './phases/5-design-system.js';
 import { runTestingPhase } from './phases/6-testing.js';
-// Future phase imports (to be implemented)
-// import { runSubmissionPhase } from './phases/7-submission.js';
+import { runSubmissionPhase } from './phases/7-submission.js';
 
 const PHASE_ORDER: Phase[] = [
   'brief',
@@ -137,8 +136,7 @@ async function runPhase(phase: Phase, session: SessionState): Promise<void> {
       await runTestingPhase(session);
       break;
     case 'submission':
-      display.info('Submission Assets phase - implementation pending');
-      display.warning('Skipping to next phase...');
+      await runSubmissionPhase(session);
       break;
   }
 }

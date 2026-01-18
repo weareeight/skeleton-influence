@@ -22,18 +22,13 @@ function createEmptySession(): SessionState {
     startedAt: new Date(),
     lastUpdatedAt: new Date(),
     currentPhase: 'brief',
+    completedPhases: [],
     brief: null,
     products: [],
     sections: [],
     designSystem: null,
     testResults: [],
-    submissionAssets: {
-      thumbnail: null,
-      desktopPreview: null,
-      mobilePreview: null,
-      keyFeatureImages: [],
-      documentation: null,
-    },
+    submissionAssets: null,
     approvalHistory: [],
   };
 }
@@ -102,6 +97,11 @@ export class SessionManager {
       ...record,
       timestamp: new Date(record.timestamp),
     }));
+
+    // Ensure completedPhases exists for older sessions
+    if (!session.completedPhases) {
+      session.completedPhases = [];
+    }
 
     return session;
   }

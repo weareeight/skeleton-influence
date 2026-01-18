@@ -211,11 +211,14 @@ function formatPhase(phase: Phase): string {
 }
 
 function countSubmissionAssets(assets: SessionState['submissionAssets']): number {
+  if (!assets) return 0;
   let count = 0;
   if (assets.thumbnail) count++;
   if (assets.desktopPreview) count++;
   if (assets.mobilePreview) count++;
-  count += assets.keyFeatureImages.length;
+  if (assets.keyFeatureImages) count += assets.keyFeatureImages.length;
+  if (assets.keyFeatures) count += assets.keyFeatures.length;
+  if (assets.assets?.keyFeatures) count += assets.assets.keyFeatures.length;
   if (assets.documentation) count++;
   return count;
 }

@@ -101,11 +101,38 @@ export interface TestResult {
 }
 
 export interface SubmissionAssets {
-  thumbnail: string | null;
-  desktopPreview: string | null;
-  mobilePreview: string | null;
-  keyFeatureImages: string[];
-  documentation: string | null;
+  themeName?: string;
+  generatedAt?: string;
+  previewUrl?: string;
+  thumbnail?: string | null;
+  desktopPreview?: string | null;
+  mobilePreview?: string | null;
+  keyFeatureImages?: string[];
+  keyFeatures?: string[];
+  documentation?: string | null;
+  assets?: {
+    keyFeatures?: string[];
+    thumbnail?: string;
+    desktopPreview?: string;
+    mobilePreview?: string;
+  };
+}
+
+export interface SectionInfo {
+  name?: string;
+  filename?: string;
+  description?: string;
+}
+
+export interface ImageManifest {
+  total?: number;
+  perProduct?: number;
+}
+
+export interface DocumentationPaths {
+  documentationPath: string;
+  checklistPath: string;
+  reportPath: string;
 }
 
 export interface SessionState {
@@ -114,12 +141,19 @@ export interface SessionState {
   startedAt: Date;
   lastUpdatedAt: Date;
   currentPhase: Phase;
+  completedPhases: Phase[];
   brief: ThemeBrief | null;
   products: Product[];
   sections: SectionProposal[];
+  newSections?: SectionInfo[];
+  modifiedSections?: SectionInfo[];
   designSystem: DesignSystem | null;
+  imageManifest?: ImageManifest;
   testResults: TestResult[];
-  submissionAssets: SubmissionAssets;
+  testThemePreviewUrl?: string;
+  submissionThemeId?: string;
+  submissionAssets: SubmissionAssets | null;
+  documentation?: DocumentationPaths;
   approvalHistory: ApprovalRecord[];
 }
 

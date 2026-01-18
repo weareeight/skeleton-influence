@@ -178,6 +178,36 @@ export const display = {
   },
 
   /**
+   * Display a phase title
+   */
+  phase(title: string): void {
+    console.log('');
+    console.log(chalk.cyan.bold(`▶ ${title}`));
+    console.log(chalk.cyan(DIVIDER));
+    console.log('');
+  },
+
+  /**
+   * Display a step indicator
+   */
+  step(current: number, total: number, description: string): void {
+    console.log('');
+    console.log(chalk.yellow(`Step ${current}/${total}: ${description}`));
+    console.log(chalk.gray(THIN_DIVIDER));
+  },
+
+  /**
+   * Display content in a box
+   */
+  box(content: string): void {
+    console.log('');
+    content.split('\n').forEach((line) => {
+      console.log(line);
+    });
+    console.log('');
+  },
+
+  /**
    * Clear the console
    */
   clear(): void {
