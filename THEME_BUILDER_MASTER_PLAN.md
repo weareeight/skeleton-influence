@@ -718,7 +718,28 @@ Agree with these differentiators, or provide comments?
 │  Shopify requires themes to be "substantially different" from existing      │
 │  themes. Here's how we ensure each generated theme qualifies:               │
 │                                                                              │
-│  MINIMUM REQUIREMENTS                                                        │
+│  MANDATORY REWRITES (every build)                                           │
+│  ═════════════════════════════════                                          │
+│                                                                              │
+│  □ HEADER - Complete rewrite                                                │
+│    - New layout structure                                                   │
+│    - Different navigation pattern (mega menu style, drawer, etc.)          │
+│    - Unique mobile behavior                                                 │
+│    - Industry-appropriate features                                          │
+│                                                                              │
+│  □ FOOTER - Complete rewrite                                                │
+│    - New layout structure                                                   │
+│    - Different column organization                                          │
+│    - Unique features (back-to-top, newsletter placement, etc.)             │
+│    - Industry-appropriate content blocks                                    │
+│                                                                              │
+│  □ JAVASCRIPT - Meaningful rewrites                                         │
+│    - New animation patterns (not just parameter changes)                   │
+│    - Different interaction behaviors                                        │
+│    - Industry-specific functionality                                        │
+│    - Unique micro-interactions                                              │
+│                                                                              │
+│  SECTION REQUIREMENTS                                                        │
 │  ════════════════════                                                        │
 │                                                                              │
 │  □ At least 4 NEW sections not present in base theme                        │
@@ -730,6 +751,9 @@ Agree with these differentiators, or provide comments?
 │    - New functionality added, not just CSS changes                          │
 │    - New settings/customization options                                     │
 │    - Different interaction patterns                                         │
+│                                                                              │
+│  DESIGN SYSTEM REQUIREMENTS                                                  │
+│  ══════════════════════════                                                  │
 │                                                                              │
 │  □ Unique design system                                                      │
 │    - Custom typography pairings                                             │
@@ -750,6 +774,9 @@ Agree with these differentiators, or provide comments?
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
 │  │  Category              │ Base (Elle) │ Generated Theme  │ Diff %     │  │
 │  │────────────────────────│─────────────│──────────────────│────────────│  │
+│  │  Header                │ original    │ REWRITTEN        │ 100%       │  │
+│  │  Footer                │ original    │ REWRITTEN        │ 100%       │  │
+│  │  JavaScript            │ original    │ REWRITTEN        │ 60%+       │  │
 │  │  Total sections        │ 53          │ 57 (+4 new)      │ +7.5%      │  │
 │  │  Modified sections     │ -           │ 4 substantially  │ -          │  │
 │  │  New settings          │ 535 lines   │ 620+ lines       │ +16%       │  │
@@ -971,180 +998,771 @@ For each of the 3 key features:
 
 ---
 
-## 9. Development Phases
+## 9. Development Plan
 
-### Phase 1: Core Interaction Loop (Week 1-2)
-
-```
-GOAL: Working interactive terminal with Claude integration
-
-Tasks:
-├── Project setup (Node.js, TypeScript, package.json)
-├── Terminal UI framework (Inquirer, Chalk, progress bars)
-├── Claude API client with conversation memory
-├── Basic phase flow (Brief → Approval loop)
-├── Session state management (save/resume)
-└── Output directory structure
-
-Deliverable:
-Can run through Phase 1-2 (brief + product catalog) interactively
-with approve/comment loops working
-```
-
-### Phase 2: Image Generation Pipeline (Week 3-4)
+### Overview
 
 ```
-GOAL: Full Nano Banana Pro integration via Replicate
-
-Tasks:
-├── Replicate API client
-├── Prompt generation for product images
-├── Core image → Approval → Angles → Lifestyle pipeline
-├── Image display in terminal (or auto-open in Preview)
-├── Parallel generation for variations
-├── Image organization and naming
-└── Regeneration on feedback
-
-Deliverable:
-Can generate full image set for one product with approval loop
-```
-
-### Phase 3: Theme Differentiation Engine (Week 5-6)
-
-```
-GOAL: AI proposes and generates unique theme features
-
-Tasks:
-├── Section proposal prompts (new + modified)
-├── Design system generation
-├── Liquid code generation for new sections
-├── Section modification (diff-based changes to existing)
-├── Schema generation for new settings
-├── Integration testing (Theme Check)
-└── Differentiation tracking/reporting
-
-Deliverable:
-Can generate 4 new sections + 4 modified sections with human approval
-```
-
-### Phase 4: Testing & Output (Week 7-8)
-
-```
-GOAL: Preview deployment, screenshot testing, final output
-
-Tasks:
-├── Shopify CLI integration (theme push, preview URL)
-├── Puppeteer screenshot capture
-├── AI screenshot review for issues
-├── Accessibility scanning (axe-core)
-├── CSV generation
-├── Theme packaging (zip)
-├── Generation report
-└── End-to-end testing
-
-Deliverable:
-Complete pipeline from brief to packaged theme + products
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         DEVELOPMENT ROADMAP                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  PHASE A: FOUNDATION                                                         │
+│  ═══════════════════                                                         │
+│  A1. Project Setup & Directory Structure                                    │
+│  A2. Terminal UI Framework                                                  │
+│  A3. Claude API Integration                                                 │
+│  A4. Approval Loop System                                                   │
+│  A5. Session State Management                                               │
+│                                                                              │
+│  PHASE B: BRIEF & CATALOG                                                   │
+│  ═════════════════════════                                                  │
+│  B1. Brief Input Phase                                                      │
+│  B2. Market Analysis                                                        │
+│  B3. Product Catalog Generation                                             │
+│  B4. CSV Export                                                             │
+│                                                                              │
+│  PHASE C: IMAGE GENERATION                                                  │
+│  ═════════════════════════                                                  │
+│  C1. Replicate API Integration                                              │
+│  C2. Core Product Image Pipeline                                            │
+│  C3. Angle Variation Generation                                             │
+│  C4. Lifestyle Image Generation                                             │
+│  C5. Image Organization & Display                                           │
+│                                                                              │
+│  PHASE D: THEME DIFFERENTIATION                                             │
+│  ══════════════════════════════                                             │
+│  D1. Header Rewrite System                                                  │
+│  D2. Footer Rewrite System                                                  │
+│  D3. JavaScript Rewrite System                                              │
+│  D4. New Section Generation                                                 │
+│  D5. Existing Section Modification                                          │
+│  D6. Design System Generation                                               │
+│                                                                              │
+│  PHASE E: TESTING FRAMEWORK                                                 │
+│  ══════════════════════════                                                 │
+│  E1. Test Theme Generation                                                  │
+│  E2. Shopify CLI Integration                                                │
+│  E3. Screenshot Capture System                                              │
+│  E4. AI Visual Review                                                       │
+│  E5. Accessibility Testing                                                  │
+│                                                                              │
+│  PHASE F: OUTPUT & SUBMISSION                                               │
+│  ════════════════════════════                                               │
+│  F1. Theme Packaging                                                        │
+│  F2. Submission Asset Generation                                            │
+│  F3. Documentation Generation                                               │
+│  F4. Final Verification                                                     │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 10. File Structure
+### Phase A: Foundation
+
+#### A1. Project Setup & Directory Structure
 
 ```
 skeleton-influence/
-├── elle/                           # Base theme (existing)
+├── elle/                           # BASE THEME - DO NOT MODIFY
+│   ├── assets/
+│   ├── config/
+│   ├── layout/
+│   ├── locales/
+│   ├── sections/
+│   ├── snippets/
+│   └── templates/
 │
-├── builder/                        # Theme builder tool
+├── builder/                        # THEME BUILDER APPLICATION
 │   ├── package.json
 │   ├── tsconfig.json
+│   ├── .env                        # API keys (gitignored)
 │   │
 │   ├── src/
 │   │   ├── index.ts                # Entry point
+│   │   ├── config.ts               # Configuration
 │   │   │
 │   │   ├── ui/                     # Terminal interface
-│   │   │   ├── prompts.ts          # Inquirer prompts
-│   │   │   ├── display.ts          # Output formatting
-│   │   │   ├── progress.ts         # Progress bars
-│   │   │   └── image-viewer.ts     # Display images in terminal
-│   │   │
-│   │   ├── phases/                 # Phase implementations
-│   │   │   ├── 1-brief.ts
-│   │   │   ├── 2-products.ts
-│   │   │   ├── 3-images.ts
-│   │   │   ├── 4-differentiation.ts
-│   │   │   ├── 5-design-system.ts
-│   │   │   ├── 6-code-generation.ts
-│   │   │   ├── 7-testing.ts
-│   │   │   └── 8-output.ts
-│   │   │
-│   │   ├── ai/
-│   │   │   ├── claude.ts           # Claude API client
-│   │   │   ├── replicate.ts        # Replicate (Nano Banana) client
-│   │   │   └── prompts/            # Prompt templates
-│   │   │       ├── market-analysis.ts
-│   │   │       ├── product-catalog.ts
-│   │   │       ├── image-prompts.ts
-│   │   │       ├── section-design.ts
-│   │   │       ├── code-generation.ts
-│   │   │       └── screenshot-review.ts
-│   │   │
-│   │   ├── generators/
-│   │   │   ├── sections.ts         # Generate Liquid sections
-│   │   │   ├── settings.ts         # Generate settings_data.json
-│   │   │   ├── csv.ts              # Generate products CSV
-│   │   │   └── theme-package.ts    # Create theme.zip
-│   │   │
-│   │   ├── testing/
-│   │   │   ├── theme-check.ts      # Run shopify theme check
-│   │   │   ├── screenshots.ts      # Puppeteer capture
-│   │   │   ├── accessibility.ts    # axe-core scanning
-│   │   │   └── preview.ts          # Deploy preview theme
-│   │   │
-│   │   ├── session/
-│   │   │   ├── state.ts            # Session state management
-│   │   │   └── resume.ts           # Resume interrupted sessions
-│   │   │
-│   │   └── utils/
-│   │       ├── files.ts            # File operations
-│   │       └── images.ts           # Image processing
+│   │   ├── phases/                 # Generation phases
+│   │   ├── ai/                     # AI integrations
+│   │   ├── generators/             # Code generators
+│   │   ├── testing/                # Testing framework
+│   │   └── session/                # State management
 │   │
-│   └── templates/
-│       └── base-prompts/           # Base prompt templates
+│   └── prompts/                    # AI prompt templates
 │
-├── output/                         # Generated themes go here
+├── output/                         # GENERATED THEMES
 │   └── [theme-name]/
+│       ├── theme/                  # Production theme
+│       ├── test-theme/             # Test theme (sections only)
+│       ├── submission/             # Store submission assets
+│       └── images/                 # Product images
 │
-└── THEME_BUILDER_MASTER_PLAN.md    # This document
+└── docs/
+    └── THEME_BUILDER_MASTER_PLAN.md
+```
+
+**Tasks:**
+- [ ] A1.1: Create `builder/` directory structure
+- [ ] A1.2: Initialize package.json with dependencies:
+  ```json
+  {
+    "dependencies": {
+      "@anthropic-ai/sdk": "latest",
+      "replicate": "latest",
+      "inquirer": "latest",
+      "chalk": "latest",
+      "ora": "latest",
+      "cli-progress": "latest",
+      "puppeteer": "latest",
+      "archiver": "latest"
+    }
+  }
+  ```
+- [ ] A1.3: Set up TypeScript configuration
+- [ ] A1.4: Create .env template and .gitignore
+- [ ] A1.5: Create entry point with phase orchestration
+
+#### A2. Terminal UI Framework
+
+**Tasks:**
+- [ ] A2.1: Create `ui/display.ts` - formatted output with Chalk
+- [ ] A2.2: Create `ui/prompts.ts` - Inquirer prompt wrappers
+- [ ] A2.3: Create `ui/progress.ts` - progress bars for long operations
+- [ ] A2.4: Create `ui/image-viewer.ts` - open images in system viewer
+- [ ] A2.5: Create phase header/footer display functions
+
+#### A3. Claude API Integration
+
+**Tasks:**
+- [ ] A3.1: Create `ai/claude.ts` - API client wrapper
+- [ ] A3.2: Implement conversation memory (message history)
+- [ ] A3.3: Create prompt template loader
+- [ ] A3.4: Add retry logic with exponential backoff
+- [ ] A3.5: Create structured output parsing (JSON extraction)
+
+#### A4. Approval Loop System
+
+**Tasks:**
+- [ ] A4.1: Create `ui/approval.ts` - reusable approval loop
+- [ ] A4.2: Implement Accept → Proceed flow
+- [ ] A4.3: Implement Comments → Regenerate → Re-prompt flow
+- [ ] A4.4: Add iteration counter and history tracking
+- [ ] A4.5: Create approval state persistence
+
+#### A5. Session State Management
+
+**Tasks:**
+- [ ] A5.1: Create `session/state.ts` - session data structure
+- [ ] A5.2: Implement auto-save on each approval
+- [ ] A5.3: Create `session/resume.ts` - resume interrupted sessions
+- [ ] A5.4: Add session listing and selection UI
+- [ ] A5.5: Implement session archiving
+
+---
+
+### Phase B: Brief & Catalog
+
+#### B1. Brief Input Phase
+
+**Tasks:**
+- [ ] B1.1: Create `phases/1-brief.ts`
+- [ ] B1.2: Implement industry/niche input prompt
+- [ ] B1.3: Implement target customer description
+- [ ] B1.4: Implement competitor URL collection
+- [ ] B1.5: Implement style direction input
+
+#### B2. Market Analysis
+
+**Tasks:**
+- [ ] B2.1: Create `prompts/market-analysis.md` prompt template
+- [ ] B2.2: Generate brand positioning proposal
+- [ ] B2.3: Generate market differentiation analysis
+- [ ] B2.4: Generate theme feature recommendations
+- [ ] B2.5: Present analysis with approval loop
+
+#### B3. Product Catalog Generation
+
+**Tasks:**
+- [ ] B3.1: Create `phases/2-products.ts`
+- [ ] B3.2: Create `prompts/product-catalog.md` prompt template
+- [ ] B3.3: Generate 20 products with names, descriptions, prices
+- [ ] B3.4: Generate product categories and collections
+- [ ] B3.5: Present catalog with approval loop
+
+#### B4. CSV Export
+
+**Tasks:**
+- [ ] B4.1: Create `generators/csv.ts`
+- [ ] B4.2: Generate Shopify-compatible CSV structure
+- [ ] B4.3: Handle product variants (sizes, colors)
+- [ ] B4.4: Generate SEO fields (title, description)
+- [ ] B4.5: Output CSV without image columns
+
+---
+
+### Phase C: Image Generation
+
+#### C1. Replicate API Integration
+
+**Tasks:**
+- [ ] C1.1: Create `ai/replicate.ts` - API client wrapper
+- [ ] C1.2: Configure Nano Banana Pro model
+- [ ] C1.3: Implement async prediction polling
+- [ ] C1.4: Add image download and saving
+- [ ] C1.5: Create retry logic for failed generations
+
+#### C2. Core Product Image Pipeline
+
+**Tasks:**
+- [ ] C2.1: Create `phases/3-images.ts`
+- [ ] C2.2: Create `prompts/image-prompts.md` for studio shots
+- [ ] C2.3: Generate core studio shot per product
+- [ ] C2.4: Display image and request approval
+- [ ] C2.5: Implement regeneration with feedback
+
+#### C3. Angle Variation Generation
+
+**Tasks:**
+- [ ] C3.1: Create angle variation prompts (front, detail, side, flat lay)
+- [ ] C3.2: Generate 4 angle variations from approved core
+- [ ] C3.3: Run variations in parallel
+- [ ] C3.4: Save with consistent naming convention
+- [ ] C3.5: Display grid for review
+
+#### C4. Lifestyle Image Generation
+
+**Tasks:**
+- [ ] C4.1: Create lifestyle prompts (in-use, environment, detail)
+- [ ] C4.2: Generate 3 lifestyle images from approved core
+- [ ] C4.3: Run in parallel with angle variations
+- [ ] C4.4: Present complete set for final approval
+- [ ] C4.5: Allow individual image regeneration
+
+#### C5. Image Organization & Display
+
+**Tasks:**
+- [ ] C5.1: Create `output/[theme]/images/[product]/` structure
+- [ ] C5.2: Implement consistent naming: `studio-main.png`, `angle-*.png`, `lifestyle-*.png`
+- [ ] C5.3: Create image manifest JSON
+- [ ] C5.4: Implement batch display (grid view)
+- [ ] C5.5: Track generation progress across all products
+
+---
+
+### Phase D: Theme Differentiation
+
+#### D1. Header Rewrite System
+
+**Tasks:**
+- [ ] D1.1: Create `prompts/header-rewrite.md` template
+- [ ] D1.2: Analyze industry requirements for header
+- [ ] D1.3: Generate new header layout proposals
+- [ ] D1.4: Generate complete header.liquid
+- [ ] D1.5: Generate header-specific CSS
+- [ ] D1.6: Generate header JavaScript functionality
+- [ ] D1.7: Present with approval loop
+
+#### D2. Footer Rewrite System
+
+**Tasks:**
+- [ ] D2.1: Create `prompts/footer-rewrite.md` template
+- [ ] D2.2: Analyze industry requirements for footer
+- [ ] D2.3: Generate new footer layout proposals
+- [ ] D2.4: Generate complete footer.liquid
+- [ ] D2.5: Generate footer-specific CSS
+- [ ] D2.6: Present with approval loop
+
+#### D3. JavaScript Rewrite System
+
+**Tasks:**
+- [ ] D3.1: Create `prompts/javascript-rewrite.md` template
+- [ ] D3.2: Analyze base theme JS patterns
+- [ ] D3.3: Generate new animation patterns
+- [ ] D3.4: Generate industry-specific interactions
+- [ ] D3.5: Generate new micro-interactions
+- [ ] D3.6: Validate JS syntax and functionality
+- [ ] D3.7: Present with approval loop
+
+#### D4. New Section Generation
+
+**Tasks:**
+- [ ] D4.1: Create `phases/4-differentiation.ts`
+- [ ] D4.2: Create `prompts/new-sections.md` template
+- [ ] D4.3: Generate 4 new section proposals
+- [ ] D4.4: Present proposals with approval loop
+- [ ] D4.5: Generate Liquid code for each approved section
+- [ ] D4.6: Generate section schema
+- [ ] D4.7: Validate with Theme Check
+
+#### D5. Existing Section Modification
+
+**Tasks:**
+- [ ] D5.1: Create `prompts/modify-sections.md` template
+- [ ] D5.2: Identify 4 sections for modification
+- [ ] D5.3: Generate modification proposals
+- [ ] D5.4: Present proposals with approval loop
+- [ ] D5.5: Generate modified Liquid code
+- [ ] D5.6: Generate updated schema
+- [ ] D5.7: Validate changes
+
+#### D6. Design System Generation
+
+**Tasks:**
+- [ ] D6.1: Create `phases/5-design-system.ts`
+- [ ] D6.2: Create `prompts/design-system.md` template
+- [ ] D6.3: Generate 5 color schemes
+- [ ] D6.4: Generate typography pairings
+- [ ] D6.5: Generate spacing and corner radius values
+- [ ] D6.6: Present with approval loop
+- [ ] D6.7: Generate settings_data.json
+
+---
+
+### Phase E: Testing Framework
+
+#### E1. Test Theme Generation
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           TEST THEME CONCEPT                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  The TEST THEME is a stripped-down version containing ONLY:                 │
+│                                                                              │
+│  ✓ Rewritten header                                                          │
+│  ✓ Rewritten footer                                                          │
+│  ✓ 4 new sections                                                            │
+│  ✓ 4 modified sections                                                       │
+│  ✓ New JavaScript                                                            │
+│  ✓ New CSS                                                                   │
+│                                                                              │
+│  Homepage template configured with ONLY these sections.                     │
+│                                                                              │
+│  PURPOSE:                                                                    │
+│  - Faster testing cycle                                                     │
+│  - Isolated validation of new/modified code                                 │
+│  - Clear visibility of what's changed                                       │
+│  - Easier debugging                                                          │
+│                                                                              │
+│  OUTPUT: ./output/[theme]/test-theme/                                       │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Tasks:**
+- [ ] E1.1: Create `testing/test-theme.ts`
+- [ ] E1.2: Copy minimal theme structure
+- [ ] E1.3: Include only new/modified sections
+- [ ] E1.4: Create test homepage template with all new sections
+- [ ] E1.5: Include header and footer
+- [ ] E1.6: Include new JS and CSS
+- [ ] E1.7: Generate test product data
+
+#### E2. Shopify CLI Integration
+
+**Tasks:**
+- [ ] E2.1: Create `testing/shopify-cli.ts`
+- [ ] E2.2: Implement `shopify theme push --unpublished`
+- [ ] E2.3: Parse preview URL from output
+- [ ] E2.4: Store theme ID for cleanup
+- [ ] E2.5: Implement `shopify theme delete` for cleanup
+
+#### E3. Screenshot Capture System
+
+**Tasks:**
+- [ ] E3.1: Create `testing/screenshots.ts`
+- [ ] E3.2: Set up Puppeteer with preview URL
+- [ ] E3.3: Capture pages: homepage, product, collection, cart, search
+- [ ] E3.4: Capture at desktop (1440px) and mobile (375px)
+- [ ] E3.5: Save to `output/[theme]/screenshots/`
+- [ ] E3.6: Generate screenshot manifest
+
+#### E4. AI Visual Review
+
+**Tasks:**
+- [ ] E4.1: Create `testing/visual-review.ts`
+- [ ] E4.2: Create `prompts/screenshot-review.md` template
+- [ ] E4.3: Send screenshots to Claude for analysis
+- [ ] E4.4: Parse issues (critical, warning, info)
+- [ ] E4.5: Present issues with fix suggestions
+- [ ] E4.6: Implement approval/fix loop
+
+#### E5. Accessibility Testing
+
+**Tasks:**
+- [ ] E5.1: Create `testing/accessibility.ts`
+- [ ] E5.2: Integrate axe-core via Puppeteer
+- [ ] E5.3: Run accessibility audit on all pages
+- [ ] E5.4: Generate accessibility report
+- [ ] E5.5: Block on critical issues
+- [ ] E5.6: Warn on serious issues
+
+---
+
+### Phase F: Output & Submission
+
+#### F1. Theme Packaging
+
+**Tasks:**
+- [ ] F1.1: Create `generators/theme-package.ts`
+- [ ] F1.2: Assemble complete theme from base + modifications
+- [ ] F1.3: Run final Theme Check validation
+- [ ] F1.4: Create theme.zip with archiver
+- [ ] F1.5: Verify zip contents
+
+#### F2. Submission Asset Generation
+
+**Tasks:**
+- [ ] F2.1: Create `phases/8-submission.ts`
+- [ ] F2.2: Capture key feature screenshots
+- [ ] F2.3: Generate annotated feature images
+- [ ] F2.4: Present each for approval
+- [ ] F2.5: Generate theme thumbnail
+- [ ] F2.6: Generate desktop/mobile previews
+- [ ] F2.7: Save to `output/[theme]/submission/`
+
+#### F3. Documentation Generation
+
+**Tasks:**
+- [ ] F3.1: Create `generators/documentation.ts`
+- [ ] F3.2: Generate theme documentation.md
+- [ ] F3.3: List all sections with descriptions
+- [ ] F3.4: Document unique features
+- [ ] F3.5: Generate settings guide
+- [ ] F3.6: Generate submission-checklist.md
+
+#### F4. Final Verification
+
+**Tasks:**
+- [ ] F4.1: Run complete Theme Check
+- [ ] F4.2: Verify all submission assets present
+- [ ] F4.3: Calculate differentiation metrics
+- [ ] F4.4: Generate final generation-report.md
+- [ ] F4.5: Present summary for final approval
+
+---
+
+## 10. Complete File Structure
+
+```
+skeleton-influence/
+│
+├── elle/                               # BASE THEME - DO NOT MODIFY
+│   ├── assets/
+│   │   ├── critical.css
+│   │   ├── theme.css
+│   │   ├── blog.css
+│   │   ├── search-overlay.css
+│   │   ├── animations.js
+│   │   └── blog.js
+│   ├── config/
+│   │   ├── settings_schema.json
+│   │   └── settings_data.json
+│   ├── layout/
+│   │   ├── theme.liquid
+│   │   └── password.liquid
+│   ├── locales/
+│   │   └── en.default.json
+│   ├── sections/                       # 53 sections
+│   ├── snippets/                       # 26 snippets
+│   └── templates/                      # 13 templates
+│
+├── builder/                            # THEME BUILDER APPLICATION
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── .env                            # API keys (gitignored)
+│   ├── .env.example                    # Template for .env
+│   │
+│   ├── src/
+│   │   ├── index.ts                    # Entry point & orchestrator
+│   │   ├── config.ts                   # Configuration loader
+│   │   │
+│   │   ├── ui/                         # Terminal Interface
+│   │   │   ├── display.ts              # Chalk formatting, boxes
+│   │   │   ├── prompts.ts              # Inquirer wrappers
+│   │   │   ├── progress.ts             # Progress bars
+│   │   │   ├── approval.ts             # Accept/Comment loop
+│   │   │   └── image-viewer.ts         # Open images in system
+│   │   │
+│   │   ├── phases/                     # Generation Phases
+│   │   │   ├── 1-brief.ts              # Brief & market analysis
+│   │   │   ├── 2-products.ts           # Product catalog
+│   │   │   ├── 3-images.ts             # Image generation
+│   │   │   ├── 4-differentiation.ts    # Sections & features
+│   │   │   ├── 5-design-system.ts      # Colors, typography
+│   │   │   ├── 6-code-generation.ts    # Header, footer, JS
+│   │   │   ├── 7-testing.ts            # Preview & testing
+│   │   │   └── 8-submission.ts         # Output & assets
+│   │   │
+│   │   ├── ai/                         # AI Integrations
+│   │   │   ├── claude.ts               # Anthropic API client
+│   │   │   └── replicate.ts            # Replicate (Nano Banana)
+│   │   │
+│   │   ├── generators/                 # Code Generators
+│   │   │   ├── header.ts               # Header rewrite
+│   │   │   ├── footer.ts               # Footer rewrite
+│   │   │   ├── javascript.ts           # JS rewrite
+│   │   │   ├── sections.ts             # New section generation
+│   │   │   ├── modifications.ts        # Section modifications
+│   │   │   ├── settings.ts             # settings_data.json
+│   │   │   ├── css.ts                  # CSS generation
+│   │   │   ├── csv.ts                  # Products CSV
+│   │   │   ├── documentation.ts        # Theme documentation
+│   │   │   └── theme-package.ts        # ZIP packaging
+│   │   │
+│   │   ├── testing/                    # Testing Framework
+│   │   │   ├── test-theme.ts           # Generate test theme
+│   │   │   ├── shopify-cli.ts          # CLI integration
+│   │   │   ├── screenshots.ts          # Puppeteer capture
+│   │   │   ├── visual-review.ts        # AI screenshot review
+│   │   │   ├── accessibility.ts        # axe-core scanning
+│   │   │   └── theme-check.ts          # Liquid validation
+│   │   │
+│   │   ├── session/                    # Session Management
+│   │   │   ├── state.ts                # State data structure
+│   │   │   └── resume.ts               # Resume sessions
+│   │   │
+│   │   └── utils/                      # Utilities
+│   │       ├── files.ts                # File operations
+│   │       ├── images.ts               # Image processing
+│   │       └── diff.ts                 # Code diff utilities
+│   │
+│   └── prompts/                        # AI Prompt Templates
+│       ├── market-analysis.md
+│       ├── product-catalog.md
+│       ├── image-prompts.md
+│       ├── header-rewrite.md
+│       ├── footer-rewrite.md
+│       ├── javascript-rewrite.md
+│       ├── new-sections.md
+│       ├── modify-sections.md
+│       ├── design-system.md
+│       └── screenshot-review.md
+│
+├── output/                             # GENERATED THEMES
+│   └── [theme-name]/
+│       │
+│       ├── theme/                      # Production Theme
+│       │   ├── assets/
+│       │   │   ├── critical.css
+│       │   │   ├── theme.css
+│       │   │   ├── [theme-name].css    # Theme-specific CSS
+│       │   │   ├── animations.js       # REWRITTEN
+│       │   │   └── [theme-name].js     # Theme-specific JS
+│       │   ├── config/
+│       │   ├── layout/
+│       │   ├── locales/
+│       │   ├── sections/
+│       │   │   ├── header.liquid       # REWRITTEN
+│       │   │   ├── footer.liquid       # REWRITTEN
+│       │   │   ├── [new-section-1].liquid
+│       │   │   ├── [new-section-2].liquid
+│       │   │   ├── [new-section-3].liquid
+│       │   │   ├── [new-section-4].liquid
+│       │   │   └── [modified sections...]
+│       │   ├── snippets/
+│       │   └── templates/
+│       │
+│       ├── test-theme/                 # Test Theme (sections only)
+│       │   ├── assets/
+│       │   │   ├── test.css
+│       │   │   └── test.js
+│       │   ├── config/
+│       │   ├── layout/
+│       │   │   └── theme.liquid
+│       │   ├── sections/
+│       │   │   ├── header.liquid       # REWRITTEN
+│       │   │   ├── footer.liquid       # REWRITTEN
+│       │   │   ├── [new-section-1].liquid
+│       │   │   ├── [new-section-2].liquid
+│       │   │   ├── [new-section-3].liquid
+│       │   │   ├── [new-section-4].liquid
+│       │   │   ├── [modified-1].liquid
+│       │   │   ├── [modified-2].liquid
+│       │   │   ├── [modified-3].liquid
+│       │   │   └── [modified-4].liquid
+│       │   └── templates/
+│       │       └── index.json          # Homepage with ONLY new sections
+│       │
+│       ├── theme.zip                   # Ready for submission
+│       │
+│       ├── submission/                 # Theme Store Assets
+│       │   ├── key-feature-1.png
+│       │   ├── key-feature-2.png
+│       │   ├── key-feature-3.png
+│       │   ├── theme-thumbnail.png
+│       │   ├── preview-desktop.png
+│       │   ├── preview-mobile.png
+│       │   ├── documentation.md
+│       │   └── submission-checklist.md
+│       │
+│       ├── images/                     # Product Images
+│       │   ├── [product-1]/
+│       │   │   ├── studio-main.png
+│       │   │   ├── angle-front.png
+│       │   │   ├── angle-detail.png
+│       │   │   ├── angle-side.png
+│       │   │   ├── angle-flatlay.png
+│       │   │   ├── lifestyle-1.png
+│       │   │   ├── lifestyle-2.png
+│       │   │   └── lifestyle-3.png
+│       │   └── [product-2]/
+│       │       └── ...
+│       │
+│       ├── screenshots/                # Test Screenshots
+│       │   ├── desktop/
+│       │   │   ├── homepage.png
+│       │   │   ├── product.png
+│       │   │   ├── collection.png
+│       │   │   └── cart.png
+│       │   └── mobile/
+│       │       └── ...
+│       │
+│       ├── products-import.csv         # Shopify CSV (no images)
+│       ├── session.json                # Session state
+│       ├── generation-report.md        # Summary report
+│       └── differentiation-report.md   # Diff metrics
+│
+└── docs/
+    └── THEME_BUILDER_MASTER_PLAN.md
 ```
 
 ---
 
-## 11. Immediate Next Steps
+## 11. Testing Framework Detail
 
-### This Week
+### Test Theme Concept
 
-1. **Set up builder project**
-   - [ ] Create `builder/` directory
-   - [ ] Initialize package.json with dependencies
-   - [ ] Set up TypeScript
-   - [ ] Create basic entry point
+The **test theme** is a minimal theme variant used for rapid testing of new/modified code:
 
-2. **Build core interaction loop**
-   - [ ] Implement terminal UI (Inquirer + Chalk)
-   - [ ] Create Claude client
-   - [ ] Build Phase 1 (Brief) with approval loop
-   - [ ] Test approve/comment/regenerate flow
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           TEST THEME STRUCTURE                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  INCLUDED (only what we built/modified):                                    │
+│  ════════════════════════════════════════                                   │
+│                                                                              │
+│  ✓ header.liquid (REWRITTEN)                                                │
+│  ✓ footer.liquid (REWRITTEN)                                                │
+│  ✓ [new-section-1].liquid                                                   │
+│  ✓ [new-section-2].liquid                                                   │
+│  ✓ [new-section-3].liquid                                                   │
+│  ✓ [new-section-4].liquid                                                   │
+│  ✓ [modified-section-1].liquid                                              │
+│  ✓ [modified-section-2].liquid                                              │
+│  ✓ [modified-section-3].liquid                                              │
+│  ✓ [modified-section-4].liquid                                              │
+│  ✓ New JavaScript                                                            │
+│  ✓ New CSS                                                                   │
+│  ✓ Minimal required snippets                                                │
+│                                                                              │
+│  HOMEPAGE TEMPLATE (index.json):                                            │
+│  ════════════════════════════════                                           │
+│                                                                              │
+│  {                                                                           │
+│    "sections": {                                                            │
+│      "header": { "type": "header" },                                        │
+│      "new-1": { "type": "[new-section-1]" },                               │
+│      "new-2": { "type": "[new-section-2]" },                               │
+│      "new-3": { "type": "[new-section-3]" },                               │
+│      "new-4": { "type": "[new-section-4]" },                               │
+│      "mod-1": { "type": "[modified-section-1]" },                          │
+│      "mod-2": { "type": "[modified-section-2]" },                          │
+│      "mod-3": { "type": "[modified-section-3]" },                          │
+│      "mod-4": { "type": "[modified-section-4]" },                          │
+│      "footer": { "type": "footer" }                                        │
+│    },                                                                        │
+│    "order": [                                                               │
+│      "header",                                                              │
+│      "new-1", "new-2", "new-3", "new-4",                                   │
+│      "mod-1", "mod-2", "mod-3", "mod-4",                                   │
+│      "footer"                                                               │
+│    ]                                                                         │
+│  }                                                                           │
+│                                                                              │
+│  TESTING WORKFLOW:                                                           │
+│  ══════════════════                                                          │
+│                                                                              │
+│  1. Generate test-theme/                                                    │
+│  2. Run: shopify theme check --path ./test-theme                           │
+│  3. Run: shopify theme push --unpublished --path ./test-theme              │
+│  4. Capture screenshots of homepage                                         │
+│  5. AI reviews screenshots                                                  │
+│  6. Human reviews preview URL                                               │
+│  7. If issues → fix → regenerate test-theme → repeat                       │
+│  8. If approved → merge into production theme                              │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
-3. **Test Replicate integration**
-   - [ ] Verify Nano Banana Pro API access
-   - [ ] Generate test product image
-   - [ ] Test img2img for variations
+### Testing Pipeline
 
-### Next Week
-
-1. **Complete Phase 1-2 implementation**
-2. **Start image generation pipeline**
-3. **Build session state management**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           TESTING PIPELINE                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  STAGE 1: STATIC VALIDATION                                                 │
+│  ══════════════════════════                                                 │
+│  │                                                                          │
+│  ├─► shopify theme check --path ./test-theme                               │
+│  ├─► Must pass with 0 errors                                               │
+│  └─► Warnings logged but allowed                                           │
+│                                                                              │
+│  STAGE 2: DEPLOY TEST THEME                                                 │
+│  ══════════════════════════                                                 │
+│  │                                                                          │
+│  ├─► shopify theme push --unpublished --path ./test-theme                  │
+│  ├─► Capture theme ID and preview URL                                      │
+│  └─► Store for cleanup                                                      │
+│                                                                              │
+│  STAGE 3: SCREENSHOT CAPTURE (Puppeteer)                                    │
+│  ═══════════════════════════════════════                                    │
+│  │                                                                          │
+│  ├─► Navigate to preview URL                                               │
+│  ├─► Capture desktop (1440px) and mobile (375px)                          │
+│  ├─► Full page screenshots                                                 │
+│  └─► Save to screenshots/                                                  │
+│                                                                              │
+│  STAGE 4: AI VISUAL REVIEW                                                  │
+│  ═════════════════════════                                                  │
+│  │                                                                          │
+│  ├─► Send screenshots to Claude                                            │
+│  ├─► Check for:                                                            │
+│  │   - Layout issues                                                       │
+│  │   - Broken elements                                                     │
+│  │   - Text overflow/truncation                                            │
+│  │   - Image loading issues                                                │
+│  │   - Mobile responsiveness                                               │
+│  │   - Design consistency                                                  │
+│  └─► Return issues list with severity                                      │
+│                                                                              │
+│  STAGE 5: ACCESSIBILITY AUDIT                                               │
+│  ════════════════════════════                                               │
+│  │                                                                          │
+│  ├─► Run axe-core via Puppeteer                                            │
+│  ├─► Check contrast, ARIA, keyboard nav                                    │
+│  └─► Critical issues block progress                                        │
+│                                                                              │
+│  STAGE 6: HUMAN REVIEW                                                      │
+│  ══════════════════════                                                     │
+│  │                                                                          │
+│  ├─► Display preview URL                                                   │
+│  ├─► Display screenshot grid                                               │
+│  ├─► Display AI-identified issues                                          │
+│  ├─► Display accessibility report                                          │
+│  └─► Accept or provide fix comments                                        │
+│                                                                              │
+│  STAGE 7: CLEANUP                                                           │
+│  ════════════════                                                           │
+│  │                                                                          │
+│  └─► shopify theme delete [theme-id]                                       │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -1153,20 +1771,99 @@ skeleton-influence/
 ```bash
 # .env (local only, never committed)
 
-# Claude API
+# Claude API (Anthropic)
 ANTHROPIC_API_KEY=sk-ant-...
 
 # Replicate (Nano Banana Pro)
 REPLICATE_API_TOKEN=r8_...
 
-# Shopify
+# Shopify CLI
 SHOPIFY_CLI_THEME_TOKEN=shptka_...
 SHOPIFY_DEV_STORE=your-dev-store.myshopify.com
+
+# Optional: Image storage (if auto-hosting later)
+# CLOUDFLARE_R2_ACCESS_KEY=...
+# CLOUDFLARE_R2_SECRET_KEY=...
+```
+
+### .env.example
+
+```bash
+# Copy this to .env and fill in your values
+
+# Required: Claude API for AI generation
+ANTHROPIC_API_KEY=
+
+# Required: Replicate for Nano Banana Pro image generation
+REPLICATE_API_TOKEN=
+
+# Required: Shopify CLI for theme preview deployment
+SHOPIFY_CLI_THEME_TOKEN=
+SHOPIFY_DEV_STORE=
 ```
 
 ---
 
-*Document Version: 3.0*
+## 13. Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- Shopify CLI installed and authenticated
+- Replicate account with Nano Banana Pro access
+- Anthropic API key
+
+### Quick Start
+
+```bash
+# 1. Navigate to builder directory
+cd builder/
+
+# 2. Install dependencies
+npm install
+
+# 3. Copy environment template
+cp .env.example .env
+
+# 4. Fill in API keys in .env
+
+# 5. Run the builder
+npm start
+
+# 6. Follow interactive prompts...
+```
+
+---
+
+## 14. Summary
+
+This document specifies an **interactive terminal application** for generating substantially differentiated Shopify themes.
+
+**Key Features:**
+- Human-in-the-loop approval at every major step
+- Accept/Comment cyclical loop until satisfied
+- AI-generated product images via Nano Banana Pro (Replicate)
+- Complete header/footer/JS rewrites for differentiation
+- 4 new sections + 4 modified sections minimum
+- Test theme for isolated validation
+- Automated testing via Shopify preview + screenshots
+- Complete theme store submission assets
+
+**Outputs:**
+- Production-ready theme.zip
+- Test theme for validation
+- 160 product images (8 per product × 20 products)
+- Products CSV (no image URLs)
+- 3 key feature images
+- Theme documentation
+- Submission checklist
+
+**Timeline:** ~2-3 hours per theme generation (image generation is bottleneck)
+
+---
+
+*Document Version: 4.0*
 *Type: Internal Tool - Interactive Terminal Application*
+*Base Theme: Elle (skeleton-influence/elle/)*
 *Created: January 2026*
 *Last Updated: January 2026*
