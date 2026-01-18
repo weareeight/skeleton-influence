@@ -1329,36 +1329,46 @@ skeleton-influence/
 │                           TEST THEME CONCEPT                                 │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│  The TEST THEME is a stripped-down version containing ONLY:                 │
+│  The TEST THEME is a FULL COPY of the production theme, but with the        │
+│  HOMEPAGE TEMPLATE configured to display ONLY the new/modified sections.    │
 │                                                                              │
-│  ✓ Rewritten header                                                          │
-│  ✓ Rewritten footer                                                          │
-│  ✓ 4 new sections                                                            │
-│  ✓ 4 modified sections                                                       │
-│  ✓ New JavaScript                                                            │
-│  ✓ New CSS                                                                   │
+│  WHY FULL THEME:                                                             │
+│  ════════════════                                                            │
+│  - Shopify requires complete theme structure to upload                      │
+│  - CSS/JS depends on all sections being present                             │
+│  - Snippets may be shared across sections                                   │
+│  - Settings schema must be complete                                         │
 │                                                                              │
-│  Homepage template configured with ONLY these sections.                     │
+│  WHAT'S DIFFERENT (homepage only):                                          │
+│  ══════════════════════════════════                                          │
+│  - index.json configured with ONLY:                                         │
+│    ✓ Rewritten header                                                        │
+│    ✓ 4 new sections                                                          │
+│    ✓ 4 modified sections                                                     │
+│    ✓ Rewritten footer                                                        │
 │                                                                              │
 │  PURPOSE:                                                                    │
-│  - Faster testing cycle                                                     │
-│  - Isolated validation of new/modified code                                 │
+│  ════════                                                                    │
+│  - Test new/modified code in isolation on homepage                          │
+│  - All other pages work normally (product, collection, etc.)               │
 │  - Clear visibility of what's changed                                       │
-│  - Easier debugging                                                          │
+│  - Easier to spot issues with new code                                      │
+│  - Full theme validates and uploads correctly                               │
 │                                                                              │
 │  OUTPUT: ./output/[theme]/test-theme/                                       │
+│  (Complete theme, only index.json is different from production)             │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Tasks:**
 - [ ] E1.1: Create `testing/test-theme.ts`
-- [ ] E1.2: Copy minimal theme structure
-- [ ] E1.3: Include only new/modified sections
-- [ ] E1.4: Create test homepage template with all new sections
-- [ ] E1.5: Include header and footer
-- [ ] E1.6: Include new JS and CSS
-- [ ] E1.7: Generate test product data
+- [ ] E1.2: Copy FULL theme structure from production
+- [ ] E1.3: Create test-specific index.json with only new/modified sections
+- [ ] E1.4: Include header and footer in homepage template
+- [ ] E1.5: Keep all other templates unchanged (product, collection, etc.)
+- [ ] E1.6: Ensure all CSS/JS included for all sections
+- [ ] E1.7: Generate test product data for other pages
 
 #### E2. Shopify CLI Integration
 
@@ -1497,8 +1507,9 @@ skeleton-influence/
 │   │   │   └── 8-submission.ts         # Output & assets
 │   │   │
 │   │   ├── ai/                         # AI Integrations
-│   │   │   ├── claude.ts               # Anthropic API client
-│   │   │   └── replicate.ts            # Replicate (Nano Banana)
+│   │   │   ├── openrouter.ts           # OpenRouter client (Opus + GPT 5.2)
+│   │   │   ├── models.ts               # Model routing configuration
+│   │   │   └── replicate.ts            # Replicate (Nano Banana Pro)
 │   │   │
 │   │   ├── generators/                 # Code Generators
 │   │   │   ├── header.ts               # Header rewrite
@@ -1565,26 +1576,16 @@ skeleton-influence/
 │       │   ├── snippets/
 │       │   └── templates/
 │       │
-│       ├── test-theme/                 # Test Theme (sections only)
-│       │   ├── assets/
-│       │   │   ├── test.css
-│       │   │   └── test.js
-│       │   ├── config/
-│       │   ├── layout/
-│       │   │   └── theme.liquid
-│       │   ├── sections/
-│       │   │   ├── header.liquid       # REWRITTEN
-│       │   │   ├── footer.liquid       # REWRITTEN
-│       │   │   ├── [new-section-1].liquid
-│       │   │   ├── [new-section-2].liquid
-│       │   │   ├── [new-section-3].liquid
-│       │   │   ├── [new-section-4].liquid
-│       │   │   ├── [modified-1].liquid
-│       │   │   ├── [modified-2].liquid
-│       │   │   ├── [modified-3].liquid
-│       │   │   └── [modified-4].liquid
+│       ├── test-theme/                 # Test Theme (FULL COPY)
+│       │   ├── assets/                 # ALL assets (same as production)
+│       │   ├── config/                 # ALL config (same as production)
+│       │   ├── layout/                 # ALL layouts (same as production)
+│       │   ├── locales/                # ALL locales (same as production)
+│       │   ├── sections/               # ALL sections (same as production)
+│       │   ├── snippets/               # ALL snippets (same as production)
 │       │   └── templates/
-│       │       └── index.json          # Homepage with ONLY new sections
+│       │       ├── index.json          # MODIFIED: Only new/modified sections
+│       │       └── [other templates]   # Same as production
 │       │
 │       ├── theme.zip                   # Ready for submission
 │       │
@@ -1635,36 +1636,30 @@ skeleton-influence/
 
 ### Test Theme Concept
 
-The **test theme** is a minimal theme variant used for rapid testing of new/modified code:
+The **test theme** is a FULL COPY of the production theme, with the homepage configured to show only new/modified sections:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           TEST THEME STRUCTURE                               │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│  INCLUDED (only what we built/modified):                                    │
-│  ════════════════════════════════════════                                   │
+│  FULL THEME (required for Shopify upload):                                  │
+│  ══════════════════════════════════════════                                 │
 │                                                                              │
-│  ✓ header.liquid (REWRITTEN)                                                │
-│  ✓ footer.liquid (REWRITTEN)                                                │
-│  ✓ [new-section-1].liquid                                                   │
-│  ✓ [new-section-2].liquid                                                   │
-│  ✓ [new-section-3].liquid                                                   │
-│  ✓ [new-section-4].liquid                                                   │
-│  ✓ [modified-section-1].liquid                                              │
-│  ✓ [modified-section-2].liquid                                              │
-│  ✓ [modified-section-3].liquid                                              │
-│  ✓ [modified-section-4].liquid                                              │
-│  ✓ New JavaScript                                                            │
-│  ✓ New CSS                                                                   │
-│  ✓ Minimal required snippets                                                │
+│  ✓ All 53+ sections (including new and modified)                            │
+│  ✓ All snippets                                                              │
+│  ✓ All CSS/JS (new code depends on existing utilities)                      │
+│  ✓ Complete settings_schema.json                                            │
+│  ✓ All templates (product, collection, cart, etc.)                          │
 │                                                                              │
-│  HOMEPAGE TEMPLATE (index.json):                                            │
-│  ════════════════════════════════                                           │
+│  ONLY DIFFERENCE - Homepage template (index.json):                          │
+│  ══════════════════════════════════════════════════                         │
+│                                                                              │
+│  Shows ONLY new/modified sections for focused testing:                      │
 │                                                                              │
 │  {                                                                           │
 │    "sections": {                                                            │
-│      "header": { "type": "header" },                                        │
+│      "header": { "type": "header" },         // REWRITTEN                  │
 │      "new-1": { "type": "[new-section-1]" },                               │
 │      "new-2": { "type": "[new-section-2]" },                               │
 │      "new-3": { "type": "[new-section-3]" },                               │
@@ -1673,7 +1668,7 @@ The **test theme** is a minimal theme variant used for rapid testing of new/modi
 │      "mod-2": { "type": "[modified-section-2]" },                          │
 │      "mod-3": { "type": "[modified-section-3]" },                          │
 │      "mod-4": { "type": "[modified-section-4]" },                          │
-│      "footer": { "type": "footer" }                                        │
+│      "footer": { "type": "footer" }          // REWRITTEN                  │
 │    },                                                                        │
 │    "order": [                                                               │
 │      "header",                                                              │
@@ -1686,14 +1681,15 @@ The **test theme** is a minimal theme variant used for rapid testing of new/modi
 │  TESTING WORKFLOW:                                                           │
 │  ══════════════════                                                          │
 │                                                                              │
-│  1. Generate test-theme/                                                    │
+│  1. Generate test-theme/ (full copy, modified index.json)                  │
 │  2. Run: shopify theme check --path ./test-theme                           │
 │  3. Run: shopify theme push --unpublished --path ./test-theme              │
-│  4. Capture screenshots of homepage                                         │
-│  5. AI reviews screenshots                                                  │
-│  6. Human reviews preview URL                                               │
-│  7. If issues → fix → regenerate test-theme → repeat                       │
-│  8. If approved → merge into production theme                              │
+│  4. Capture screenshots of homepage (new sections)                         │
+│  5. Also capture product/collection pages (verify no breaks)               │
+│  6. AI reviews all screenshots                                              │
+│  7. Human reviews preview URL                                               │
+│  8. If issues → fix → regenerate → repeat                                  │
+│  9. If approved → production theme is ready (same code)                    │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -1766,15 +1762,153 @@ The **test theme** is a minimal theme variant used for rapid testing of new/modi
 
 ---
 
-## 12. Environment Configuration
+## 12. AI Model Routing (OpenRouter)
+
+### Model Selection Strategy
+
+We use **different AI models for different tasks** based on their strengths:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         AI MODEL ROUTING                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  All AI calls routed through OPENROUTER for unified API access              │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                       │   │
+│  │  PLANNING & ANALYSIS TASKS → Claude Opus 4.5                         │   │
+│  │  ══════════════════════════════════════════                          │   │
+│  │                                                                       │   │
+│  │  Best for:                                                            │   │
+│  │  - Market analysis and positioning                                   │   │
+│  │  - Brand strategy and naming                                         │   │
+│  │  - Section concept proposals                                         │   │
+│  │  - Design system decisions                                           │   │
+│  │  - Screenshot visual review                                          │   │
+│  │  - Architecture and planning                                         │   │
+│  │                                                                       │   │
+│  │  Model: anthropic/claude-opus-4.5                                    │   │
+│  │  Strengths: Reasoning, creativity, nuanced analysis                  │   │
+│  │                                                                       │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                       │   │
+│  │  CODE GENERATION TASKS → GPT 5.2 Codex (Extra High Thinking)        │   │
+│  │  ═══════════════════════════════════════════════════════════        │   │
+│  │                                                                       │   │
+│  │  Best for:                                                            │   │
+│  │  - Liquid template generation                                        │   │
+│  │  - JavaScript code generation                                        │   │
+│  │  - CSS generation                                                    │   │
+│  │  - Section schema generation                                         │   │
+│  │  - Header/footer rewrites                                            │   │
+│  │  - Code modifications                                                │   │
+│  │                                                                       │   │
+│  │  Model: openai/gpt-5.2-codex-extra-high-thinking                    │   │
+│  │  Strengths: Code quality, syntax accuracy, structured output        │   │
+│  │                                                                       │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                       │   │
+│  │  IMAGE GENERATION → Nano Banana Pro (via Replicate)                 │   │
+│  │  ══════════════════════════════════════════════════                  │   │
+│  │                                                                       │   │
+│  │  - Product studio shots                                              │   │
+│  │  - Angle variations                                                  │   │
+│  │  - Lifestyle images                                                  │   │
+│  │                                                                       │   │
+│  │  API: Replicate (not OpenRouter)                                    │   │
+│  │                                                                       │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Task-to-Model Mapping
+
+| Task Category | Specific Tasks | Model |
+|--------------|----------------|-------|
+| **Planning** | Market analysis, brand positioning | Claude Opus 4.5 |
+| **Planning** | Section concepts, feature proposals | Claude Opus 4.5 |
+| **Planning** | Design system (colors, typography) | Claude Opus 4.5 |
+| **Review** | Screenshot analysis, issue detection | Claude Opus 4.5 |
+| **Review** | Code review, suggestions | Claude Opus 4.5 |
+| **Content** | Product names, descriptions | Claude Opus 4.5 |
+| **Code** | Liquid section generation | GPT 5.2 Codex |
+| **Code** | Header/footer rewrite | GPT 5.2 Codex |
+| **Code** | JavaScript generation | GPT 5.2 Codex |
+| **Code** | CSS generation | GPT 5.2 Codex |
+| **Code** | Schema generation | GPT 5.2 Codex |
+| **Code** | Section modifications | GPT 5.2 Codex |
+| **Images** | Product images | Nano Banana Pro |
+
+### OpenRouter Integration
+
+```typescript
+// ai/openrouter.ts
+
+interface ModelConfig {
+  planning: string;
+  coding: string;
+}
+
+const MODELS: ModelConfig = {
+  planning: 'anthropic/claude-opus-4.5',
+  coding: 'openai/gpt-5.2-codex-extra-high-thinking'
+};
+
+export async function chat(
+  messages: Message[],
+  taskType: 'planning' | 'coding'
+): Promise<string> {
+  const model = MODELS[taskType];
+
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://theme-builder.local',
+      'X-Title': 'Theme Builder'
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: taskType === 'coding' ? 0.2 : 0.7,
+      max_tokens: taskType === 'coding' ? 8192 : 4096
+    })
+  });
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+```
+
+### File Structure Update
+
+```
+builder/
+├── src/
+│   ├── ai/
+│   │   ├── openrouter.ts       # OpenRouter client (unified API)
+│   │   ├── models.ts           # Model configuration & routing
+│   │   └── replicate.ts        # Replicate client (images only)
+```
+
+---
+
+## 13. Environment Configuration
 
 ```bash
 # .env (local only, never committed)
 
-# Claude API (Anthropic)
-ANTHROPIC_API_KEY=sk-ant-...
+# OpenRouter API (routes to Claude Opus 4.5 and GPT 5.2 Codex)
+OPENROUTER_API_KEY=sk-or-...
 
-# Replicate (Nano Banana Pro)
+# Replicate (Nano Banana Pro - images only)
 REPLICATE_API_TOKEN=r8_...
 
 # Shopify CLI
@@ -1791,8 +1925,8 @@ SHOPIFY_DEV_STORE=your-dev-store.myshopify.com
 ```bash
 # Copy this to .env and fill in your values
 
-# Required: Claude API for AI generation
-ANTHROPIC_API_KEY=
+# Required: OpenRouter API for AI (routes to Opus and GPT 5.2 Codex)
+OPENROUTER_API_KEY=
 
 # Required: Replicate for Nano Banana Pro image generation
 REPLICATE_API_TOKEN=
@@ -1804,7 +1938,7 @@ SHOPIFY_DEV_STORE=
 
 ---
 
-## 13. Getting Started
+## 14. Getting Started
 
 ### Prerequisites
 
@@ -1835,23 +1969,26 @@ npm start
 
 ---
 
-## 14. Summary
+## 15. Summary
 
 This document specifies an **interactive terminal application** for generating substantially differentiated Shopify themes.
 
 **Key Features:**
 - Human-in-the-loop approval at every major step
 - Accept/Comment cyclical loop until satisfied
+- AI model routing via OpenRouter:
+  - Claude Opus 4.5 for planning, analysis, and review
+  - GPT 5.2 Codex (extra high thinking) for code generation
 - AI-generated product images via Nano Banana Pro (Replicate)
 - Complete header/footer/JS rewrites for differentiation
 - 4 new sections + 4 modified sections minimum
-- Test theme for isolated validation
+- Test theme (full copy) with focused homepage for validation
 - Automated testing via Shopify preview + screenshots
 - Complete theme store submission assets
 
 **Outputs:**
 - Production-ready theme.zip
-- Test theme for validation
+- Test theme (full copy, homepage shows only new sections)
 - 160 product images (8 per product × 20 products)
 - Products CSV (no image URLs)
 - 3 key feature images
@@ -1862,8 +1999,9 @@ This document specifies an **interactive terminal application** for generating s
 
 ---
 
-*Document Version: 4.0*
+*Document Version: 5.0*
 *Type: Internal Tool - Interactive Terminal Application*
 *Base Theme: Elle (skeleton-influence/elle/)*
+*AI: OpenRouter (Claude Opus 4.5 + GPT 5.2 Codex) + Replicate (Nano Banana Pro)*
 *Created: January 2026*
 *Last Updated: January 2026*
