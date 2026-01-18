@@ -6,9 +6,10 @@ import { promptMainMenu, promptResume } from './ui/prompts.js';
 import { SessionManager } from './session/state.js';
 import type { Phase, SessionState } from './types.js';
 
-// Phase imports (to be implemented)
-// import { runBriefPhase } from './phases/1-brief.js';
-// import { runProductsPhase } from './phases/2-products.js';
+// Phase imports
+import { runBriefPhase } from './phases/1-brief.js';
+import { runProductsPhase } from './phases/2-products.js';
+// Future phase imports (to be implemented)
 // import { runImagesPhase } from './phases/3-images.js';
 // import { runDifferentiationPhase } from './phases/4-differentiation.js';
 // import { runDesignSystemPhase } from './phases/5-design-system.js';
@@ -113,31 +114,36 @@ async function runGenerationFlow(
 }
 
 async function runPhase(phase: Phase, session: SessionState): Promise<void> {
-  // Placeholder implementations - to be replaced with actual phase imports
   switch (phase) {
     case 'brief':
-      display.info('Brief & Market Analysis phase - implementation pending');
+      await runBriefPhase(session);
       break;
     case 'products':
-      display.info('Product Catalog phase - implementation pending');
+      await runProductsPhase(session);
       break;
     case 'images':
       display.info('Image Generation phase - implementation pending');
+      display.warning('Skipping to next phase...');
       break;
     case 'differentiation':
       display.info('Theme Differentiation phase - implementation pending');
+      display.warning('Skipping to next phase...');
       break;
     case 'design-system':
       display.info('Design System phase - implementation pending');
+      display.warning('Skipping to next phase...');
       break;
     case 'code-generation':
       display.info('Code Generation phase - implementation pending');
+      display.warning('Skipping to next phase...');
       break;
     case 'testing':
       display.info('Testing phase - implementation pending');
+      display.warning('Skipping to next phase...');
       break;
     case 'submission':
       display.info('Submission Assets phase - implementation pending');
+      display.warning('Skipping to next phase...');
       break;
   }
 }
