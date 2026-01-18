@@ -10,8 +10,8 @@ import type { Phase, SessionState } from './types.js';
 import { runBriefPhase } from './phases/1-brief.js';
 import { runProductsPhase } from './phases/2-products.js';
 import { runImagesPhase } from './phases/3-images.js';
+import { runDifferentiationPhase } from './phases/4-differentiation.js';
 // Future phase imports (to be implemented)
-// import { runDifferentiationPhase } from './phases/4-differentiation.js';
 // import { runDesignSystemPhase } from './phases/5-design-system.js';
 // import { runCodeGenerationPhase } from './phases/6-code-generation.js';
 // import { runTestingPhase } from './phases/7-testing.js';
@@ -125,8 +125,7 @@ async function runPhase(phase: Phase, session: SessionState): Promise<void> {
       await runImagesPhase(session);
       break;
     case 'differentiation':
-      display.info('Theme Differentiation phase - implementation pending');
-      display.warning('Skipping to next phase...');
+      await runDifferentiationPhase(session);
       break;
     case 'design-system':
       display.info('Design System phase - implementation pending');
