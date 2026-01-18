@@ -20,14 +20,93 @@ The process is **conversational** - every major decision gets human approval bef
 | Principle | Implementation |
 |-----------|----------------|
 | **Human-in-the-loop** | Every major output requires approval before continuing |
-| **Iterative refinement** | "Agree or comment?" at each step - comments feed back into regeneration |
+| **Iterative refinement** | "Accept or comment?" at each step - comments feed back into regeneration |
 | **Substantial differentiation** | Generated themes must be meaningfully unique for theme store |
 | **Local-only** | Runs on your machine, no hosting, no auth |
 | **Time-realistic** | ~2-3 hours total (image generation is the bottleneck) |
 
 ---
 
-## 3. The Generation Flow
+## 3. The Approval Loop
+
+Every major checkpoint uses the same cyclical pattern:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           APPROVAL LOOP PATTERN                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                        ┌──────────────────┐                                 │
+│                        │  AI GENERATES    │                                 │
+│                        │  PROPOSAL/OUTPUT │                                 │
+│                        └────────┬─────────┘                                 │
+│                                 │                                            │
+│                                 ▼                                            │
+│                        ┌──────────────────┐                                 │
+│                        │  DISPLAY TO      │                                 │
+│                        │  HUMAN           │                                 │
+│                        └────────┬─────────┘                                 │
+│                                 │                                            │
+│                                 ▼                                            │
+│                   ┌─────────────────────────────┐                           │
+│                   │  "Accept or provide         │                           │
+│                   │   comments to refine?"      │                           │
+│                   └─────────────┬───────────────┘                           │
+│                                 │                                            │
+│                    ┌────────────┴────────────┐                              │
+│                    │                         │                              │
+│                    ▼                         ▼                              │
+│           ┌──────────────┐          ┌──────────────┐                       │
+│           │   ACCEPT     │          │   COMMENTS   │                       │
+│           └──────┬───────┘          └──────┬───────┘                       │
+│                  │                         │                                │
+│                  │                         ▼                                │
+│                  │                ┌──────────────────┐                      │
+│                  │                │  AI INCORPORATES │                      │
+│                  │                │  FEEDBACK        │◄─────────┐          │
+│                  │                └────────┬─────────┘          │          │
+│                  │                         │                     │          │
+│                  │                         ▼                     │          │
+│                  │                ┌──────────────────┐          │          │
+│                  │                │  REGENERATE      │          │          │
+│                  │                └────────┬─────────┘          │          │
+│                  │                         │                     │          │
+│                  │                         └─────────────────────┘          │
+│                  │                         (loops until accepted)           │
+│                  │                                                          │
+│                  ▼                                                          │
+│         ┌──────────────────┐                                               │
+│         │  PROCEED TO      │                                               │
+│         │  NEXT PHASE      │                                               │
+│         └──────────────────┘                                               │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Terminal UX:**
+```
+───────────────────────────────────────────────────────────────────────────────
+? Accept this proposal, or provide comments to refine?
+  › Accept - proceed to next step
+    Comments - I'll regenerate based on your feedback
+───────────────────────────────────────────────────────────────────────────────
+```
+
+If "Comments" selected:
+```
+───────────────────────────────────────────────────────────────────────────────
+Enter your feedback (what should change?):
+► [user types feedback here]
+
+Incorporating feedback and regenerating...
+───────────────────────────────────────────────────────────────────────────────
+```
+
+This loop continues **indefinitely** until you select "Accept".
+
+---
+
+## 4. The Generation Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -103,13 +182,20 @@ The process is **conversational** - every major decision gets human approval bef
 │  ├─► Run accessibility checks                                               │
 │  └─► YOU REVIEW PREVIEW URL ────────────────────────────────► Fix issues   │
 │                                                                              │
-│  PHASE 8: OUTPUT ASSEMBLY                                                   │
-│  ════════════════════════════                                               │
+│  PHASE 8: THEME STORE SUBMISSION ASSETS (~20 min)                           │
+│  ═════════════════════════════════════════════════                          │
 │  │                                                                          │
+│  ├─► Generate: 3 Key Feature Images (1200x900) ─────────► YOU APPROVE      │
+│  │   - Each showcasing a unique theme feature                               │
+│  │   - Annotated screenshots with callouts                                  │
+│  ├─► Generate: Theme Thumbnail (1200x900)                                   │
+│  ├─► Generate: Desktop Preview (1920x1080)                                  │
+│  ├─► Generate: Mobile Preview (750x1334)                                    │
+│  ├─► Generate: Theme documentation (features, settings guide)               │
 │  ├─► Generate: products-import.csv (no images, manual hosting)              │
 │  ├─► Package: theme.zip (ready for submission)                              │
 │  ├─► Save: All product images in organized folders                          │
-│  └─► Generate: Summary report of what was created                           │
+│  └─► Generate: Submission checklist + summary report                        │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -758,25 +844,35 @@ weekend-leash,"The Weekend Leash","<p>A 6-foot leather leash designed for...</p>
 
 ```
 ./output/borough-theme/
-├── theme/                          # Full Shopify theme
+├── theme/                              # Full Shopify theme
 │   ├── assets/
 │   ├── config/
-│   │   ├── settings_schema.json    # May have new settings
-│   │   └── settings_data.json      # Configured for this theme
+│   │   ├── settings_schema.json        # May have new settings
+│   │   └── settings_data.json          # Configured for this theme
 │   ├── layout/
 │   ├── locales/
 │   ├── sections/
 │   │   ├── [base sections...]
-│   │   ├── pet-profile.liquid      # NEW
-│   │   ├── size-guide-overlay.liquid # NEW
-│   │   ├── shop-by-size.liquid     # NEW
-│   │   └── community-gallery.liquid # NEW
+│   │   ├── pet-profile.liquid          # NEW
+│   │   ├── size-guide-overlay.liquid   # NEW
+│   │   ├── shop-by-size.liquid         # NEW
+│   │   └── community-gallery.liquid    # NEW
 │   ├── snippets/
 │   └── templates/
 │
-├── theme.zip                       # Ready for upload/submission
+├── theme.zip                           # Ready for upload/submission
 │
-├── images/                         # All product images
+├── submission/                         # THEME STORE SUBMISSION ASSETS
+│   ├── key-feature-1.png               # 1200x900 - Feature showcase
+│   ├── key-feature-2.png               # 1200x900 - Feature showcase
+│   ├── key-feature-3.png               # 1200x900 - Feature showcase
+│   ├── theme-thumbnail.png             # 1200x900 - Theme card image
+│   ├── preview-desktop.png             # 1920x1080 - Desktop preview
+│   ├── preview-mobile.png              # 750x1334 - Mobile preview
+│   ├── documentation.md                # Theme features & settings guide
+│   └── submission-checklist.md         # Pre-submission verification
+│
+├── images/                             # All product images
 │   ├── daily-collar/
 │   │   ├── studio-main.png
 │   │   ├── angle-front.png
@@ -790,15 +886,87 @@ weekend-leash,"The Weekend Leash","<p>A 6-foot leather leash designed for...</p>
 │   │   └── [8 images...]
 │   └── [18 more products...]
 │
-├── products-import.csv             # Shopify CSV (no images)
+├── products-import.csv                 # Shopify CSV (no images)
 │
-├── screenshots/                    # Test screenshots
+├── screenshots/                        # Test screenshots
 │   ├── desktop/
 │   └── mobile/
 │
-├── session.json                    # Session state
+├── session.json                        # Session state
 │
-└── generation-report.md            # Summary
+└── generation-report.md                # Summary
+```
+
+### 8.3 Theme Store Submission Assets
+
+Shopify requires specific assets for theme store submission:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      THEME STORE SUBMISSION REQUIREMENTS                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  REQUIRED IMAGES                                                             │
+│  ═══════════════                                                             │
+│                                                                              │
+│  1. KEY FEATURE IMAGES (3 required) - 1200x900px                            │
+│     ┌─────────────────────────────────────────────────────────────────┐    │
+│     │  Purpose: Showcase unique theme features                         │    │
+│     │  Format: Annotated screenshots with callouts                     │    │
+│     │  Example features to highlight:                                  │    │
+│     │  - "Pet Profile Builder" - show the interactive UI               │    │
+│     │  - "Size Guide Overlay" - show it in action on product page     │    │
+│     │  - "Community Gallery" - show UGC integration                    │    │
+│     └─────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  2. THEME THUMBNAIL - 1200x900px                                            │
+│     - Shows in theme store listing                                          │
+│     - Clean homepage screenshot with logo                                   │
+│                                                                              │
+│  3. DESKTOP PREVIEW - 1920x1080px                                           │
+│     - Full homepage screenshot                                              │
+│                                                                              │
+│  4. MOBILE PREVIEW - 750x1334px                                             │
+│     - Mobile homepage screenshot                                            │
+│                                                                              │
+│  REQUIRED DOCUMENTATION                                                      │
+│  ══════════════════════                                                      │
+│                                                                              │
+│  1. THEME DOCUMENTATION (documentation.md)                                  │
+│     - Theme overview and target merchant                                    │
+│     - List of all sections with descriptions                                │
+│     - Settings guide (how to customize)                                     │
+│     - Unique features explanation                                           │
+│     - Demo store content requirements                                       │
+│                                                                              │
+│  2. SUBMISSION CHECKLIST (submission-checklist.md)                          │
+│     □ Theme passes shopify theme check with 0 errors                       │
+│     □ All 3 key feature images created and approved                        │
+│     □ Thumbnail and previews generated                                      │
+│     □ Documentation complete                                                │
+│     □ Demo store populated with products                                   │
+│     □ All sections tested on demo store                                    │
+│     □ Accessibility audit passed                                           │
+│     □ Performance score meets requirements                                 │
+│     □ 4+ new sections documented                                           │
+│     □ 4+ modified sections documented                                      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Feature Image Generation Process:**
+
+```
+For each of the 3 key features:
+│
+├─► Capture screenshot of feature in action (from preview URL)
+├─► AI suggests annotation callouts and highlights
+├─► Generate annotated version with:
+│   - Feature name heading
+│   - Arrow/circle callouts pointing to key UI elements
+│   - Brief benefit statement
+├─► Present to human for approval
+└─► Loop until accepted
 ```
 
 ---
