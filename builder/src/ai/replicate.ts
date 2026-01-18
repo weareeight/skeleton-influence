@@ -1,6 +1,6 @@
 import { API_CONFIG } from '../config.js';
 import { writeFile, mkdir } from 'fs/promises';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 
 interface ReplicatePrediction {
   id: string;
@@ -12,6 +12,26 @@ interface ReplicatePrediction {
     cancel: string;
   };
 }
+
+export interface ImageGenerationResult {
+  success: boolean;
+  imageUrl?: string;
+  localPath?: string;
+  error?: string;
+  prompt: string;
+  type: 'studio' | 'angle' | 'lifestyle';
+  variant?: string;
+}
+
+export interface GenerationProgress {
+  productId: string;
+  productName: string;
+  stage: 'studio' | 'angles' | 'lifestyle' | 'complete';
+  current: number;
+  total: number;
+}
+
+type ProgressCallback = (progress: GenerationProgress) => void;
 
 /**
  * Replicate API client for Nano Banana Pro image generation
@@ -35,9 +55,48 @@ export class ReplicateClient {
     productName: string,
     productDescription: string,
     style?: string
-  ): Promise<string[]> {
+  ): Promise<ImageGenerationResult> {
     const prompt = this.buildStudioPrompt(productName, productDescription, style);
-    return this.generate(prompt);
+    try {
+      const urls = await this.generate(prompt);
+      return {
+        success: true,
+        imageUrl: urls[0],
+        prompt,
+        type: 'studio',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        prompt,
+        type: 'studio',
+      };
+    }
+  }
+
+  /**
+   * Generate a single image with custom prompt
+   */
+  async generateImage(prompt: string, type: 'studio' | 'angle' | 'lifestyle', variant?: string): Promise<ImageGenerationResult> {
+    try {
+      const urls = await this.generate(prompt);
+      return {
+        success: true,
+        imageUrl: urls[0],
+        prompt,
+        type,
+        variant,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        prompt,
+        type,
+        variant,
+      };
+    }
   }
 
   /**
@@ -45,15 +104,18 @@ export class ReplicateClient {
    */
   async generateAngleVariations(
     productName: string,
-    coreImageUrl: string,
-    angles: string[] = ['front', 'side', 'detail', 'flat-lay']
-  ): Promise<string[]> {
-    const results: string[] = [];
+    productDescription: string,
+    angles: string[] = ['front', 'side', 'detail', 'flat-lay'],
+    onProgress?: (completed: number, total: number) => void
+  ): Promise<ImageGenerationResult[]> {
+    const results: ImageGenerationResult[] = [];
 
-    for (const angle of angles) {
-      const prompt = this.buildAnglePrompt(productName, angle);
-      const images = await this.generate(prompt);
-      results.push(...images);
+    for (let i = 0; i < angles.length; i++) {
+      const angle = angles[i];
+      const prompt = this.buildAnglePrompt(productName, productDescription, angle);
+      const result = await this.generateImage(prompt, 'angle', angle);
+      results.push(result);
+      onProgress?.(i + 1, angles.length);
     }
 
     return results;
@@ -65,34 +127,114 @@ export class ReplicateClient {
   async generateLifestyleImages(
     productName: string,
     productDescription: string,
-    contexts: string[] = ['in-use', 'environment', 'styled']
-  ): Promise<string[]> {
-    const results: string[] = [];
+    contexts: string[] = ['in-use', 'environment', 'styled'],
+    onProgress?: (completed: number, total: number) => void
+  ): Promise<ImageGenerationResult[]> {
+    const results: ImageGenerationResult[] = [];
 
-    for (const context of contexts) {
+    for (let i = 0; i < contexts.length; i++) {
+      const context = contexts[i];
       const prompt = this.buildLifestylePrompt(productName, productDescription, context);
-      const images = await this.generate(prompt);
-      results.push(...images);
+      const result = await this.generateImage(prompt, 'lifestyle', context);
+      results.push(result);
+      onProgress?.(i + 1, contexts.length);
     }
 
     return results;
   }
 
   /**
+   * Generate all images for a product (studio + angles + lifestyle)
+   */
+  async generateAllProductImages(
+    productId: string,
+    productName: string,
+    productDescription: string,
+    style: string,
+    onProgress?: ProgressCallback
+  ): Promise<{
+    studio: ImageGenerationResult;
+    angles: ImageGenerationResult[];
+    lifestyle: ImageGenerationResult[];
+  }> {
+    const totalImages = 1 + 4 + 3; // studio + angles + lifestyle
+    let completed = 0;
+
+    const reportProgress = (stage: GenerationProgress['stage']) => {
+      onProgress?.({
+        productId,
+        productName,
+        stage,
+        current: completed,
+        total: totalImages,
+      });
+    };
+
+    // Generate studio shot first
+    reportProgress('studio');
+    const studio = await this.generateStudioImage(productName, productDescription, style);
+    completed++;
+    reportProgress('angles');
+
+    // Generate angle variations
+    const angles = await this.generateAngleVariations(
+      productName,
+      productDescription,
+      ['front', 'side', 'detail', 'flat-lay'],
+      (done) => {
+        completed = 1 + done;
+        reportProgress('angles');
+      }
+    );
+
+    // Generate lifestyle images
+    reportProgress('lifestyle');
+    const lifestyle = await this.generateLifestyleImages(
+      productName,
+      productDescription,
+      ['in-use', 'environment', 'styled'],
+      (done) => {
+        completed = 5 + done;
+        reportProgress('lifestyle');
+      }
+    );
+
+    reportProgress('complete');
+
+    return { studio, angles, lifestyle };
+  }
+
+  /**
    * Run image generation with Nano Banana Pro
    */
-  private async generate(prompt: string): Promise<string[]> {
-    // Create prediction
-    const prediction = await this.createPrediction(prompt);
+  private async generate(prompt: string, retries = 2): Promise<string[]> {
+    let lastError: Error | null = null;
 
-    // Poll for completion
-    const result = await this.pollPrediction(prediction.id);
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        // Create prediction
+        const prediction = await this.createPrediction(prompt);
 
-    if (result.status === 'failed') {
-      throw new Error(`Image generation failed: ${result.error}`);
+        // Poll for completion
+        const result = await this.pollPrediction(prediction.id);
+
+        if (result.status === 'failed') {
+          throw new Error(`Image generation failed: ${result.error}`);
+        }
+
+        return result.output || [];
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+
+        if (attempt < retries) {
+          // Wait before retry (exponential backoff: 5s, 10s)
+          const delay = Math.pow(2, attempt) * 5000;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
     }
 
-    return result.output || [];
+    throw lastError || new Error('Image generation failed after retries');
   }
 
   /**
@@ -193,16 +335,16 @@ export class ReplicateClient {
   /**
    * Build angle variation prompt
    */
-  private buildAnglePrompt(productName: string, angle: string): string {
+  private buildAnglePrompt(productName: string, description: string, angle: string): string {
     const angleDescriptions: Record<string, string> = {
-      'front': 'front view, straight on',
-      'side': 'side profile view, 90 degree angle',
-      'detail': 'close-up detail shot, texture and craftsmanship',
-      'flat-lay': 'flat lay overhead view, top down perspective',
+      'front': 'front view, straight on, showing main features',
+      'side': 'side profile view, 90 degree angle, showing depth',
+      'detail': 'extreme close-up detail shot, texture and craftsmanship visible',
+      'flat-lay': 'flat lay overhead view, top down perspective, clean arrangement',
     };
 
     const angleDesc = angleDescriptions[angle] || angle;
-    return `Professional product photography of ${productName}, ${angleDesc}. Studio lighting, white background, clean, sharp focus.`;
+    return `Professional product photography of ${productName}. ${description}. ${angleDesc}. Studio lighting, white background, clean, sharp focus, e-commerce ready.`;
   }
 
   /**

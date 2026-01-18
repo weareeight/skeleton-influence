@@ -15,4 +15,6 @@ export {
 export {
   ReplicateClient,
   getReplicateClient,
+  type ImageGenerationResult,
+  type GenerationProgress,
 } from './replicate.js';
